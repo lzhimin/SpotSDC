@@ -1,1 +1,1 @@
-# skeleton
+# Skeleton example

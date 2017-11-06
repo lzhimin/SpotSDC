@@ -9,16 +9,16 @@ import simple from '../../data/simple.cpp';
 let _editor;
 let _single;
 
-console.log('skeleton started');
+console.log('Skeleton started');
 setup();
 
 
 function setup() {
-  // setup file loading
+  // setup file loader
   d3.select('#load')
-    .on('click', () =>  document.getElementById('file').click());
+    .on('click', () =>  document.getElementById('fileLoader').click());
 
-  d3.select('#file')
+  d3.select('#fileLoader')
     .on('change', function () { selectFile(this.files.length && this.files[0]); });
 
   // setup the editor
