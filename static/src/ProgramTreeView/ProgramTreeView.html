@@ -1,13 +1,51 @@
 <div id='ProgramTreeView'>
-    <div>
-        <label> File Name</label>
-        <select id='file_selector' onchange="changeFile()">
-            <option>none</option>
-            <option>cg_exhaust</option>
-            <option>cg_highbit</option>
-            <option>fft_exhaust</option>
-            <option>fft_highbit</option>
-        </select>
+    <div id='ProgramTreeViewMenu'>
+        <div>
+            <label class='program_TreeView_menu_label'> File Name </label>
+            <select id='program_TreeView_file_selector' onchange="changeFile()">
+                <option>none</option>
+                <option>cg_exhaust</option>
+                <option>cg_highbit</option>
+                <option>fft_exhaust</option>
+                <option>fft_highbit</option>
+            </select>
+        </div>
+        
+        <div> 
+                <label class='program_TreeView_menu_label'> Tree Hierarchy </label>
+                <label >level1</label>
+                <select id='attribute_level1'>
+                    <option selected>Function</option>
+                    <option >Line</option>
+                    <option >Variable</option>
+                    <option >iter</option>
+                </select>
+                <label>level2</label>
+                <select id='attribute_level2'>
+                    <option> </option>
+                    <option >Line</option>
+                    <option selected>Variable</option>
+                    <option >iter</option>
+                </select>
+                <label>level3</label>
+                <select id='attribute_level3'>
+                    <option > </option>
+                    <option selected> Line </option>
+                    <option >iter</option>
+                </select>
+        </div>
+        
+        <div>
+                <label class='program_TreeView_menu_label'>Sample Subset</label>
+                <input type="range" max=100 min=0 value=100  style='width: 300px; display:inline;' id='subsampling_percentage' />
+                <b id='subsampling_percentage_label'>100%</b>
+        </div>
+        
+        <div>
+                <label class='program_TreeView_menu_label'>Inject Error Scale</label>
+                <input type="range" max=100 min=0 value=100  style='width: 300px; display:inline;' />
+                <b>Max</b>
+        </div>
     </div>
     <div id='ProgramTreeViewCanvas'>
 

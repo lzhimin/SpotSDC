@@ -1,5 +1,9 @@
 let myLayout = new GoldenLayout(config);
 
+//ptv: program tree view
+//scv: source code view
+//tv: table view
+//epv: error propagation view
 let ptv, scv, tv, epv;
 
 myLayout.registerComponent('ProgramTreeView', function(container, state){

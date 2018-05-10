@@ -2,6 +2,25 @@
     border: 1px solid gray;
 }
 
+#ProgramTreeViewMenu{
+    border: 1px solid gray;
+    margin: 5px;
+}
+
 #ProgramTreeViewCanvas{
     border: 1px solid gray;
+    margin: 5px;
+}
+
+.program_TreeView_menu_label{
+    width: 20%;
+    display: inline-block;
+}
+
+ProgramTreeView div{
+    margin: 5px;
+}
+
+#ProgramTreeViewMenu label{
+    font-weight:bold
 }
