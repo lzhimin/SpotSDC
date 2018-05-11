@@ -42,7 +42,7 @@ myLayout.init();
 
 // define global function
 function changeFile(){
-    let filename = $('#file_selector').val();
+    let filename = $('#program_TreeView_file_selector').val();
     fetchDataset(filename);
 
     //public source code file

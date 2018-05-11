@@ -2,6 +2,8 @@ class ProgramTreeView extends BasicView{
 
     constructor(container){
         super(container);
+ 
+        this.programtreedata = new ProgramTreeData();
     }
     
     setFilename(){
@@ -18,10 +20,13 @@ class ProgramTreeView extends BasicView{
             .attr('height', this.height);
     }
 
+    draw(){
+        
+    }
+
     setData(msg, data){
         this.init();
-
-        this.data = data;
+        this.programtreedata.setData(data);
     }
 }
 
