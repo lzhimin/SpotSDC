@@ -1,5 +1,5 @@
 class ErrorPropagationView extends BasicView{
-    constructor(){
-        super();
+    constructor(container){
+        super(container);
     }
 }

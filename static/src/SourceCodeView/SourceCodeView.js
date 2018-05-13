@@ -1,9 +1,6 @@
 class SourceCodeView extends BasicView{
     constructor(container){
-        super();
-        
-        //set container div overflow:auto 
-        d3.select(container.getElement()[0]).style('overflow', 'auto');
+        super(container);
     }
 
     clean(){

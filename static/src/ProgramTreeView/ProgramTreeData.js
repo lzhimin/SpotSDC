@@ -1,10 +1,12 @@
 class ProgramTreeData{
+
     constructor(){
         
     }
 
-    setData(data){
+    setData(data, pattern = null){
         this.data = data;
+        this.setHierachicalData(pattern);
     }
 
     getData(){
@@ -38,7 +40,7 @@ class ProgramTreeData{
                 return d.outcome
             });
         }
-        this.hierachicalData =  {'key':'cg', 'value':values.entries(this.data)};
+        this.hierachicalData =  {'key':'program', 'values':values.entries(this.data)};
     }
 
     getHierachicalData(){

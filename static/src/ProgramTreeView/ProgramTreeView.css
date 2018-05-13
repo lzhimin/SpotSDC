@@ -24,3 +24,9 @@ ProgramTreeView div{
 #ProgramTreeViewMenu label{
     font-weight:bold
 }
+
+.tree_node{
+    fill:white;
+    stroke: gray;
+    stroke-width: 1px;
+}
