@@ -3,14 +3,19 @@ class ProgramTreeView extends BasicView{
     constructor(container){
         super(container);
         this.programtreedata = new ProgramTreeData();
-
         this.outcome_color = {
             'DUE': '#cbd5e8',
             'Masked': '#b3e2cd',
             'SDC': '#fdcdac'
-        }
+        }   
 
-                
+        this.colorscale = ['#feedde', '#fdbe85', '#fd8d3c', '#e6550d', '#a63603'];
+        
+        this.stackbar_bucket = {};
+        this.bit_heatmap_bucket = {};
+        this.impact_heatmap_bucket = {};
+        this.value_heatmap_bucket = {};
+        this.cdf_bucket = {};
     }
     
     setFilename(){
@@ -21,11 +26,11 @@ class ProgramTreeView extends BasicView{
         super.init();
 
         this.blockw = 60;
-        this.blockh = 30;
+        this.blockh = 35;
 
         this.top_padding = 150;
         this.left_padding = 20;
-        this.bottom_padding = 50;
+        this.bottom_padding = 10;
 
         d3.select('#ProgramTreeViewCanvas').html('');
         this.svg = d3.select('#ProgramTreeViewCanvas').append('svg')
@@ -53,7 +58,6 @@ class ProgramTreeView extends BasicView{
         if(this.height < this.top_padding + h + this.bottom_padding){
             this.svg.attr('height', this.top_padding + h + this.bottom_padding);
         }
-
         this.draw_node(x, y, h - padding, this.blockw, hierachicaldata);
     }
 
@@ -111,7 +115,13 @@ class ProgramTreeView extends BasicView{
 
     draw_leaf_vis(x, y, data){
 
-        return 0;
+        this.bit_heatmap_bucket[data.key] = new BitHeatMap(this.svg, x, y, 300, this.blockh, data);
+        this.bit_heatmap_bucket[data.key].setColormapColor(this.colorscale);
+        this.bit_heatmap_bucket[data.key].draw();
+
+        this.stackbar_bucket[data.key] = new StackBarChart(this.svg, x + 320, y, 150, this.blockh, data);
+        this.stackbar_bucket[data.key].setOutcomeColor(this.outcome_color);
+        this.stackbar_bucket[data.key].draw();
     }
 
     is_the_node_a_leaf(data){

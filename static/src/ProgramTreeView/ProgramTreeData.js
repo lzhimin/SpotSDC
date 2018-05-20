@@ -13,6 +13,10 @@ class ProgramTreeData{
         return this.data;
     }
 
+    getDataSize(){
+        return this.data.length;
+    }
+
     //TODO: what's the inter leaf order of the tree?
     setHierachicalData(pattern){
         let values = null;

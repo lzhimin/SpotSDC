@@ -1,6 +1,6 @@
 <div id='ProgramTreeView'>
     <div id='ProgramTreeViewMenu'>
-        <div>
+        <div class='ProgramTreeViewMenu_div'>
             <label class='program_TreeView_menu_label'> File Name </label>
             <select id='program_TreeView_file_selector' onchange="changeFile()">
                 <option>none</option>
@@ -11,7 +11,7 @@
             </select>
         </div>
         
-        <div> 
+        <div class='ProgramTreeViewMenu_div'> 
                 <label class='program_TreeView_menu_label'> Tree Hierarchy </label>
                 <label >level1</label>
                 <select id='attribute_level1'>
@@ -35,7 +35,7 @@
                 </select>
         </div>
         
-        <div>
+        <div class='ProgramTreeViewMenu_div'>
                 <label class='program_TreeView_menu_label'>Sample Subset</label>
                 <input type="range" max=100 min=0 value=100  style='width:300px; display:inline;' id='subsampling_percentage' />
                 <b id='subsampling_percentage_label'>100%</b>

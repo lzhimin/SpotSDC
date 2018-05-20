@@ -25,6 +25,10 @@ ProgramTreeView div{
     font-weight:bold
 }
 
+.ProgramTreeViewMenu_div{
+    margin:3px;
+}
+
 .tree_node{
     fill:white;
     stroke: gray;
