@@ -1,4 +1,5 @@
 class BitHeatMap extends standardChildView{
+
     constructor(svg, x, y, width, height, data){
         super(svg, x, y, width, height, data);
 
@@ -19,7 +20,6 @@ class BitHeatMap extends standardChildView{
 
 
     draw(){
-
         this.hist = this.histogram2d();
 
         this.init_color_scale();
@@ -45,8 +45,11 @@ class BitHeatMap extends standardChildView{
             return this.y + this.rect_h * (Math.floor(i / this.col));
         })
         .style('fill', (d, i)=>{
-            return d == 0 ? 'white':this.get_local_color_scale(i, d);
-			//return d == 0 ? 'white':this.get_global_color_scale(d);
+            //return d == 0 ? 'white':this.get_local_color_scale(i, d);
+			return d == 0 ? 'white':this.get_global_color_scale(d);
+        })
+        .on('click', (d, i)=>{
+            publish('SUBSETDATA', d);
         });
 
         // y-axis
@@ -82,13 +85,12 @@ class BitHeatMap extends standardChildView{
 		.style('stroke-dasharray', '5,5');   
     }
 
-
     setColormapColor(color){
         this.color = color;
     }
 
     init_color_scale(){
-		this.globalcolorscale = d3.scaleQuantize().domain(d3.extent(this.hist)).range(this.color);
+		this.globalcolorscale = d3.scaleQuantize().domain(d3.extent(this.hist, (d)=>{return d.length;})).range(this.color);
 		this.local_color_scale = new Array(this.bit);
 		
 		for(let i = 0; i < this.col; i++){
@@ -105,18 +107,19 @@ class BitHeatMap extends standardChildView{
 			data.push(this.hist[i * this.col + col]);
 		}
 	
-		let colorscale = d3.scaleQuantize().domain([0, d3.sum(data)]).range(this.color);
-		return colorscale;
+		let colorscale = d3.scaleQuantize().domain([0, d3.sum(data, (d)=>{return d.length;})]).range(this.color);
+        
+        return colorscale;
 	}
 
-
 	get_global_color_scale(d){
-		return this.globalcolorscale(d);
+		return this.globalcolorscale(d.length);
 	}
 
 	get_local_color_scale(i, d){
 		let col = i % this.col;
-		return this.local_color_scale[col](d);
+        
+        return this.local_color_scale[col](d.length);
 	}
 
     histogram2d(){
@@ -124,7 +127,7 @@ class BitHeatMap extends standardChildView{
         let hist2d = [];
 
         for(let i = 0; i < this.bit; i++){
-            hist2d.push([0, 0, 0]);
+            hist2d.push([[], [], []]);
         }
 
         let bit = 0, outcome_menu = {'DUE':0, 'SDC': 1, 'Masked': 2};
@@ -132,7 +135,7 @@ class BitHeatMap extends standardChildView{
         this.data.values.forEach(element => {
             element.values.forEach(e=>{
                 bit = parseInt(e.bit) - 1;
-                hist2d[bit][outcome_menu[e.outcome]]++;
+                hist2d[bit][outcome_menu[e.outcome]].push(e);
             })
         });
 

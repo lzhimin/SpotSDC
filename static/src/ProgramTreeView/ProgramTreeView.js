@@ -9,8 +9,7 @@ class ProgramTreeView extends BasicView{
             'SDC': '#fdcdac'
         }   
 
-        this.colorscale = ['#feedde', '#fdbe85', '#fd8d3c', '#e6550d', '#a63603'];
-        
+        this.colorscale = ['#feedde', '#fdbe85', '#fd8d3c', '#e6550d', '#a63603']; 
         this.stackbar_bucket = {};
         this.bit_heatmap_bucket = {};
         this.impact_heatmap_bucket = {};
@@ -115,11 +114,11 @@ class ProgramTreeView extends BasicView{
 
     draw_leaf_vis(x, y, data){
 
-        this.bit_heatmap_bucket[data.key] = new BitHeatMap(this.svg, x, y, 300, this.blockh, data);
+        this.bit_heatmap_bucket[data.key] = new BitHeatMap(this.svg, x, y, 250, this.blockh, data);
         this.bit_heatmap_bucket[data.key].setColormapColor(this.colorscale);
         this.bit_heatmap_bucket[data.key].draw();
 
-        this.stackbar_bucket[data.key] = new StackBarChart(this.svg, x + 320, y, 150, this.blockh, data);
+        this.stackbar_bucket[data.key] = new StackBarChart(this.svg, x + 270, y, 150, this.blockh, data);
         this.stackbar_bucket[data.key].setOutcomeColor(this.outcome_color);
         this.stackbar_bucket[data.key].draw();
     }

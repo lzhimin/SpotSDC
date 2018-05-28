@@ -41,6 +41,15 @@ class StackBarChart extends standardChildView{
             .classed('stackBarChart_rect', true)
             .style('fill', (d)=>{
                 return this.outcomecolor[d.key];
+            })
+            .on('mouseover', function(d, i){
+                
+            })
+            .on('mouseout', function(d, i){
+
+            })
+            .on('click', function(d, i){
+
             });
     }
 

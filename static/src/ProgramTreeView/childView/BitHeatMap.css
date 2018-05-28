@@ -10,3 +10,9 @@
 	stroke-width:1px;
 	stroke-opacity: 0.1;
 }
+
+.Bit_outcome_heatmap_rect:hover{
+	stroke:steelblue;
+	stroke-width:2px;
+	stroke-opacity: 0.5;
+}

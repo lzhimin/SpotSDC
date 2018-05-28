@@ -21,6 +21,7 @@ myLayout.registerComponent('ErrorPropagationView', function(container, state){
 
 myLayout.registerComponent('TableView', function(container, state){
     //table view, subscribe to subset data
+    $(container.getElement()[0]).load('../static/src/TableView/TableView.html');
     tv = new TableView(container);
     subscribe('SUBSETDATA', tv.setData.bind(tv));
 });

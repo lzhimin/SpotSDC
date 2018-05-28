@@ -1,0 +1,8 @@
+#tableView th, td {
+    border: 1px solid black;
+    pointer-events: none;
+ }
+
+ #tableView tr:hover{
+     border: 2px solid yellowgreen;
+ }
