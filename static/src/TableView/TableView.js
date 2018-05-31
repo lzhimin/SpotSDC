@@ -45,8 +45,8 @@ class TableView extends BasicView{
         .data(this.data)
         .enter()
         .append('tr')
-        .on('click', (d)=>{
-            publish('SINGLE_SIMULATION', d);
+        .on('click', (d, i)=>{
+            fetchSingleSimulationData(i);
         })
         .selectAll('tableView_tbody_td')
         .data(d=>{
