@@ -21,6 +21,12 @@ class ErrorPropagationView extends BasicView{
         this.svg = d3.select('#ErrorPropagationView').append('svg')
             .attr('width', this.width)
             .attr('height', this.height);
+
+        this.variableViewBucket = [];
+        ///init each variable view's and data
+        this.propagationData.seqVar.forEach(d=>{
+            this.variableViewBucket.push(new SingleVariableView(this.svg, d, this.propagationData.getLineVar_SequenceValue(d)));
+        });
     }
 
     setData(msg, data){
@@ -31,38 +37,18 @@ class ErrorPropagationView extends BasicView{
 
     draw(){
 
-        this.svg.selectAll('.propagationVar_'+this.uuid).data(this.propagationData.seqVar)
-        .enter()
-        .append('rect')
-        .attr('x', (d, i)=>{
-            return this.x;
-        })
-        .attr('y', (d, i)=>{
-            return this.y + (this.blockh  + this.padding) * i;
-        })
-        .attr('width', this.blockw)
-        .attr('height', this.blockh)
-        .classed('propagation_rect', true);
+        this.variableViewBucket.forEach((view, i)=>{
+            view.setX(this.x);
+            view.setY(this.y + i * (view.getRectHeight() + view.getPadding()));
 
-
-        this.svg.selectAll('.propagation_'+this.uuid).data(this.propagationData.seqVar)
-        .enter()
-        .append('text')
-        .text(d=>d)
-        .attr('x', (d, i)=>{
-            return this.x + this.blockw/2;
-        })
-        .attr('y', (d, i)=>{
-            return this.y + (this.blockh  + this.padding) * i + this.blockh/2;
-        })
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'central');
+            view.draw();
+        });
 
         //if the propagation view is large than the computer screen view,
         //reset the size of svg 
-        let currentheight = this.y + (this.blockh + this.padding) * this.propagationData.seqVar.length;
+        let currentheight = this.y + (this.variableViewBucket[0].getRectHeight() + this.variableViewBucket[0].getPadding()) * this.propagationData.seqVar.length;
         if(currentheight > this.height){
-            this.svg.attr('height', currentheight + this.padding);
+            this.svg.attr('height', currentheight + this.variableViewBucket[0].getPadding());
         }
     }
 }
