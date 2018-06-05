@@ -13,7 +13,7 @@ class ErrorPropagationView extends BasicView{
         this.blockh = 30;
 
         this.y = this.top_padding = 150;
-        this.x = this.left_padding = 100;
+        this.x = this.left_padding = 150;
         this.padding = 20;
         this.propagationData.setData(data);
 
@@ -25,14 +25,21 @@ class ErrorPropagationView extends BasicView{
         this.variableViewBucket = [];
         ///init each variable view's and data
         this.propagationData.seqVar.forEach(d=>{
-            this.variableViewBucket.push(new SingleVariableView(this.svg, d, this.propagationData.getLineVar_SequenceValue(d)));
+            let view = new SingleVariableView(this.svg, d);
+
+            view.setData(this.propagationData.getGolden_Error_SequenceValue(d));
+             
+            this.variableViewBucket.push(view);
         });
     }
 
     setData(msg, data){
         this.init(data);
-
         this.draw();
+    }
+
+    setGoldenRunData(msg, data){
+        this.propagationData.setGoldenRunData(data);
     }
 
     draw(){
@@ -40,7 +47,6 @@ class ErrorPropagationView extends BasicView{
         this.variableViewBucket.forEach((view, i)=>{
             view.setX(this.x);
             view.setY(this.y + i * (view.getRectHeight() + view.getPadding()));
-
             view.draw();
         });
 
@@ -48,7 +54,7 @@ class ErrorPropagationView extends BasicView{
         //reset the size of svg 
         let currentheight = this.y + (this.variableViewBucket[0].getRectHeight() + this.variableViewBucket[0].getPadding()) * this.propagationData.seqVar.length;
         if(currentheight > this.height){
-            this.svg.attr('height', currentheight + this.variableViewBucket[0].getPadding());
+            this.svg.attr('height', currentheight + this.variableViewBucket[0].getPadding() * 2);
         }
     }
 }

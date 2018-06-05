@@ -46,7 +46,7 @@ class TableView extends BasicView{
         .enter()
         .append('tr')
         .on('click', (d, i)=>{
-            fetchSingleSimulationData(i);
+            fetchSingleSimulationData(d.File_index);
         })
         .selectAll('tableView_tbody_td')
         .data(d=>{

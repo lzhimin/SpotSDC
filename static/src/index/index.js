@@ -17,7 +17,11 @@ myLayout.registerComponent('ErrorPropagationView', function(container, state){
     //error propagation view subscribe to single simulation data
     epv = new ErrorPropagationView(container);
     $(container.getElement()[0]).load('../static/src/ErrorPropagationView/ErrorPropagationView.html');
+
+    fetchGoldenSimulationData()
+
     subscribe('SINGLE_SIMULATION', epv.setData.bind(epv));
+    subscribe('SINGLE_SIMULATION_GOLDEN', epv.setGoldenRunData.bind(epv));
 });
 
 myLayout.registerComponent('TableView', function(container, state){
