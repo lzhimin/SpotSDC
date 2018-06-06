@@ -41,13 +41,17 @@ class SingleVariableView{
                 e = data.error[data.error.length - 1];
             }
 
-            if(type == 'absolute')
-                values.push(Math.abs(e - g));
+            if(type == 'absolute'){
+                e - g != 0 ? values.push(Math.log(Math.abs(e - g))): values.push(0);
+            }
             else if(type == 'relative'){
                 if(e == 0 && g == 0)
                     values.push(0);
-                else
-                    values.push(Math.abs(e - g)/(Math.max(Math.abs(e), Math.abs(g))));
+                else{
+                    
+                    //values.push(Math.abs(e - g)/(Math.max(Math.abs(e), Math.abs(g))));
+                    e - g == 0? values.push(0) : values.push(Math.log(Math.abs(e - g))/d3.max(this.absoluteData));
+                }
             }
         }
         return values;
@@ -98,8 +102,8 @@ class SingleVariableView{
         .attr('domain-baseline', 'central');
 
         //draw line chart
-        //this.draw_absolute_error_chart(this.absoluteData);
-        this.draw_absolute_error_chart(this.relativeData);
+        this.draw_absolute_error_chart(this.absoluteData);
+        //this.draw_absolute_error_chart(this.relativeData);
     }
 
 

@@ -25,7 +25,7 @@ class ErrorPropagationData{
                 seq.push(d.line+':'+d.var);
             }
         });
-        return seq;
+        return seq.sort();
     }
 
     extractVariableDynamicDependency(){  
