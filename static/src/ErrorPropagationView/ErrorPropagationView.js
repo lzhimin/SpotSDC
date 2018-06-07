@@ -34,6 +34,15 @@ class ErrorPropagationView extends BasicView{
 
         //timer 
         this.timer = new Timer(this.svg, this.variableViewBucket[0].getMaxTimeStep());
+            //timer step change event
+        this.timer.setTimerStepChangeCallBack(this.setTimerChangeEvent.bind(this));
+    }
+
+    setTimerChangeEvent(timer){
+
+        this.variableViewBucket.forEach(view=>{
+            view.setTimerStep(timer);
+        })
     }
 
     setData(msg, data){
@@ -54,8 +63,8 @@ class ErrorPropagationView extends BasicView{
         });
 
         //timer
-        this.timer.setX(this.x + this.variableViewBucket[0].getLineChartStartX());
-        this.timer.setY(this.y);
+        this.timer.setX(this.x);
+        this.timer.setY(this.y - this.top_padding/2);
         this.timer.draw();
     
 

@@ -78,7 +78,7 @@ class SingleVariableView{
     }
 
     getLineChartStartX(){
-        return this.x + this.padding * 6 + this.blockw;
+        return this.x + this.blockw;
     }
 
     getMaxTimeStep(){
@@ -86,7 +86,7 @@ class SingleVariableView{
     }
 
     draw(){
-        this.svg.selectAll('.singleVariableRect'+'_'+this.uuid)
+        this.rects = this.svg.selectAll('.singleVariableRect'+'_'+this.uuid)
         .data(this.name.split(':'))
         .enter()
         .append('rect')
@@ -102,7 +102,7 @@ class SingleVariableView{
         .attr('height', this.blockh)
         .classed('singleVariableRect', true);
 
-        this.svg.selectAll('.singleVariableText'+'_'+this.uuid)
+        this.texts = this.svg.selectAll('.singleVariableText'+'_'+this.uuid)
         .data(this.name.split(':'))
         .enter()
         .append('text')
@@ -159,6 +159,16 @@ class SingleVariableView{
             .style('stroke', function(d, i){
                 return '#d95f0e';
             }); 
+    }
+
+    setTimerStep(timer){
+
+        if(timer >= this.relativeData.length)
+            return;
+
+        this.rects.style('fill', (d, i)=>{
+            return this.relativeData[timer] == 0? 'white':d3.interpolateReds(this.relativeData[timer]);
+        });
     }
 
 }

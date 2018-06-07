@@ -1,0 +1,19 @@
+.Timer_trigger{
+    stroke: black;
+    stroke-width: 1px;
+    fill-opacity: 0.4;
+    fill:gray;
+}
+
+
+.Timer_trigger:active{
+    stroke:orange;
+    stroke-width: 2px;
+}
+
+
+.timer_trigger_text{
+    fill:white;
+    font-size: 12;
+    pointer-events: none;
+}
