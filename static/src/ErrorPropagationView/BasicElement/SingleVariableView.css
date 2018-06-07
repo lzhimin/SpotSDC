@@ -1,10 +1,10 @@
 .singleVariableRect{
-    fill:steelblue;
+    fill:white;
     stroke: black;
     stroke-width: 1px;
 }
 
 
 .singleVariableText{
-    fill: white;
+    fill: black;
 }

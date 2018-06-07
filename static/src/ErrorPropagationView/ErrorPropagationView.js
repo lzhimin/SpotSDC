@@ -31,6 +31,9 @@ class ErrorPropagationView extends BasicView{
              
             this.variableViewBucket.push(view);
         });
+
+        //timer 
+        this.timer = new Timer(this.svg, this.variableViewBucket[0].getMaxTimeStep());
     }
 
     setData(msg, data){
@@ -49,6 +52,12 @@ class ErrorPropagationView extends BasicView{
             view.setY(this.y + i * (view.getRectHeight() + view.getPadding()));
             view.draw();
         });
+
+        //timer
+        this.timer.setX(this.x + this.variableViewBucket[0].getLineChartStartX());
+        this.timer.setY(this.y);
+        this.timer.draw();
+    
 
         //if the propagation view is large than the computer screen view,
         //reset the size of svg 

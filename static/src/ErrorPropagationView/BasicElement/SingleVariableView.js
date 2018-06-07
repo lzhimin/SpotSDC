@@ -42,7 +42,7 @@ class SingleVariableView{
             }
 
             if(type == 'absolute'){
-                e - g != 0 ? values.push(Math.log(Math.abs(e - g))): values.push(0);
+                e - g != 0 ? values.push(Math.abs(e - g)): values.push(0);
             }
             else if(type == 'relative'){
                 if(e == 0 && g == 0)
@@ -50,7 +50,7 @@ class SingleVariableView{
                 else{
                     
                     //values.push(Math.abs(e - g)/(Math.max(Math.abs(e), Math.abs(g))));
-                    e - g == 0? values.push(0) : values.push(Math.log(Math.abs(e - g))/d3.max(this.absoluteData));
+                    e - g == 0? values.push(0) : values.push(Math.abs(e - g)/d3.max(this.absoluteData));
                 }
             }
         }
@@ -77,33 +77,47 @@ class SingleVariableView{
         return this.padding;
     }
 
+    getLineChartStartX(){
+        return this.x + this.padding * 6 + this.blockw;
+    }
+
+    getMaxTimeStep(){
+        return this.relativeData.length;
+    }
+
     draw(){
         this.svg.selectAll('.singleVariableRect'+'_'+this.uuid)
-        .data([this.name])
+        .data(this.name.split(':'))
         .enter()
         .append('rect')
-        .attr('x', this.x)
+        .attr('x', (d, i)=>{
+            return this.x + this.blockw/2 * i;
+        })
         .attr('y', this.y)
         .attr('rx', 5)
         .attr('ry', 5)
-        .attr('width', this.blockw)
+        .attr('width', (d, i)=>{
+            return i == 0? this.blockw/2:this.blockw;
+        })
         .attr('height', this.blockh)
         .classed('singleVariableRect', true);
 
         this.svg.selectAll('.singleVariableText'+'_'+this.uuid)
-        .data([this.name])
+        .data(this.name.split(':'))
         .enter()
         .append('text')
         .text(d=>d)
-        .attr('x', this.x + this.blockw/2)
+        .attr('x', (d, i)=>{
+            return this.x + (i == 0? this.blockw/4: this.blockw);
+        })
         .attr('y', this.y + this.blockh/2)
         .classed('singleVariableText', true)
         .attr('text-anchor', 'middle')
         .attr('domain-baseline', 'central');
 
         //draw line chart
-        this.draw_absolute_error_chart(this.absoluteData);
-        //this.draw_absolute_error_chart(this.relativeData);
+        //this.draw_absolute_error_chart(this.absoluteData);
+        this.draw_absolute_error_chart(this.relativeData);
     }
 
 
@@ -114,7 +128,7 @@ class SingleVariableView{
                         .domain([0, data.length]);
         let y_axis = d3.scaleLinear()
                         .domain([0, d3.max(data)])
-                        .range([this.y + this.blockh, this.y])
+                        .range([this.y + this.blockh - 10, this.y])
                         
         let line = d3.line()
                         .x((d, i)=>{
@@ -125,12 +139,12 @@ class SingleVariableView{
                         });
         
         this.svg.append('g').attr('class','axis axis--x')
-            .attr("transform", "translate(0,"+(this.y + this.blockh) + ")")
+            .attr("transform", "translate(0,"+(this.y + this.blockh - 5) + ")")
             .call(d3.axisBottom(x_axis).ticks(10));
         
         this.svg.append("g")
             .attr("class", "axis axis--y")
-            .attr("transform", "translate("+(this.x+ this.blockw + this.padding + this.width)+",0)")
+            .attr("transform", "translate("+(this.x+ this.blockw + this.padding + this.width)+",5)")
             .call(d3.axisRight(y_axis).ticks(2));
         
         this.svg.selectAll('.cleanErrorline').data([data])
