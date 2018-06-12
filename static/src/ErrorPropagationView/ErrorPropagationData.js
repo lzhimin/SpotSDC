@@ -47,7 +47,6 @@ class ErrorPropagationData{
         return flowPath;
     }
 
-
     getGolden_Error_SequenceValue(lineVar){
 
         let golden = [];
@@ -87,11 +86,15 @@ class ErrorPropagationData{
 
     }
 
+    getProgramCurrentExecutedLine(time){
+        return this.data[time];
+    }
 
     //data come in float by float,
     //this function parse all the variable into norm formate
     parseData(data){
 
+        /*
         let parseData = [];
 
         let temp = [+data[0].value];
@@ -112,7 +115,8 @@ class ErrorPropagationData{
                 currentItem = data[i];
             }      
         }
-        return parseData;
+        return parseData;*/
+        return data;
     }
 
     l2_norm(array){

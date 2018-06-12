@@ -11,6 +11,8 @@ class SingleVariableView{
 
         this.name = name;
 
+        this.error_option = 'relative';
+
         this.uuid = uuidv4();
     }
 
@@ -116,8 +118,10 @@ class SingleVariableView{
         .attr('domain-baseline', 'central');
 
         //draw line chart
-        //this.draw_absolute_error_chart(this.absoluteData);
-        this.draw_absolute_error_chart(this.relativeData);
+        if(this.error_option == 'relative')
+            this.draw_absolute_error_chart(this.relativeData);
+        else
+            this.draw_absolute_error_chart(this.absoluteData);
     }
 
 
@@ -171,4 +175,8 @@ class SingleVariableView{
         });
     }
 
+
+    setErrorOption(option){
+        this.error_option = option;
+    }
 }

@@ -1,8 +1,6 @@
 class ErrorPropagationView extends BasicView{
     constructor(container){
         super(container);
-
-        
         this.propagationData = new ErrorPropagationData();
     }
 
@@ -36,13 +34,19 @@ class ErrorPropagationView extends BasicView{
         this.timer = new Timer(this.svg, this.variableViewBucket[0].getMaxTimeStep());
             //timer step change event
         this.timer.setTimerStepChangeCallBack(this.setTimerChangeEvent.bind(this));
+
+        //controller 
+        this.propagationController = new ErrorPropagationController();
+        this.propagationController.set_change_Relative_And_Absolute_Option_callback(this.draw.bind(this));
     }
 
-    setTimerChangeEvent(timer){
+    setTimerChangeEvent(time){
 
         this.variableViewBucket.forEach(view=>{
-            view.setTimerStep(timer);
-        })
+            view.setTimerStep(time);
+        });
+
+        publish('SOURCECODE_HIGHLIGHT', this.propagationData.getProgramCurrentExecutedLine(time));
     }
 
     setData(msg, data){
@@ -56,9 +60,13 @@ class ErrorPropagationView extends BasicView{
 
     draw(){
 
+        //clean svg
+        this.svg.html('');
+
         this.variableViewBucket.forEach((view, i)=>{
             view.setX(this.x);
             view.setY(this.y + i * (view.getRectHeight() + view.getPadding()));
+            view.setErrorOption(this.propagationController.getOption());
             view.draw();
         });
 

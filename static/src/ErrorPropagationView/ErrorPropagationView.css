@@ -1,0 +1,9 @@
+#ErrorPropagationMenu{
+    border: 1px solid gray;
+    margin: 5px;
+}
+
+.Error_propagation_menu_label{
+    width: 20%;
+    display: inline-block;
+}
