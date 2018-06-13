@@ -1,4 +1,5 @@
 class ErrorPropagationView extends BasicView{
+    
     constructor(container){
         super(container);
         this.propagationData = new ErrorPropagationData();
@@ -11,7 +12,7 @@ class ErrorPropagationView extends BasicView{
         this.blockh = 30;
 
         this.y = this.top_padding = 150;
-        this.x = this.left_padding = 150;
+        this.x = this.left_padding = 50;
         this.padding = 20;
         this.propagationData.setData(data);
 
@@ -83,4 +84,10 @@ class ErrorPropagationView extends BasicView{
             this.svg.attr('height', currentheight + this.variableViewBucket[0].getPadding() * 2);
         }
     }
+
+
+    drawMatrix(){
+
+    }
+
 }

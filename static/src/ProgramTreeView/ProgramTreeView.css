@@ -34,3 +34,7 @@ ProgramTreeView div{
     stroke: gray;
     stroke-width: 1px;
 }
+
+.programTreeView_text{
+    font-size:14;
+}

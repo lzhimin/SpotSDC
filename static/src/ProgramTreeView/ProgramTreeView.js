@@ -25,7 +25,7 @@ class ProgramTreeView extends BasicView{
         super.init();
 
         this.blockw = 60;
-        this.blockh = 35;
+        this.blockh = 30;
 
         this.top_padding = 150;
         this.left_padding = 20;
@@ -100,6 +100,7 @@ class ProgramTreeView extends BasicView{
             .attr('y', (d, i)=>{
                 return y + h / 2;
             })
+            .classed('programTreeView_text', true)
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'central')
             .style('font-size', (d, i, node)=>{

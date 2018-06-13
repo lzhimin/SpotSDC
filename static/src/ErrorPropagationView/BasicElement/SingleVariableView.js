@@ -4,10 +4,10 @@ class SingleVariableView{
         this.svg = svg;
 
         this.blockw = 80;
-        this.blockh = 40;
+        this.blockh = 30;
 
-        this.width = 350;
-        this.padding = 20;
+        this.width = 500;
+        this.padding = 5;
 
         this.name = name;
 
@@ -23,7 +23,7 @@ class SingleVariableView{
 
     extractDataByType(data, type){
         
-        let l = Math.max(data.error.length, data.golden.length);
+        let l = Math.min(data.error.length, data.golden.length);
         let e = 0;
         let g = 0;
 
@@ -118,12 +118,11 @@ class SingleVariableView{
         .attr('domain-baseline', 'central');
 
         //draw line chart
-        if(this.error_option == 'relative')
-            this.draw_absolute_error_chart(this.relativeData);
-        else
-            this.draw_absolute_error_chart(this.absoluteData);
+        //if(this.error_option == 'relative')
+        //    this.draw_absolute_error_chart(this.relativeData);
+        //else
+        //    this.draw_absolute_error_chart(this.absoluteData);
     }
-
 
     draw_absolute_error_chart(data){
     
@@ -174,7 +173,6 @@ class SingleVariableView{
             return this.relativeData[timer] == 0? 'white':d3.interpolateReds(this.relativeData[timer]);
         });
     }
-
 
     setErrorOption(option){
         this.error_option = option;
