@@ -3,7 +3,21 @@
     margin: 5px;
 }
 
+#ErrorPropagationView_control_bar{
+    align-content: center;
+}
+
+#ErrorPropagationView_button_control button{
+    margin: 2px
+}
+
 .Error_propagation_menu_label{
     width: 20%;
     display: inline-block;
+}
+
+.errorPropagation_DynamicFlowPath{
+    stroke:gray;
+    stroke-width: 4px;
+    stroke-opacity:0.1;
 }

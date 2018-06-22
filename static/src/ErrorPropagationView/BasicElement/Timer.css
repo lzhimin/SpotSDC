@@ -17,3 +17,11 @@
     font-size: 12;
     pointer-events: none;
 }
+
+
+.timer_error_linechart_line{
+    stroke:steelblue;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    stroke-width: 1.5;
+}

@@ -15,21 +15,8 @@ class SourceCodeView extends BasicView{
         .style('background', (d, i)=>{
             if(i == +data.line-1)
                 return 'orange';
-            return i%2 == 1 ? 'white' : '#eee';
+            return i%2 == 1 ? '#f5f5f5' : '#fff';
         });
-        /*.classed('sourceCode_odd_line', (d, i)=>{
-            if(i == +data.line-1)
-                return false;
-            return i%2 == 1 ? true : false;
-        })
-        .classed('sourceCode_even_line', (d, i)=>{
-            if(i == +data.line-1)
-                return false;
-            return i%2 == 0 ? true: false;
-        })
-        .classed('sourceCode_highlight', (d, i)=>{
-            return i == +data.line-1? true : false;
-        });*/
     }
 
     setSourceCodeFile(msg, data){

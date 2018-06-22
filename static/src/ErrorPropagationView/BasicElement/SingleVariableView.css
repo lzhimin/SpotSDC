@@ -9,3 +9,6 @@
     fill: black;
     font-size: 12;
 }
+.axis--x text{
+    font-size: 8;
+}

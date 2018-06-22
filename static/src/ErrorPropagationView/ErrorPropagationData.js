@@ -7,15 +7,17 @@ class ErrorPropagationData{
 
 
     setData(data){
-        this.data = this.parseData(data);
+        this.data = data;
 
         this.seqVar = this.extractProgramVariableExecutionSequence();
 
         this.variableDependency = this.extractVariableDynamicDependency();
+
+        this.relativeError = this.parseData_relativeError(data);
     }
 
     setGoldenRunData(data){
-        this.goldenRun = this.parseData(data);
+        this.goldenRun = data;
     }
 
     extractProgramVariableExecutionSequence(){
@@ -63,7 +65,8 @@ class ErrorPropagationData{
             if(this.data[i].line+':'+this.data[i].var  == lineVar){
                 error.push(this.data[i].value);
             }else{
-                error.push(error[i-1]);
+                error.push(0);
+                //error.push(error[i-1]);
             }
         }
 
@@ -78,7 +81,8 @@ class ErrorPropagationData{
             if(this.goldenRun[i].line+':'+this.goldenRun[i].var  == lineVar){
                 golden.push(this.goldenRun[i].value);
             }else{
-                golden.push(golden[i-1]);
+                golden.push(0);
+                //golden.push(golden[i-1]);
             }
         }
 
@@ -92,46 +96,37 @@ class ErrorPropagationData{
 
     //data come in float by float,
     //this function parse all the variable into norm formate
-    parseData(data){
+    parseData_relativeError(){
 
-        /*
         let parseData = [];
 
-        let temp = [+data[0].value];
+        let error = 0;
 
-        let currentItem = data[0];
+        let maxError_variableTable = {};
 
-        for(let i = 1; i < data.length; i++){
+        let lineVar = '';
 
-            if(data[i].var == currentItem.var && data[i].line == currentItem.line){
-                temp.push(+data[i].value);
-            }
-            else{
-                let item = Object.assign({}, currentItem);
-                item.value = this.l2_norm(temp);
-                parseData.push(item);
-
-                temp = [+data[i].value];
-                currentItem = data[i];
-            }      
+        //extract the maximum error of each variable
+        for(let i = 0; i < this.seqVar.length; i++){
+            maxError_variableTable[this.seqVar[i]] = 0;
         }
-        return parseData;*/
-        return data;
+
+        for(let i = 0; i < this.goldenRun.length; i++){
+            lineVar = this.data[i].line+':'+this.data[i].var;
+            error = Math.abs(+this.data[i].value -  +this.goldenRun[i].value);
+            maxError_variableTable[lineVar] = Math.max(error, +maxError_variableTable[lineVar]);
+        }
+
+        //extract the relative error of the execution sequence
+        for(let i = 0; i < this.goldenRun.length; i++){
+            lineVar = this.data[i].line+':'+this.data[i].var;
+            if(maxError_variableTable[lineVar] == 0)
+                error = 0;
+            else
+                error = Math.abs(+this.data[i].value -  +this.goldenRun[i].value)/maxError_variableTable[lineVar];
+            parseData.push([lineVar,error]);
+        }
+        
+        return parseData;
     }
-
-    l2_norm(array){
-        if(array.length == 1){
-            return array[0];
-        }
-        else{
-            let sum_square = 0;
-
-            array.forEach(d=>{
-                sum_square += (d * d);
-            });
-
-            return Math.sqrt(sum_square);
-        }
-    }
-    
 }

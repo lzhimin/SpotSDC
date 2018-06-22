@@ -4,21 +4,20 @@ class SingleVariableView{
         this.svg = svg;
 
         this.blockw = 80;
-        this.blockh = 30;
+        this.blockh = 20;
 
         this.width = 500;
-        this.padding = 5;
+        this.padding = 10;
 
         this.name = name;
 
         this.error_option = 'relative';
 
-        this.uuid = uuidv4();
-    }
+        //this.time_intervel = 50;
 
-    setData(data){
-        this.absoluteData = this.extractDataByType(data, 'absolute');
-        this.relativeData = this.extractDataByType(data, 'relative');
+        this.timer = 0;
+
+        this.uuid = uuidv4();
     }
 
     extractDataByType(data, type){
@@ -67,6 +66,46 @@ class SingleVariableView{
         this.y = y;
     }
 
+    setData(data){
+        this.absoluteData = this.extractDataByType(data, 'absolute');
+        this.relativeData = this.extractDataByType(data, 'relative');
+    }
+
+    setTimerStep(timer){
+
+        if(timer >= this.relativeData.length)
+            return;
+
+        this.rects.style('fill', (d, i)=>{
+            return this.relativeData[timer] == 0? 'white':d3.interpolateReds(this.relativeData[timer]);
+        });
+
+        this.timer = timer;
+
+        this.draw_error_heatmap(this.relativeData);
+    }
+
+    setErrorOption(option){
+        this.error_option = option;
+    }
+
+    getDownConnectionLocation(){
+
+        return [this.x + this.blockw * 1.5, this.y + this.blockh/2];
+    }
+
+    getUpConnectionLocation(){
+        return [this.x, this.y + this.blockh/2];
+    }
+
+    getX(){
+        return this.x;
+    }
+
+    getY(){
+        return this.y;
+    }
+
     getRectWidth(){
         return this.blockw;
     }
@@ -80,7 +119,7 @@ class SingleVariableView{
     }
 
     getLineChartStartX(){
-        return this.x + this.blockw;
+        return this.x + this.blockw + this.padding;
     }
 
     getMaxTimeStep(){
@@ -117,17 +156,18 @@ class SingleVariableView{
         .attr('text-anchor', 'middle')
         .attr('domain-baseline', 'central');
 
+        this.draw_error_heatmap(this.relativeData);
         //draw line chart
         //if(this.error_option == 'relative')
-        //    this.draw_absolute_error_chart(this.relativeData);
+        //   this.draw_error_line_chart(this.relativeData);
         //else
-        //    this.draw_absolute_error_chart(this.absoluteData);
+        //   this.draw_error_line_chart(this.absoluteData);
     }
 
-    draw_absolute_error_chart(data){
+    draw_error_line_chart(data){
     
         let x_axis = d3.scaleLinear()
-                        .range([this.x + this.padding * 6 + this.blockw, this.x + this.padding + this.width + this.blockw])
+                        .range([this.x + this.padding * 10 + this.blockw, this.x + this.padding + this.width + this.blockw])
                         .domain([0, data.length]);
         let y_axis = d3.scaleLinear()
                         .domain([0, d3.max(data)])
@@ -164,17 +204,36 @@ class SingleVariableView{
             }); 
     }
 
-    setTimerStep(timer){
+    draw_error_heatmap(data){
+        
+        if(this.heatmapsvg ==  undefined)
+            this.heatmapsvg = this.svg.append('g');
+        this.heatmapsvg.html('');
 
-        if(timer >= this.relativeData.length)
-            return;
+        let x_axis = d3.scaleLinear()
+                        .range([this.x + this.blockw * 1.6, this.x + this.width + this.blockw * 1.6])
+                        .domain([0, data.length]);
 
-        this.rects.style('fill', (d, i)=>{
-            return this.relativeData[timer] == 0? 'white':d3.interpolateReds(this.relativeData[timer]);
+        this.heatmapsvg.selectAll('.errorHeatmap').data(()=>{
+            if(this.timer + this.time_intervel > data.length)
+                return data.slice(this.timer, this.timer + data.length - this.timer);
+            else
+                return data.slice(this.timer, this.timer + this.time_intervel);
+        })
+        .enter()
+        .append('rect')
+        .attr('x', (d, i)=>{
+            return this.x + this.blockw * 1.6 + i * 10;
+        })
+        .attr('y', (d)=>{
+            return this.y + this.blockh/2-5;
+        })
+        .attr('width', (d, i)=>{
+            return this.blockw;
+        })
+        .attr('height', 10)
+        .style('fill', (d)=>{
+            return d!=0?d3.interpolateOrRd(d):'white';
         });
-    }
-
-    setErrorOption(option){
-        this.error_option = option;
     }
 }
