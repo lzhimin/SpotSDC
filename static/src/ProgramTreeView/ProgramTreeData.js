@@ -19,9 +19,11 @@ class ProgramTreeData{
 
     //TODO: what's the inter leaf order of the tree?
     setHierachicalData(pattern){
-        let values = null;
 
-        if(pattern == null){
+        let values = null;
+        this.pattern = pattern;
+
+        if(this.pattern == null){
             values = d3.nest()
             .key(function (d) {
                 return d.Function;
@@ -35,7 +37,7 @@ class ProgramTreeData{
         }
         else{
             values =  d3.nest();
-            for (let i = 0; i < pattern.length; i++)
+            for (let i = 0; i < this.pattern.length; i++)
                 values.key(function (d) {
                     return d[pattern[i]];
                 });
@@ -49,5 +51,9 @@ class ProgramTreeData{
 
     getHierachicalData(){
         return this.hierachicalData;
+    }
+
+    getTreeHeight(){
+        return this.pattern.length + 1;
     }
 }

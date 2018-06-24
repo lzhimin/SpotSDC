@@ -16,20 +16,19 @@ class ProgramTreeView extends BasicView{
         this.value_heatmap_bucket = {};
         this.cdf_bucket = {};
     }
-    
-    setFilename(){
-        //fetch data from server
-    }
 
     init(){
         super.init();
 
         this.blockw = 60;
-        this.blockh = 30;
+        this.blockh = 40;
 
-        this.top_padding = 150;
-        this.left_padding = 20;
+        this.top_padding = this.y = 180;
+        this.left_padding = this.x = 20;
         this.bottom_padding = 10;
+
+        this.bitmap_width = 250;
+        this.stackbar_width = 200;
 
         d3.select('#ProgramTreeViewCanvas').html('');
         this.svg = d3.select('#ProgramTreeViewCanvas').append('svg')
@@ -41,6 +40,7 @@ class ProgramTreeView extends BasicView{
         //reset all the content on canvas
         this.init();
         this.draw_tree();
+        this.draw_menu();
     }
 
     draw_tree(){
@@ -69,7 +69,7 @@ class ProgramTreeView extends BasicView{
         });
 
         if(this.is_the_node_a_leaf(data)){
-             //recursive draw the tree node
+            //recursive draw the tree node
             data.values.forEach((d, index)=>{
                 height_of_current_node += this.draw_inner_node(x + this.blockw, y + height_of_current_node, d);
             });
@@ -115,13 +115,33 @@ class ProgramTreeView extends BasicView{
 
     draw_leaf_vis(x, y, data){
 
-        this.bit_heatmap_bucket[data.key] = new BitHeatMap(this.svg, x, y, 250, this.blockh, data);
+        this.bit_heatmap_bucket[data.key] = new BitHeatMap(this.svg, x, y, this.bitmap_width, this.blockh, data);
         this.bit_heatmap_bucket[data.key].setColormapColor(this.colorscale);
         this.bit_heatmap_bucket[data.key].draw();
 
-        this.stackbar_bucket[data.key] = new StackBarChart(this.svg, x + 270, y, 150, this.blockh, data);
+        this.stackbar_bucket[data.key] = new StackBarChart(this.svg, x + this.bitmap_width + 20, y, this.stackbar_width, this.blockh, data);
         this.stackbar_bucket[data.key].setOutcomeColor(this.outcome_color);
         this.stackbar_bucket[data.key].draw();
+    }
+
+    draw_menu(){
+        let x = this.x + this.programtreedata.getTreeHeight() * this.blockw + this.padding;
+        let y = 50;
+        //draw distribution chart menu
+
+        let chartOptions = ['Bit', 'Value', 'Impact']
+        this.svg.selectAll('.programTreeViewMenu').data(chartOptions).enter()
+        .append('text')
+        .text(d=>d)
+        .attr('x', (d, i)=>{
+            return x + 50 * i;
+        })
+        .attr('y', y);
+
+
+
+        //draw ratio chart menu
+
     }
 
     is_the_node_a_leaf(data){
