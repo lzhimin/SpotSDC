@@ -27,6 +27,7 @@ class ProgramTreeView extends BasicView{
         this.left_padding = this.x = 20;
         this.bottom_padding = 10;
 
+        this.padding_between_bit_stack = 20;
         this.bitmap_width = 250;
         this.stackbar_width = 200;
 
@@ -119,28 +120,58 @@ class ProgramTreeView extends BasicView{
         this.bit_heatmap_bucket[data.key].setColormapColor(this.colorscale);
         this.bit_heatmap_bucket[data.key].draw();
 
-        this.stackbar_bucket[data.key] = new StackBarChart(this.svg, x + this.bitmap_width + 20, y, this.stackbar_width, this.blockh, data);
+        this.stackbar_bucket[data.key] = new StackBarChart(this.svg, x + this.bitmap_width + this.padding_between_bit_stack, y, this.stackbar_width, this.blockh, data);
         this.stackbar_bucket[data.key].setOutcomeColor(this.outcome_color);
         this.stackbar_bucket[data.key].draw();
     }
 
     draw_menu(){
-        let x = this.x + this.programtreedata.getTreeHeight() * this.blockw + this.padding;
-        let y = 50;
-        //draw distribution chart menu
+        let x = this.x + this.programtreedata.getTreeHeight() * this.blockw + this.left_padding;
+        let y = 100;
 
-        let chartOptions = ['Bit', 'Value', 'Impact']
-        this.svg.selectAll('.programTreeViewMenu').data(chartOptions).enter()
+        //draw tree menu
+        d3.select('#ProgramTree_Tree_Menu')
+        .style('width', this.blockw * 4)
+        .style('height', 150)
+        .style('display', 'block')
+        .style('position', 'absolute')
+        .style('top', y - 50)
+        .style('left', this.left_padding);
+
+        d3.selectAll('.tree_attribute').style('margin', '1px').style('width', this.blockw - 3);
+
+        //draw distribution chart menu
+        d3.select('#ProgramTree_impact_chart_menu')
+        .style('width', this.bitmap_width)
+        .style('height', 150)
+        .style('display', 'block')
+        .style('position', 'absolute')
+        .style('top', y - 50)
+        .style('left', x);
+        
+        d3.select('#ProgramTree_ratio_chart_menu')
+        .style('width', this.stackbar_width)
+        .style('height',  150)
+        .style('display', 'block')
+        .style('position', 'absolute')
+        .style('top', y - 50)
+        .style('left', x + this.bitmap_width+this.padding_between_bit_stack);
+
+        //let chartOptions = ['Bit', 'Value', 'Impact']
+        /*this.svg.selectAll('.programTreeViewMenu').data(chartOptions).enter()
         .append('text')
         .text(d=>d)
         .attr('x', (d, i)=>{
             return x + 50 * i;
         })
-        .attr('y', y);
-
+        .attr('y', y)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central');*/
 
 
         //draw ratio chart menu
+
+
 
     }
 

@@ -24,13 +24,6 @@ myLayout.registerComponent('ErrorPropagationView', function(container, state){
     subscribe('SINGLE_SIMULATION_GOLDEN', epv.setGoldenRunData.bind(epv));
 });
 
-myLayout.registerComponent('TableView', function(container, state){
-    //table view, subscribe to subset data
-    $(container.getElement()[0]).load('../static/src/TableView/TableView.html');
-    tv = new TableView(container);
-    subscribe('SUBSETDATA', tv.setData.bind(tv));
-});
-
 myLayout.registerComponent('SourceCodeView', function(container, state){
     $(container.getElement()[0]).load('../static/src/SourceCodeView/SourceCodeView.html');
     //source code view, subscribe to source code event
@@ -39,6 +32,15 @@ myLayout.registerComponent('SourceCodeView', function(container, state){
     subscribe('SOURCECODE_HIGHLIGHT', scv.setHighLightIndex.bind(scv));
 
 });
+
+myLayout.registerComponent('TableView', function(container, state){
+    //table view, subscribe to subset data
+    $(container.getElement()[0]).load('../static/src/TableView/TableView.html');
+    tv = new TableView(container);
+    subscribe('SUBSETDATA', tv.setData.bind(tv));
+});
+
+
 
 myLayout.on('itemCreated', (item)=>{
     if( item.config.cssClass ){

@@ -14,14 +14,14 @@ let config = {
             title:'ErrorPropagationView'
         }]
     },{
-          type: 'column',
-          content:[{
-              type: 'component',
-              componentName: 'TableView'
-          },{
-              type: 'component',
-              componentName: 'SourceCodeView'
-          }]
+        type: 'column',
+         content:[{
+            type: 'component',
+            componentName: 'SourceCodeView'
+        },{
+            type: 'component',
+            componentName: 'TableView'
+        }]
       }]
   }]
 };

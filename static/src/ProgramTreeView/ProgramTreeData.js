@@ -4,7 +4,7 @@ class ProgramTreeData{
         
     }
 
-    setData(data, pattern = null){
+    setData(data, pattern = ['Function', 'Variable', 'Line']){
         this.data = data;
         this.setHierachicalData(pattern);
     }
