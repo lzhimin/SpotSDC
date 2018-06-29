@@ -24,6 +24,10 @@ text{
     user-select: none;
 }
 
+input{
+    margin: 5px;
+}
+
 
 #ProgramTreeViewMenu label{
     font-weight:bold

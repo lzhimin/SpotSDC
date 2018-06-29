@@ -3,6 +3,7 @@ class ProgramTreeView extends BasicView{
     constructor(container){
         super(container);
         this.programtreedata = new ProgramTreeData();
+        this.programtreecontroller = new ProgramViewController();
         this.outcome_color = {
             'DUE': '#cbd5e8',
             'Masked': '#b3e2cd',
@@ -36,11 +37,11 @@ class ProgramTreeView extends BasicView{
         this.svg = d3.select('#ProgramTreeViewCanvas').append('svg')
             .attr('width', this.width)
             .attr('height', this.height);
+        this.programtreecontroller.bindingEvent();
     }
 
     draw(){
         //reset all the content on canvas
-        this.init();
         this.draw_tree();
         this.draw_menu();
         this.draw_annotation();
@@ -225,6 +226,7 @@ class ProgramTreeView extends BasicView{
 
     setData(msg, data){
         this.programtreedata.setData(data);
+        this.init();
         this.draw();
     }
 }
