@@ -23,8 +23,9 @@ class ProgramTreeView extends BasicView{
         this.blockw = 60;
         this.blockh = 40;
 
-        this.top_padding = this.y = 180;
+        this.top_padding = this.y = 150;
         this.left_padding = this.x = 20;
+        this.padding = 20;
         this.bottom_padding = 10;
 
         this.padding_between_bit_stack = 20;
@@ -42,6 +43,7 @@ class ProgramTreeView extends BasicView{
         this.init();
         this.draw_tree();
         this.draw_menu();
+        this.draw_annotation();
     }
 
     draw_tree(){
@@ -77,7 +79,7 @@ class ProgramTreeView extends BasicView{
         }
         else{
             height_of_current_node = this.blockh;
-            this.draw_leaf_vis(x + this.blockw + 20, y, data);
+            this.draw_leaf_vis(x + this.blockw + this.padding, y, data);
         }
         this.draw_node(x, y, height_of_current_node, this.blockw, data);
         return height_of_current_node;
@@ -126,35 +128,31 @@ class ProgramTreeView extends BasicView{
     }
 
     draw_menu(){
+        
         let x = this.x + this.programtreedata.getTreeHeight() * this.blockw + this.left_padding;
         let y = 100;
 
         //draw tree menu
         d3.select('#ProgramTree_Tree_Menu')
-        .style('width', this.blockw * 4)
-        .style('height', 150)
         .style('display', 'block')
         .style('position', 'absolute')
-        .style('top', y - 50)
-        .style('left', this.left_padding);
+        .style('top', this.top_padding + $('#ProgramTreeViewMenu').height() - 20)
+        .style('left', this.left_padding + this.blockw);
 
-        d3.selectAll('.tree_attribute').style('margin', '1px').style('width', this.blockw - 3);
+        d3.selectAll('.tree_attribute').style('width', this.blockw - 3);
 
         //draw distribution chart menu
         d3.select('#ProgramTree_impact_chart_menu')
-        .style('width', this.bitmap_width)
-        .style('height', 150)
         .style('display', 'block')
         .style('position', 'absolute')
-        .style('top', y - 50)
+        .style('top',$('#ProgramTreeViewMenu').height() + 10)
         .style('left', x);
         
+        //draw ratio 
         d3.select('#ProgramTree_ratio_chart_menu')
-        .style('width', this.stackbar_width)
-        .style('height',  150)
         .style('display', 'block')
         .style('position', 'absolute')
-        .style('top', y - 50)
+        .style('top', $('#ProgramTreeViewMenu').height() + 10)
         .style('left', x + this.bitmap_width+this.padding_between_bit_stack);
 
         //let chartOptions = ['Bit', 'Value', 'Impact']
@@ -170,10 +168,56 @@ class ProgramTreeView extends BasicView{
 
 
         //draw ratio chart menu
+    }
 
+    draw_annotation(){
+        this.svg.selectAll('.programTreeViewMenu_annotation').data(['sign', 'exponent', 'mantissa'])
+        .enter()
+        .append('text')
+        .text(d=>d)
+        .attr('x', (d, i)=>{
+            if(i==0) 
+                return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/128;
+            else if(i == 1)
+                return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/8;
+            else 
+                return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width* 19/32;
+        })
+        .attr('y', (d, i)=>{
+            return this.top_padding - 20;
+        }) 
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "central")
+        .style('font-size', 8);
 
+        let colorscale = ['white'].concat(this.colorscale);
+        let colorscale_w = this.bitmap_width/(2 * colorscale.length);
+        let colorscale_h = 20;
+        this.svg.selectAll('.colorscale').data(colorscale).enter()
+        .append('rect')
+        .attr('x', (d, i)=>{
+            return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/3 + colorscale_w * i;
+        })
+        .attr('y', (d, i)=>{
+            return this.top_padding - 60;
+        })
+        .attr('width', colorscale_w)
+        .attr('height', colorscale_h)
+        .attr('fill', (d, i)=>{
+            return d;
+        })
+        .style('stroke', 'gray')
+        .style('stroke-width', '1px');
+
+        //ratio
+        let ratio_chart_x = this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width;
+        this.stackbar_chart_axis = d3.scaleLinear().range([ratio_chart_x, ratio_chart_x + this.stackbar_width]).domain([0, 1]);
+        this.svg.append('g').attr('class','axis axis--x')
+            .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
+            .call(d3.axisTop(this.stackbar_chart_axis).ticks(5));
 
     }
+
 
     is_the_node_a_leaf(data){
         return 'key' in data.values[0] && !(data.values[0].key in this.outcome_color);

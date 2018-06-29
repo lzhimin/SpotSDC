@@ -1,8 +1,8 @@
 <div id='ProgramTreeView'>
     <div id='ProgramTreeViewMenu'>
         <div class='ProgramTreeViewMenu_div'>
-            <label class='program_TreeView_menu_label'> File Name </label>
-            <select id='program_TreeView_file_selector' onchange="changeFile()">
+            <label class='program_TreeView_menu_label'> Dataset </label>
+            <select id='program_TreeView_file_selector' class='program_TreeView_menu_select' onchange="changeFile()">
                 <option>none</option>
                 <option>cg_exhaust</option>
                 <option>cg_highbit</option>
@@ -10,68 +10,62 @@
                 <option>fft_highbit</option>
             </select>
         </div>
+        <div class='ProgramTreeViewMenu_div'>
+            <label class='program_TreeView_menu_label'>Data Filter</label>
+            <select id='program_TreeView_Filter_Option' class='program_TreeView_menu_select'>
+                <option>bit</option>
+                <option>outcome</option>
+                <option>diffnorm</option>
+                <option>injectError</option>
+            </select>
+            <div id='program_TreeView_filter_bit' class='program_TreeView_filter_div' style='display:block;'>
+                <label style='font-weight:normal;'> <input type='checkbox' name='bit_out_xor_radio' checked  class='bit_out_xor_filter' value='sign'> Sign </label>  
+                <label style='font-weight:normal;'> <input type='checkbox' name='bit_out_xor_radio' checked  class='bit_out_xor_filter' value='exponent'> Exponent </label> 
+                <label style='font-weight:normal;'> <input type='checkbox' name='bit_out_xor_radio' checked  class='bit_out_xor_filter' value='mantissa'> Mantissa </label>  
+            </div>
+            <div id='program_TreeView_filter_outcome' class='program_TreeView_filter_div'>
+                <label style='font-weight:normal;background-color:#cbd5e8'> <input type='checkbox' name='optradio' checked id='filter_due' class='check_filter'> DUE </label> 
+                <label style='font-weight:normal;background-color:#b3e2cd'> <input type='checkbox' name='optradio' checked id='filter_mask' class='check_filter'> Masked </label>  
+                <label style='font-weight:normal;background-color:#fdcdac'> <input type='checkbox' name='optradio' checked id='filter_sdc' class='check_filter'> SDC </label> 
+            </div>
+        </div>
     </div>
         
-        <!--div class='ProgramTreeViewMenu_div'>
-                <label class='program_TreeView_menu_label'>Sample Subset</label>
-                <input type="range" max=100 min=0 value=100  style='width:300px; display:inline;' id='subsampling_percentage' />
-                <b id='subsampling_percentage_label'>100%</b>
-        </div>
-
-        
-    </div-->
     <div class='ProgramTreeViewMenu_div' id='ProgramTree_Tree_Menu'> 
-        <div>
-            <select id='attribute_level1' class='tree_attribute'>
-                <option selected>Function</option>
-                <option >Line</option>
-                <option >Variable</option>
-                <option >iter</option>
-            </select>
-            <select id='attribute_level2' class='tree_attribute'>
-                <option> </option>
-                <option >Line</option>
-                <option selected>Variable</option>
-                <option >iter</option>
-            </select>
-            <select id='attribute_level3' class='tree_attribute'>
-                <option > </option>
-                <option selected> Line </option>
-                <option >iter</option>
-            </select>
-        </div>
+        <select id='attribute_level1' class='tree_attribute'>
+            <option selected>Function</option>
+            <option >Line</option>
+            <option >Variable</option>
+            <option >iter</option>
+        </select>
+        <select id='attribute_level2' class='tree_attribute'>
+            <option> </option>
+            <option >Line</option>
+            <option selected>Variable</option>
+            <option >iter</option>
+        </select>
+        <select id='attribute_level3' class='tree_attribute'>
+            <option > </option>
+            <option selected> Line </option>
+            <option >iter</option>
+        </select>
     </div>
 
     <div class='ProgramTreeViewMenu_div' id='ProgramTree_impact_chart_menu'>
-        <div class='ProgramTreeViewMenu_div'>
-                <label class='program_TreeView_menu_label'>Sample Subset</label><br>
-                <input type="range" max=100 min=0 value=100  style='width:180px; display:inline;' id='subsampling_percentage' />
-                <b id='subsampling_percentage_label'>100%</b>
-        </div>
         <div >
             <label > View </label><br>
             <label style='font-weight:normal;'> <input type='radio' name='view_radio' checked value='bit_heatmap'> Bit </label>
             <label style='font-weight:normal;'> <input type='radio' name='view_radio'  value='value_heatmap'> Value </label>
             <label style='font-weight:normal;'> <input type='radio' name='view_radio'  value='heatmap_impact'> Impact </label>
         </div>
-        <div>
-            <label >Bit Flip</label> <br>
-            <label style='font-weight:normal;'> <input type='checkbox' name='bit_out_xor_radio' checked  class='bit_out_xor_filter' value='sign'> Sign </label>  
-            <label style='font-weight:normal;'> <input type='checkbox' name='bit_out_xor_radio' checked  class='bit_out_xor_filter' value='exponent'> Exponent </label> 
-            <label style='font-weight:normal;'> <input type='checkbox' name='bit_out_xor_radio' checked  class='bit_out_xor_filter' value='mantissa'> Mantissa </label>  
-        </div>
+        
     </div>
+
     <div class='ProgramTreeViewMenu_div' id='ProgramTree_ratio_chart_menu'>
         <div >
             <label> Normalize: </label><br>
             <label style='font-weight:normal;'> <input type='radio' name='normalize_radio' value='local'> local </label> 
             <label style='font-weight:normal;'> <input type='radio' name='normalize_radio' checked value='global'> global </label>
-        </div>
-        <div>
-            <label >Outcome</label><br>
-            <label style='font-weight:normal;background-color:#cbd5e8'> <input type='checkbox' name='optradio' checked id='filter_due' class='check_filter'> DUE </label> 
-            <label style='font-weight:normal;background-color:#b3e2cd'> <input type='checkbox' name='optradio' checked id='filter_mask' class='check_filter'> Masked </label>  
-            <label style='font-weight:normal;background-color:#fdcdac'> <input type='checkbox' name='optradio' checked id='filter_sdc' class='check_filter'> SDC </label> 
         </div>
     </div>
 

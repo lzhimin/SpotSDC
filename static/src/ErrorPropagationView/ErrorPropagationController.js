@@ -2,21 +2,23 @@ class ErrorPropagationController{
 
     constructor(){
         this.error_option = 'Relative';
-        this.binding();
         this.play_trigger = true; 
     }
 
     binding(){
+
+        $('input:radio[name="propagatation_error_radio"]').unbind();
         $('input:radio[name="propagatation_error_radio"]').change((d, i, node)=>{
             this.error_option = $('input:radio[name="propagatation_error_radio"]:checked').val();        
             this.callback(this.error_option);
         });
 
-
+        $('#ErrorPropagationView_backward_control').unbind()
         $('#ErrorPropagationView_backward_control').on('click', ()=>{
             this.update(-1, 'manual');
         });
 
+        $('#ErrorPropagationView_play_pause_control').unbind();
         $('#ErrorPropagationView_play_pause_control').on('click', ()=>{
             if(d3.select('#ErrorPropagationView_play_pause_control_icon').classed('glyphicon-play')){
                 d3.select('#ErrorPropagationView_play_pause_control_icon').classed('glyphicon-pause', true);
@@ -33,12 +35,10 @@ class ErrorPropagationController{
             }
         });
 
+        $('#ErrorPropagationView_forward_control').unbind();
         $('#ErrorPropagationView_forward_control').on('click', ()=>{
             this.update(1, 'manual');
         });
-
-
-
     }
 
     getOption(){
@@ -52,8 +52,6 @@ class ErrorPropagationController{
     update(step=1, option ='auto'){
         if(!this.timeStepChangeFunc(step) && option == 'auto'){
             clearInterval(this.clock);
-        }else{
-            this.timeStepChangeFunc(step);
         }
     }
 

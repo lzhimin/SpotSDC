@@ -119,7 +119,7 @@ class SingleVariableView{
     }
 
     getLineChartStartX(){
-        return this.x + this.blockw + this.padding;
+        return this.x + this.blockw * 1.5 + this.padding;
     }
 
     getMaxTimeStep(){
