@@ -11,11 +11,6 @@ class ProgramTreeView extends BasicView{
         }   
 
         this.colorscale = ['#feedde', '#fdbe85', '#fd8d3c', '#e6550d', '#a63603']; 
-        this.stackbar_bucket = {};
-        this.bit_heatmap_bucket = {};
-        this.impact_heatmap_bucket = {};
-        this.value_heatmap_bucket = {};
-        this.cdf_bucket = {};
     }
 
     init(){
@@ -33,11 +28,18 @@ class ProgramTreeView extends BasicView{
         this.bitmap_width = 250;
         this.stackbar_width = 200;
 
+        this.stackbar_bucket = {};
+        this.bit_heatmap_bucket = {};
+        this.impact_heatmap_bucket = {};
+        this.value_heatmap_bucket = {};
+        this.cdf_bucket = {};
+
         d3.select('#ProgramTreeViewCanvas').html('');
         this.svg = d3.select('#ProgramTreeViewCanvas').append('svg')
             .attr('width', this.width)
             .attr('height', this.height);
-        this.programtreecontroller.bindingEvent();
+
+        this.callbackBinding();
     }
 
     draw(){
@@ -52,6 +54,11 @@ class ProgramTreeView extends BasicView{
         let hierachicaldata = this.programtreedata.getHierachicalData();
         let x = this.left_padding, y = this.top_padding, h=0;
         let padding = 3;
+
+        hierachicaldata.values.sort(function(a, b){
+            return a.key > b.key;
+        });
+
         hierachicaldata.values.forEach((d, index)=>{
             h += this.draw_inner_node(20 + this.blockw, y + h, d);
             h += padding;
@@ -154,21 +161,7 @@ class ProgramTreeView extends BasicView{
         .style('display', 'block')
         .style('position', 'absolute')
         .style('top', $('#ProgramTreeViewMenu').height() + 10)
-        .style('left', x + this.bitmap_width+this.padding_between_bit_stack);
-
-        //let chartOptions = ['Bit', 'Value', 'Impact']
-        /*this.svg.selectAll('.programTreeViewMenu').data(chartOptions).enter()
-        .append('text')
-        .text(d=>d)
-        .attr('x', (d, i)=>{
-            return x + 50 * i;
-        })
-        .attr('y', y)
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'central');*/
-
-
-        //draw ratio chart menu
+        .style('left', x + this.bitmap_width + this.padding_between_bit_stack);
     }
 
     draw_annotation(){
@@ -213,12 +206,11 @@ class ProgramTreeView extends BasicView{
         //ratio
         let ratio_chart_x = this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width;
         this.stackbar_chart_axis = d3.scaleLinear().range([ratio_chart_x, ratio_chart_x + this.stackbar_width]).domain([0, 1]);
-        this.svg.append('g').attr('class','axis axis--x')
+        this.stackbar_chart_axis_annotation = this.svg.append('g').attr('class','axis axis--x')
             .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
             .call(d3.axisTop(this.stackbar_chart_axis).ticks(5));
 
     }
-
 
     is_the_node_a_leaf(data){
         return 'key' in data.values[0] && !(data.values[0].key in this.outcome_color);
@@ -228,6 +220,43 @@ class ProgramTreeView extends BasicView{
         this.programtreedata.setData(data);
         this.init();
         this.draw();
+    }
+
+    /**
+     *  callback binding
+     **/
+    callbackBinding(){
+        this.programtreecontroller.bindingEvent();
+        this.programtreecontroller.setNormalizationChangeCallback(this.updateStackChart.bind(this));
+        //this.programtreecontroller.setBitfilterChangeCallback()
+    }
+
+    updateStackChart(option){
+        if(option == 'global'){
+            let maxsize = 0;
+
+            for(let key in  this.stackbar_bucket){
+                maxsize = Math.max(maxsize, this.stackbar_bucket[key].getExperimentCount());
+            }
+
+            for(let key in this.stackbar_bucket){
+                this.stackbar_bucket[key].setMaxDataSize(maxsize);
+                this.stackbar_bucket[key].setGlobalFlag(true);
+                this.stackbar_bucket[key].draw();
+            }
+
+            this.stackbar_chart_axis.domain([0, maxsize]);
+        }else if(option == 'local'){
+            for(let key in this.stackbar_bucket){
+                this.stackbar_bucket[key].setGlobalFlag(false);
+                this.stackbar_bucket[key].draw();
+            }
+
+            this.stackbar_chart_axis.domain([0, 1]);
+        }
+
+        //update axis
+        this.stackbar_chart_axis_annotation.transition(1500).call(d3.axisTop(this.stackbar_chart_axis).ticks(5));
     }
 }
 

@@ -3,7 +3,6 @@ class ProgramViewController{
 
         this.treestructurechangecallback = undefined;
         
-        this.samplesizechangecallback = undefined;
         this.viewchangecallback = undefined;
         this.bitfilterchangecallback = undefined;
 
@@ -11,8 +10,27 @@ class ProgramViewController{
         this.outcomechangecallback = undefined;
     }
 
-    bindingEvent(){
+    setTreeStructureChangeCallback(func){
+        this.treestructurechangecallback = func;
+    }
 
+    setViewChangeCallback(func){
+        this.viewchangecallback = func;
+    }
+
+    setBitfilterChangeCallback(func){
+        this.bitfilterchangecallback = func;
+    }
+
+    setNormalizationChangeCallback(func){
+        this.normalizationchangecallback = func;
+    }
+
+    setOutcomeChangeCallback(func){
+        this.outcomechangecallback = func;
+    }
+
+    bindingEvent(){
         this.bindingTreeMenu();
         this.bindingViewMenu();
         this.bindingNormalizationMenu();
@@ -26,6 +44,7 @@ class ProgramViewController{
 
     bindingViewMenu(){
         //binding view change event.
+        $('input:radio[name="view_radio"]').unbind();
         $('input:radio[name="view_radio"]').change(function () {
             let option = $('input[name=view_radio]:checked').val();
             this.viewchangecallback(option);
@@ -34,6 +53,7 @@ class ProgramViewController{
 
     bindingNormalizationMenu(){
         //binding normalization change event.
+        $('input:radio[name="normalize_radio"]').unbind();
         $('input:radio[name="normalize_radio"]').change(()=>{
             let option = $('input[name=normalize_radio]:checked').val();
             this.normalizationchangecallback(option);
@@ -41,6 +61,8 @@ class ProgramViewController{
     }
 
     bindingFilterMenu(){
+
+        $('#program_TreeView_Filter_Option').unbind();
         $('#program_TreeView_Filter_Option').change(()=>{
             let option = $('#program_TreeView_Filter_Option').val();
 
