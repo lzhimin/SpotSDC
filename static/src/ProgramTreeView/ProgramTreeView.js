@@ -34,15 +34,18 @@ class ProgramTreeView extends BasicView{
         this.value_heatmap_bucket = {};
         this.cdf_bucket = {};
 
+        //this.callbackBinding();
+
+        //clean svg
         d3.select('#ProgramTreeViewCanvas').html('');
         this.svg = d3.select('#ProgramTreeViewCanvas').append('svg')
             .attr('width', this.width)
             .attr('height', this.height);
-
-        this.callbackBinding();
     }
 
     draw(){
+
+        this.init();
         //reset all the content on canvas
         this.draw_tree();
         this.draw_menu();
@@ -59,10 +62,15 @@ class ProgramTreeView extends BasicView{
             return a.key > b.key;
         });
 
-        hierachicaldata.values.forEach((d, index)=>{
-            h += this.draw_inner_node(20 + this.blockw, y + h, d);
-            h += padding;
-        });
+        if(this.is_the_node_a_leaf(hierachicaldata)){
+            hierachicaldata.values.forEach((d, index)=>{
+                h += this.draw_inner_node(20 + this.blockw, y + h, d, hierachicaldata.key);
+                h += padding;
+            });
+        }else{
+            h += this.blockh;
+            this.draw_leaf_vis(x + this.blockw * 2 + this.padding, y, hierachicaldata);
+        }
 
         //if the current svg is smaller than the current size of tree
         if(this.height < this.top_padding + h + this.bottom_padding){
@@ -71,7 +79,7 @@ class ProgramTreeView extends BasicView{
         this.draw_node(x, y, h - padding, this.blockw, hierachicaldata);
     }
 
-    draw_inner_node(x, y, data){
+    draw_inner_node(x, y, data, parent){
 
         let height_of_current_node = 0;
         //fix the order
@@ -82,12 +90,12 @@ class ProgramTreeView extends BasicView{
         if(this.is_the_node_a_leaf(data)){
             //recursive draw the tree node
             data.values.forEach((d, index)=>{
-                height_of_current_node += this.draw_inner_node(x + this.blockw, y + height_of_current_node, d);
+                height_of_current_node += this.draw_inner_node(x + this.blockw, y + height_of_current_node, d, parent+'_'+data.key);
             });
         }
         else{
             height_of_current_node = this.blockh;
-            this.draw_leaf_vis(x + this.blockw + this.padding, y, data);
+            this.draw_leaf_vis(x + this.blockw + this.padding, y, data, parent+'_'+data.key);
         }
         this.draw_node(x, y, height_of_current_node, this.blockw, data);
         return height_of_current_node;
@@ -124,20 +132,22 @@ class ProgramTreeView extends BasicView{
             .style('pointer-events', 'none');            
     }
 
-    draw_leaf_vis(x, y, data){
+    draw_leaf_vis(x, y, data, parent){
 
-        this.bit_heatmap_bucket[data.key] = new BitHeatMap(this.svg, x, y, this.bitmap_width, this.blockh, data);
-        this.bit_heatmap_bucket[data.key].setColormapColor(this.colorscale);
-        this.bit_heatmap_bucket[data.key].draw();
+        x = this.left_padding + this.blockw * 4 + this.padding;
+        this.bit_heatmap_bucket[parent+'_'+data.key] = new BitHeatMap(this.svg, x, y, this.bitmap_width, this.blockh, data);
+        this.bit_heatmap_bucket[parent+'_'+data.key].setColormapColor(this.colorscale);
+        this.bit_heatmap_bucket[parent+'_'+data.key].draw();
 
-        this.stackbar_bucket[data.key] = new StackBarChart(this.svg, x + this.bitmap_width + this.padding_between_bit_stack, y, this.stackbar_width, this.blockh, data);
-        this.stackbar_bucket[data.key].setOutcomeColor(this.outcome_color);
-        this.stackbar_bucket[data.key].draw();
+        this.stackbar_bucket[parent+'_'+data.key] = new StackBarChart(this.svg, x + this.bitmap_width + this.padding_between_bit_stack, y, this.stackbar_width, this.blockh, data);
+        this.stackbar_bucket[parent+'_'+data.key].setOutcomeColor(this.outcome_color);
+        this.stackbar_bucket[parent+'_'+data.key].draw();
     }
 
     draw_menu(){
         
-        let x = this.x + this.programtreedata.getTreeHeight() * this.blockw + this.left_padding;
+        //let x = this.x + this.programtreedata.getTreeHeight() * this.blockw + this.left_padding;
+        let x = this.left_padding + this.blockw * 4 + this.padding;
         let y = 100;
 
         //draw tree menu
@@ -218,6 +228,7 @@ class ProgramTreeView extends BasicView{
 
     setData(msg, data){
         this.programtreedata.setData(data);
+        this.callbackBinding();
         this.init();
         this.draw();
     }
@@ -228,13 +239,14 @@ class ProgramTreeView extends BasicView{
     callbackBinding(){
         this.programtreecontroller.bindingEvent();
         this.programtreecontroller.setNormalizationChangeCallback(this.updateStackChart.bind(this));
+        this.programtreecontroller.setTreeStructureChangeCallback(this.treeStructureChangeEvent.bind(this));
+
         //this.programtreecontroller.setBitfilterChangeCallback()
     }
 
     updateStackChart(option){
         if(option == 'global'){
             let maxsize = 0;
-
             for(let key in  this.stackbar_bucket){
                 maxsize = Math.max(maxsize, this.stackbar_bucket[key].getExperimentCount());
             }
@@ -251,12 +263,16 @@ class ProgramTreeView extends BasicView{
                 this.stackbar_bucket[key].setGlobalFlag(false);
                 this.stackbar_bucket[key].draw();
             }
-
             this.stackbar_chart_axis.domain([0, 1]);
         }
 
         //update axis
         this.stackbar_chart_axis_annotation.transition(1500).call(d3.axisTop(this.stackbar_chart_axis).ticks(5));
+    }
+
+    treeStructureChangeEvent(pattern){
+        this.programtreedata.setHierachicalData(pattern);
+        this.draw();
     }
 }
 

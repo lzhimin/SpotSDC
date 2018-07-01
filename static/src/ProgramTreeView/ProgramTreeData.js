@@ -4,7 +4,7 @@ class ProgramTreeData{
         
     }
 
-    setData(data, pattern = ['Function', 'Variable', 'Line']){
+    setData(data, pattern = []){
         this.data = data;
         this.setHierachicalData(pattern);
     }
@@ -20,33 +20,30 @@ class ProgramTreeData{
     //TODO: what's the inter leaf order of the tree?
     setHierachicalData(pattern){
 
-        let values = null;
+        let values = d3.nest();
         this.pattern = pattern;
 
         if(this.pattern == null){
-            values = d3.nest()
-            .key(function (d) {
+            values.key(function (d) {
                 return d.Function;
             }).key(function (d) {
                 return d.Variable;
             }).key(function (d) {
                 return d.Line;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-            }).key(function (d) {
-                return d.outcome;
             });
         }
-        else{
-            values =  d3.nest();
+        else if(this.pattern.length > 0){
             for (let i = 0; i < this.pattern.length; i++)
                 values.key(function (d) {
                     return d[pattern[i]];
                 });
-            //values.key(function(d){return d[pattern[i].toLowerCase()];});
-            values.key(function (d) {
-                return d.outcome
-            });
         }
-        this.hierachicalData =  {'key':'program', 'values':values.entries(this.data)};
+
+        values.key(function (d) {
+            return d.outcome
+        });
+
+        this.hierachicalData =  {'key':$('#program_TreeView_file_selector').val().split('_')[0], 'values':values.entries(this.data)};
     }
 
     getHierachicalData(){

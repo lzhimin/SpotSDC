@@ -38,8 +38,73 @@ class ProgramViewController{
     }
 
     bindingTreeMenu(){
-        //binding Tree structure change event
+        //reset everything
+        $('#tree_level1').val('');
+        $('#tree_level2').hide();
+        $('#tree_level3').hide();
 
+
+        //binding Tree structure change event
+        $('#tree_level1').unbind();
+        $('#tree_level1').change(()=>{
+            let options = ['Function', 'Variable', 'Line', 'Iter'];
+            let attr = $('#tree_level1').val();
+            if(attr != ''){
+                options.splice(options.indexOf(attr), 1);
+                $('#tree_level2').html('');
+                $('#tree_level2').append('<option></option>');
+
+                options.forEach((d, i)=>{
+                    $('#tree_level2').append('<option>'+d+'</option>');
+                });
+
+                //hide
+                $('#tree_level2').show();
+                $('#tree_level3').hide();
+                this.treestructurechangecallback([attr])
+            }else{
+                $('#tree_level2').hide();
+                $('#tree_level3').hide();
+                this.treestructurechangecallback([]);
+            }
+        });
+
+        $('#tree_level2').unbind();
+        $('#tree_level2').change(()=>{
+            let attr1 = $('#tree_level1').val();
+            let attr2 = $('#tree_level2').val();
+
+            let options = ['Function', 'Variable', 'Line', 'iter'];
+            options.splice(options.indexOf(attr1), 1);
+            options.splice(options.indexOf(attr2), 1);
+
+            $('#tree_level3').html('');
+            $('#tree_level3').append('<option></option>');
+            options.forEach((d, i)=>{
+                $('#tree_level3').append('<option>'+d+'</option>');
+            });
+
+            if(attr2 == ""){
+                $('#tree_level3').hide();
+                this.treestructurechangecallback([attr1]);
+            }else{
+                $('#tree_level3').show();
+                this.treestructurechangecallback([attr1, attr2]);
+            }
+        });
+        
+        $('#tree_level3').unbind();
+        $('#tree_level3').change(()=>{
+            let attr1 = $('#tree_level1').val(),
+            attr2 = $('#tree_level2').val(),
+            attr3 = $('#tree_level3').val();
+
+            if(attr3 == ''){
+                this.treestructurechangecallback([attr1, attr2]);
+            }else{
+                this.treestructurechangecallback([attr1, attr2, attr3]);
+            }
+        });
     }
 
     bindingViewMenu(){
@@ -52,6 +117,8 @@ class ProgramViewController{
     }
 
     bindingNormalizationMenu(){
+
+        $('input:radio[name="normalize_radio"][value=local]').prop('checked', true);
         //binding normalization change event.
         $('input:radio[name="normalize_radio"]').unbind();
         $('input:radio[name="normalize_radio"]').change(()=>{
@@ -75,5 +142,11 @@ class ProgramViewController{
                 d3.select('#program_TreeView_filter_outcome').style('display', 'block');
             }
         });
+
+
+        //bit filter
+
+        //outcome filter
+        
     }
 }
