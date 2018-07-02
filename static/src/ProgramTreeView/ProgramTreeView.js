@@ -135,6 +135,8 @@ class ProgramTreeView extends BasicView{
     draw_leaf_vis(x, y, data, parent){
 
         x = this.left_padding + this.blockw * 4 + this.padding;
+        let current_scale_option = $('input[name=normalize_radio]').val();
+
         this.bit_heatmap_bucket[parent+'_'+data.key] = new BitHeatMap(this.svg, x, y, this.bitmap_width, this.blockh, data);
         this.bit_heatmap_bucket[parent+'_'+data.key].setColormapColor(this.colorscale);
         this.bit_heatmap_bucket[parent+'_'+data.key].draw();
@@ -219,7 +221,6 @@ class ProgramTreeView extends BasicView{
         this.stackbar_chart_axis_annotation = this.svg.append('g').attr('class','axis axis--x')
             .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
             .call(d3.axisTop(this.stackbar_chart_axis).ticks(5));
-
     }
 
     is_the_node_a_leaf(data){

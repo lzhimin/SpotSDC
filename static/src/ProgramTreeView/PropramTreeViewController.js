@@ -118,7 +118,7 @@ class ProgramViewController{
 
     bindingNormalizationMenu(){
 
-        $('input:radio[name="normalize_radio"][value=local]').prop('checked', true);
+        //$('input:radio[name="normalize_radio"][value=local]').prop('checked', true);
         //binding normalization change event.
         $('input:radio[name="normalize_radio"]').unbind();
         $('input:radio[name="normalize_radio"]').change(()=>{
@@ -128,6 +128,7 @@ class ProgramViewController{
     }
 
     bindingFilterMenu(){
+
 
         $('#program_TreeView_Filter_Option').unbind();
         $('#program_TreeView_Filter_Option').change(()=>{
@@ -147,6 +148,6 @@ class ProgramViewController{
         //bit filter
 
         //outcome filter
-        
+
     }
 }

@@ -15,7 +15,8 @@ class ErrorPropagationView extends BasicView{
         this.y = this.top_padding = 150;
         this.x = this.left_padding = 100;
         this.padding = 20;
-        this.path_width = this.width - this.left_padding - this.padding;
+        this.step_size = 50;
+        this.path_width = this.width - this.left_padding - this.padding - this.blockw * 1.5;
         this.propagationData.setData(data);
 
         d3.select('#ErrorPropagationView').html('');
@@ -77,7 +78,7 @@ class ErrorPropagationView extends BasicView{
         //timer
         this.timer.setX(this.variableViewBucket[this.propagationData.seqVar[0]].getLineChartStartX());
         this.timer.setY(this.y - this.top_padding/2);
-        this.timer.setWidth(this.path_width);
+        this.timer.setWidth(Math.floor(this.path_width/this.step_size) * this.step_size);
         this.timer.setRelativeData(this.propagationData.relativeError);
         this.timer.draw();
     
@@ -111,15 +112,13 @@ class ErrorPropagationView extends BasicView{
 
     drawExecutionLineChart(current_time){
 
-        
-        let step_size = 50;
-        let step_w = this.path_width/step_size;
+        let step_w = Math.floor(this.path_width/this.step_size);
         let line = d3.line().x((d, i)=>{return d[0];}).y((d, i)=>{return d[1];}).curve(d3.curveStepAfter);
         let path = [];
         let items = [];
         let item = undefined;
 
-        for(let i = 0; i < step_size && (current_time + i) < this.propagationData.relativeError.length; i++){  
+        for(let i = 0; i < this.step_size && (current_time + i) < this.propagationData.relativeError.length; i++){  
             item = this.propagationData.relativeError[current_time + i]; 
             path.push([this.x + this.blockw * 1.6 + i * step_w, this.variableViewBucket[item[0]].getY() + this.blockh/2 - step_w/2]);
             items.push(item);
@@ -128,15 +127,6 @@ class ErrorPropagationView extends BasicView{
         if(this.excutionLineChart_g != undefined)
             this.excutionLineChart_g.remove();
         this.excutionLineChart_g = this.svg.append('g');
-        
-        /*this.excutionLineChart_g.selectAll('.DynamicFlowPath').data([path]).enter()
-            .append('path')
-            .classed('line', true)
-            .classed('errorPropagation_DynamicFlowPath', true)
-            .attr('d', function(d, i){
-                return line(d);
-            })
-            .attr("fill", "none");*/
 
         this.excutionLineChart_g.selectAll('.DynamicFlowPath_rect').data(items).enter()
             .append('rect')

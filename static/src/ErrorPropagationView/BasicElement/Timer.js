@@ -31,6 +31,8 @@ class Timer{
             return i==0 ? this.axis_x(this.current_time_step) : this.axis_x(this.current_time_step + 50);
         });
         this.trigger_rect.attr('x', this.axis_x(this.current_time_step));
+
+        this.draw_select_time_intervel();
                 
     }
 
@@ -52,7 +54,7 @@ class Timer{
 
     draw(){
 
-        this.axis_x = d3.scaleLinear().range([this.x, this.left_padding + this.width]).domain([0, this.time]);
+        this.axis_x = d3.scaleLinear().range([this.x, this.x + this.width]).domain([0, this.time]);
         this.axis_y = d3.scaleLinear().range([this.y, this.y - this.height]).domain([0, 1]);//relative error the value scale from 0~1
         this.trigger_rect_w = this.axis_x(50) - this.axis_x(0);
 
@@ -97,6 +99,7 @@ class Timer{
                 
                 //call back function.
                 this.callback(this.current_time_step);
+                this.draw_select_time_intervel();
             })
             .on('end', (d)=>{
 
@@ -114,6 +117,42 @@ class Timer{
         .attr('text-anchor', 'middle')
         .attr('domain-baseline', 'central')
         .classed('timer_trigger_text', true);
+
+        this.draw_select_time_intervel();
+    }
+
+    draw_select_time_intervel(){
+        let selected_time_axis = d3.scaleLinear().range([this.x, this.x + this.width]).domain([this.current_time_step, this.current_time_step+50]);
+        
+        if(this.selected_time_axis_g == undefined)
+            this.selected_time_axis_g = this.svg.append('g').attr('class','axis axis--x')
+                .attr("transform", "translate(0,"+ (this.y + 50) + ")")
+                .call(d3.axisBottom(selected_time_axis).ticks(20));
+        else
+            this.selected_time_axis_g.call(d3.axisBottom(selected_time_axis).ticks(20));
+
+        //connecting path
+        let path = [];
+        let line = d3.line().x((d, i)=>{return d[0];}).y((d, i)=>{return d[1];}).curve(d3.curveStepAfter);
+        path.push([this.x, this.y + 50]);
+        path.push([this.x, this.y + 30]);
+        path.push([+this.trigger_rect.attr('x'), this.y + 30]);
+        path.push([+this.trigger_rect.attr('x'), this.y]);
+        path.push([(+this.trigger_rect.attr('x')) + (+this.trigger_rect.attr('width')), this.y]);
+        path.push([(+this.trigger_rect.attr('x')) + (+this.trigger_rect.attr('width')), this.y + 30]);
+        path.push([this.x + this.width, this.y + 30]);
+        path.push([this.x + this.width, this.y + 50]);
+        
+        if(this.selected_time_axis_connector == undefined)
+            this.selected_time_axis_connector = this.svg.append('path')
+            .datum(path)
+            .attr('d', line)
+            .classed("Timer_trigger", true);
+        else{
+            this.selected_time_axis_connector.datum(path)
+            .attr('d', line);
+        }
+
     }
 
     setTimerStepChangeCallBack(func){
