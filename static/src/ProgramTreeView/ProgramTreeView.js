@@ -241,7 +241,7 @@ class ProgramTreeView extends BasicView{
         this.programtreecontroller.bindingEvent();
         this.programtreecontroller.setNormalizationChangeCallback(this.updateStackChart.bind(this));
         this.programtreecontroller.setTreeStructureChangeCallback(this.treeStructureChangeEvent.bind(this));
-
+        this.programtreecontroller.setfiltercalllback(this.filterData.bind(this));
         //this.programtreecontroller.setBitfilterChangeCallback()
     }
 
@@ -273,6 +273,11 @@ class ProgramTreeView extends BasicView{
 
     treeStructureChangeEvent(pattern){
         this.programtreedata.setHierachicalData(pattern);
+        this.draw();
+    }
+
+    filterData(category, items){
+        this.programtreedata.filterDataCallBack(category, items);
         this.draw();
     }
 }

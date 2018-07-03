@@ -12,12 +12,18 @@ class Timer{
 
         this.current_time_step = 0;
 
+        this.display_var = new Set();
+
         this.trigger_rect_w = 20;
         this.trigger_rect_h = this.height;
     }
 
     getCurrentTimeStep(){
         return this.current_time_step
+    }
+
+    setTimerStepChangeCallBack(func){
+        this.callback = func;
     }
 
     setCurrentTimeStep(step){
@@ -66,12 +72,12 @@ class Timer{
             .attr("transform", "translate("+ (this.x - 5) + ", 0)")
             .call(d3.axisLeft(this.axis_y).ticks(4));
 
-        let line = d3.line().x((d, i)=>{return this.axis_x(i);}).y((d, i)=>{return this.axis_y(d[1]);}).curve(d3.curveStepAfter);
-        this.svg.append('path')
+        this.linefunc = d3.line().x((d, i)=>{return this.axis_x(i);}).y((d, i)=>{return this.axis_y(d[1]);}).curve(d3.curveStepAfter);
+        this.relativeErrorPath = this.svg.append('path')
             .datum(this.relativeData)
             .classed('timer_error_linechart_line', true)
             .attr("fill", "none")
-            .attr('d', line);
+            .attr('d', this.linefunc);
 
         this.trigger_rect = this.svg.append('rect').datum(this.current_time_step)
         .attr('x', this.x)
@@ -133,14 +139,14 @@ class Timer{
 
         //connecting path
         let path = [];
-        let line = d3.line().x((d, i)=>{return d[0];}).y((d, i)=>{return d[1];}).curve(d3.curveStepAfter);
+        let line = d3.line().x((d, i)=>{return d[0];}).y((d, i)=>{return d[1];});//.curve(d3.curveStepAfter);
         path.push([this.x, this.y + 50]);
-        path.push([this.x, this.y + 30]);
-        path.push([+this.trigger_rect.attr('x'), this.y + 30]);
+        path.push([this.x, this.y + 40]);
+        //path.push([+this.trigger_rect.attr('x'), this.y + 30]);
         path.push([+this.trigger_rect.attr('x'), this.y]);
         path.push([(+this.trigger_rect.attr('x')) + (+this.trigger_rect.attr('width')), this.y]);
-        path.push([(+this.trigger_rect.attr('x')) + (+this.trigger_rect.attr('width')), this.y + 30]);
-        path.push([this.x + this.width, this.y + 30]);
+        //path.push([(+this.trigger_rect.attr('x')) + (+this.trigger_rect.attr('width')), this.y + 30]);
+        path.push([this.x + this.width, this.y + 40]);
         path.push([this.x + this.width, this.y + 50]);
         
         if(this.selected_time_axis_connector == undefined)
@@ -155,7 +161,28 @@ class Timer{
 
     }
 
-    setTimerStepChangeCallBack(func){
-        this.callback = func;
+    setDisplayVariable(variable){
+        if(this.display_var.has(variable)){
+            this.display_var.delete(variable);
+        }else{
+            this.display_var.add(variable);
+        }
+
+        let filterdata =[];
+        for(let i = 0; i < this.relativeData.length; i++){
+            if(this.display_var.has(this.relativeData[i][0]))
+                filterdata.push(this.relativeData[i]);
+            else{
+                filterdata.push([0, 0]);
+            }
+        }
+
+        if(this.display_var.size == 0){
+            filterdata = this.relativeData;
+        }
+
+        this.relativeErrorPath.datum(filterdata)
+        .attr('d', this.linefunc);
     }
+
 }

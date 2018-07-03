@@ -73,6 +73,7 @@ class ErrorPropagationView extends BasicView{
         for(let key in this.variableViewBucket){
             this.variableViewBucket[key].setErrorOption(this.propagationController.getOption());
             this.variableViewBucket[key].draw();
+            this.variableViewBucket[key].setOnClickEventListener(this.timer.setDisplayVariable.bind(this.timer));
         }
         
         //timer

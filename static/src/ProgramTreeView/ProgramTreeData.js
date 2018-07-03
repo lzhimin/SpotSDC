@@ -6,15 +6,8 @@ class ProgramTreeData{
 
     setData(data, pattern = []){
         this.data = data;
+        this.filterData = this.data;
         this.setHierachicalData(pattern);
-    }
-
-    getData(){
-        return this.data;
-    }
-
-    getDataSize(){
-        return this.data.length;
     }
 
     //TODO: what's the inter leaf order of the tree?
@@ -43,7 +36,15 @@ class ProgramTreeData{
             return d.outcome
         });
 
-        this.hierachicalData =  {'key':$('#program_TreeView_file_selector').val().split('_')[0], 'values':values.entries(this.data)};
+        this.hierachicalData =  {'key':$('#program_TreeView_file_selector').val().split('_')[0], 'values':values.entries(this.filterData)};
+    }
+
+    getData(){
+        return this.filterData;
+    }
+
+    getDataSize(){
+        return this.filterData.length;
     }
 
     getHierachicalData(){
@@ -52,5 +53,37 @@ class ProgramTreeData{
 
     getTreeHeight(){
         return this.pattern.length + 1;
+    }
+
+    filterDataCallBack(category, filteritems){
+
+        this.filterData = [];
+        if(category == 'bit'){
+            for(let i = 0; i < this.data.length; i++){
+                let item = this.data[i];
+                if(!filteritems.has(item.bit)){
+                    this.filterData.push(item);
+                }
+            }
+        }
+        else if(category == 'outcome'){
+            for(let i = 0; i < this.data.length; i++){
+                let item = this.data[i];
+                if(!filteritems.has(item.outcome)){
+                    this.filterData.push(item);
+                }
+            }
+        }
+        else if(category == 'diffnorm'){
+
+        }
+        else if(category == 'injectError'){
+
+        }else{
+            
+        }
+
+        //reset the data hierachy
+        this.setHierachicalData(this.pattern);
     }
 }

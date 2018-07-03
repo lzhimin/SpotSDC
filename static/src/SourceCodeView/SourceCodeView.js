@@ -5,7 +5,6 @@ class SourceCodeView extends BasicView{
 
     setHighLightIndex(msg, data){
 
-        console.log(data);
         //scroll div to the target line
         let offset = $('#sourceCode_display li')[+data.line-1].offsetTop;
         this.container.getElement()[0].scrollTop = offset - $(this.container.getElement()[0]).height()/2;

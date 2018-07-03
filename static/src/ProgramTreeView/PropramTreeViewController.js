@@ -4,7 +4,7 @@ class ProgramViewController{
         this.treestructurechangecallback = undefined;
         
         this.viewchangecallback = undefined;
-        this.bitfilterchangecallback = undefined;
+        this.filtercalllback = undefined;
 
         this.normalizationchangecallback = undefined;
         this.outcomechangecallback = undefined;
@@ -18,8 +18,8 @@ class ProgramViewController{
         this.viewchangecallback = func;
     }
 
-    setBitfilterChangeCallback(func){
-        this.bitfilterchangecallback = func;
+    setfiltercalllback(func){
+        this.filtercalllback = func;
     }
 
     setNormalizationChangeCallback(func){
@@ -129,11 +129,9 @@ class ProgramViewController{
 
     bindingFilterMenu(){
 
-
         $('#program_TreeView_Filter_Option').unbind();
         $('#program_TreeView_Filter_Option').change(()=>{
             let option = $('#program_TreeView_Filter_Option').val();
-
             if(option == 'bit'){
                 d3.select('#program_TreeView_filter_bit').style('display', 'block');
                 d3.select('#program_TreeView_filter_outcome').style('display', 'none');
@@ -144,10 +142,50 @@ class ProgramViewController{
             }
         });
 
-
         //bit filter
+        $('input[name=bit_out_xor_radio]').unbind();
+        $('input[name=bit_out_xor_radio]').change(()=>{
+            let checkedItem = $('input[name=bit_out_xor_radio]:checked');
+            let filter = new Set(['sign', 'exponent', 'mantissa']);
+
+            for(let i = 0; i < checkedItem.length; i++)
+                filter.delete(checkedItem[i].value);
+
+            this.filtercalllback('bit', this.IEEE_Binary_Representation(filter));
+        });
+
 
         //outcome filter
+        $('input[name=outcome_filter]').change(()=>{
+            let checkedItem = $('input[name=outcome_filter]:checked');
+            let filter = new Set(['DUE', 'Masked', 'SDC']);
 
+            for(let i = 0; i < checkedItem.length; i++)
+                filter.delete(checkedItem[i].value);
+            
+            this.filtercalllback('outcome', filter);
+        });
+
+    }
+
+    IEEE_Binary_Representation(filter){
+
+        let bitfilter = new Set([]);
+        if(filter.has('sign')){
+            bitfilter.add('64');
+        }
+        if(filter.has('exponent')){
+            for(let i = 53; i < 64; i++){
+                bitfilter.add(i+'');
+            }
+        }
+        if(filter.has('mantissa')){
+            for(let i = 1; i < 53; i++){
+                bitfilter.add(i+'');
+            }
+        }
+
+        return bitfilter;
+        
     }
 }

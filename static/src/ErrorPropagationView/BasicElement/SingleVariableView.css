@@ -4,6 +4,10 @@
     stroke-width: 1px;
 }
 
+.singleVariableRect_clicked{
+    stroke: orange;
+}
+
 
 .singleVariableText{
     fill: black;

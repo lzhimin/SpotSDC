@@ -18,6 +18,8 @@ class SingleVariableView{
         this.timer = 0;
 
         this.uuid = uuidv4();
+
+        this.onclickeventlistener = undefined;
     }
 
     extractDataByType(data, type){
@@ -89,6 +91,10 @@ class SingleVariableView{
         this.error_option = option;
     }
 
+    setOnClickEventListener(func){
+        this.onclickeventlistener = func;
+    }
+
     getDownConnectionLocation(){
 
         return [this.x + this.blockw * 1.5, this.y + this.blockh/2];
@@ -141,6 +147,11 @@ class SingleVariableView{
             return i == 0? this.blockw/2:this.blockw;
         })
         .attr('height', this.blockh)
+        .on('click', (d, i, nodes)=>{
+            this.onclickeventlistener(this.name);
+            d3.selectAll(nodes).classed("singleVariableRect_clicked", !d3.select(nodes[0]).classed("singleVariableRect_clicked"));
+
+        })
         .classed('singleVariableRect', true);
 
         this.texts = this.svg.selectAll('.singleVariableText'+'_'+this.uuid)
