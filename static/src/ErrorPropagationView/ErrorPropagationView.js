@@ -10,7 +10,7 @@ class ErrorPropagationView extends BasicView{
         super.init();
 
         this.blockw = 80;
-        this.blockh = 30;
+        this.blockh = 20;
 
         this.y = this.top_padding = 150;
         this.x = this.left_padding = 100;
@@ -145,33 +145,4 @@ class ErrorPropagationView extends BasicView{
             .style('stroke-opacity', 0.2)
             .style('stroke-width', '1px');
     }
-
-    /*drawExecutionLineChart(){
-
-        let step_size = 10;
-        
-        let line = d3.line().x((d, i)=>{return d[0];}).y((d, i)=>{return d[1];}).curve(d3.curveStepAfter);
-
-        let path = [];
-
-        this.propagationData.data.forEach((d, i)=>{
-            if(i >= this.timer.current_time_step  && i <= this.timer.current_time_step + this.variableViewBucket[d.line+':'+d.var].time_intervel)
-                path.push([this.x + this.blockw * 1.6 + (i - this.timer.current_time_step) * step_size, this.variableViewBucket[d.line+':'+d.var].getY() + this.blockh/2 - 5]);
-        });
-
-
-        if(this.excutionLineChart_g != undefined)
-            this.excutionLineChart_g.remove();
-        this.excutionLineChart_g = this.svg.append('g');
-        
-        this.excutionLineChart_g.selectAll('.DynamicFlowPath').data([path]).enter()
-            .append('path')
-            .classed('line', true)
-            .classed('errorPropagation_DynamicFlowPath', true)
-            .attr('d', function(d, i){
-                return line(d);
-            })
-            .attr("fill", "none");
-    }*/
-
 }

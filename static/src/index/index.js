@@ -4,7 +4,8 @@ let myLayout = new GoldenLayout(config);
 //scv: source code view
 //tv: table view
 //epv: error propagation view
-let ptv, scv, tv, epv;
+//lav: location analysis view
+let ptv, scv, tv, epv, lav;
 
 myLayout.registerComponent('ProgramTreeView', function(container, state){
     $(container.getElement()[0]).load('../static/src/ProgramTreeView/ProgramTreeView.html');
@@ -40,8 +41,6 @@ myLayout.registerComponent('TableView', function(container, state){
     subscribe('SUBSETDATA', tv.setData.bind(tv));
 });
 
-
-
 myLayout.on('itemCreated', (item)=>{
     if( item.config.cssClass ){
       item.element.addClass( item.config.cssClass );
@@ -58,7 +57,6 @@ function changeFile(){
     //public source code file
     publish('SOURCECODE', filename);
 }
-
 
 function uuidv4() {
     function s4() {

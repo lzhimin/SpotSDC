@@ -202,27 +202,75 @@ class ProgramTreeView extends BasicView{
         this.stackbar_chart_axis_annotation = this.svg.append('g').attr('class','axis axis--x')
             .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
             .call(d3.axisTop(this.stackbar_chart_axis).ticks(5));
+
+        //category annotation
+        
+        if(this.stackbar_chart_text != undefined)
+            this.stackbar_chart_text.remove();
+        this.stackbar_chart_text = this.svg.append('g');
+
+        this.stackbar_chart_text.selectAll('.stackbar_chart_text').data(Object.keys(this.outcome_color).sort())
+            .enter()
+            .append('text')
+            .text(d=>d)
+            .attr('x', (d, i)=>{
+                return ratio_chart_x + this.stackbar_width/1.5;
+            })
+            .attr('y', (d, i)=>{
+                return this.top_padding - 140 + i * 20 + 7.5;
+            })
+            .attr('dominant-baseline', 'central')
+            .style('font-size', 12);
+
+        if(this.stackbar_chart_rect != undefined)
+            this.stackbar_chart_rect.remove();
+        this.stackbar_chart_rect = this.svg.append('g');
+
+        this.stackbar_chart_rect.selectAll('.stackbar_chart_rect').data(Object.keys(this.outcome_color).sort())
+            .enter()
+            .append('rect')
+            .attr('x', (d, i)=>{
+                return ratio_chart_x + this.stackbar_width;
+            })
+            .attr('y', (d, i)=>{
+                return this.top_padding - 140 + i * 20;
+            })
+            .attr('width', 15)
+            .attr('height', 15)
+            .style('fill', (d)=>{
+                return this.outcome_color[d];
+            })
+            .classed('tree_node' , true);
+
+
+
+
     }
 
     draw_annotation_heatmap(){
 
-        if(this.impactHeatmapAnnotation!=undefined)
+        if(this.impactHeatmapAnnotation!=undefined){
             this.impactHeatmapAnnotation.remove();
+        }
         
         if(this.bitHeatMapAnnotation != undefined)
             this.bitHeatMapAnnotation.remove();
 
+        if(this.bitHeatMapAnnotation_colorscale != undefined)
+            this.bitHeatMapAnnotation_colorscale.remove();
 
         let colorscale = ['white'].concat(this.colorscale);
         let colorscale_w = this.bitmap_width/(2 * colorscale.length);
         let colorscale_h = 20;
-        this.svg.selectAll('.colorscale').data(colorscale).enter()
+       
+        this.bitHeatMapAnnotation_colorscale = this.svg.append('g');
+        this.bitHeatMapAnnotation_colorscale.selectAll('.colorscale').data(colorscale).enter()
         .append('rect')
         .attr('x', (d, i)=>{
             return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/3 + colorscale_w * i;
         })
         .attr('y', (d, i)=>{
-            return this.top_padding - 60;
+            return this.top_padding - 85;
         })
         .attr('width', colorscale_w)
         .attr('height', colorscale_h)
@@ -231,6 +279,18 @@ class ProgramTreeView extends BasicView{
         })
         .style('stroke', 'gray')
         .style('stroke-width', '1px');
+
+        this.bitHeatMapAnnotation_colorscale.selectAll('.colorscale_text').data(['0', '0<','100 %']).enter().append('text')
+            .text(d=>d)
+            .attr('x', (d, i)=>{
+                if(i < 2)
+                    return  this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/3 + colorscale_w * i;
+                else 
+                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/3 + colorscale_w * (this.colorscale.length+1);
+            })
+            .attr('y', this.top_padding - 95)
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'central');
 
 
         if(this.viewoption == 'bit_heatmap'){
@@ -259,7 +319,15 @@ class ProgramTreeView extends BasicView{
             let mindiff = this.programtreedata.getMinDiff();
             let x_axis = d3.scaleLinear().range([x, x + Math.floor(this.bitmap_width/10) * 10]).domain([mindiff, maxdiff]);
 
-            this.impactHeatmapAnnotation = this.svg.append('g').attr('class','axis axis--x')
+            this.impactHeatmapAnnotation = this.svg.append('g')
+            this.impactHeatmapAnnotation.append('text').datum(['SDC Impact']).text(d=>d)
+                .attr('x', (d, i)=>{
+                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/3;
+                })
+                .attr('y', (d, i)=>{
+                    return this.top_padding - 40;
+                });
+            this.impactHeatmapAnnotation.append('g').attr('class','axis axis--x')
                 .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
                 .call(d3.axisTop(x_axis).tickValues(d3.range(mindiff, maxdiff, (maxdiff - mindiff)/10)));
         }

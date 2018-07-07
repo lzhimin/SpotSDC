@@ -54,7 +54,10 @@ class ImpactHeatmap extends standardChildView{
             return d.length == 0? 'white': colorscale(d.length);
         })
         .style('stroke', 'gray')
-		.style('stroke-width', '1px');
+        .style('stroke-width', '1px')
+        .on('click',(d)=>{
+            publish('SUBSETDATA', d);
+        });
     }
 
     histogram1D(){
