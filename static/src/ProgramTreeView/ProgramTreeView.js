@@ -10,7 +10,11 @@ class ProgramTreeView extends BasicView{
             'SDC': '#fdcdac'
         }   
 
-        this.colorscale = ['#feedde', '#fdbe85', '#fd8d3c', '#e6550d', '#a63603']; 
+        //this.colorscale = ['#feedde', '#fdbe85', '#fd8d3c', '#e6550d', '#a63603']; 
+
+        this.colorscale = ['#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5','#08519c','#08306b'];
+        
+        this.viewoption = 'bit_heatmap';
     }
 
     init(){
@@ -139,11 +143,21 @@ class ProgramTreeView extends BasicView{
 
         this.bit_heatmap_bucket[parent+'_'+data.key] = new BitHeatMap(this.svg, x, y, this.bitmap_width, this.blockh, data);
         this.bit_heatmap_bucket[parent+'_'+data.key].setColormapColor(this.colorscale);
-        this.bit_heatmap_bucket[parent+'_'+data.key].draw();
+        //this.bit_heatmap_bucket[parent+'_'+data.key].draw();
 
         this.stackbar_bucket[parent+'_'+data.key] = new StackBarChart(this.svg, x + this.bitmap_width + this.padding_between_bit_stack, y, this.stackbar_width, this.blockh, data);
         this.stackbar_bucket[parent+'_'+data.key].setOutcomeColor(this.outcome_color);
         this.stackbar_bucket[parent+'_'+data.key].draw();
+
+
+        this.impact_heatmap_bucket[parent+'_'+data.key] = new ImpactHeatmap(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxDiff(), this.programtreedata.getMinDiff());
+        this.impact_heatmap_bucket[parent+'_'+data.key].setOutcomeColor(this.colorscale);
+        
+        if(this.viewoption == 'bit_heatmap')
+            this.bit_heatmap_bucket[parent+'_'+data.key].draw();
+        else if(this.viewoption == 'heatmap_impact')
+            this.impact_heatmap_bucket[parent+'_'+data.key].draw();
+         
     }
 
     draw_menu(){
@@ -177,24 +191,27 @@ class ProgramTreeView extends BasicView{
     }
 
     draw_annotation(){
-        this.svg.selectAll('.programTreeViewMenu_annotation').data(['sign', 'exponent', 'mantissa'])
-        .enter()
-        .append('text')
-        .text(d=>d)
-        .attr('x', (d, i)=>{
-            if(i==0) 
-                return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/128;
-            else if(i == 1)
-                return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/8;
-            else 
-                return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width* 19/32;
-        })
-        .attr('y', (d, i)=>{
-            return this.top_padding - 20;
-        }) 
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "central")
-        .style('font-size', 8);
+        this.draw_annotation_heatmap();
+        this.draw_annotation_stackchart();        
+    }
+
+    draw_annotation_stackchart(){
+        //ratio
+        let ratio_chart_x = this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width;
+        this.stackbar_chart_axis = d3.scaleLinear().range([ratio_chart_x, ratio_chart_x + this.stackbar_width]).domain([0, 1]);
+        this.stackbar_chart_axis_annotation = this.svg.append('g').attr('class','axis axis--x')
+            .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
+            .call(d3.axisTop(this.stackbar_chart_axis).ticks(5));
+    }
+
+    draw_annotation_heatmap(){
+
+        if(this.impactHeatmapAnnotation!=undefined)
+            this.impactHeatmapAnnotation.remove();
+        
+        if(this.bitHeatMapAnnotation != undefined)
+            this.bitHeatMapAnnotation.remove();
+
 
         let colorscale = ['white'].concat(this.colorscale);
         let colorscale_w = this.bitmap_width/(2 * colorscale.length);
@@ -215,13 +232,39 @@ class ProgramTreeView extends BasicView{
         .style('stroke', 'gray')
         .style('stroke-width', '1px');
 
-        //ratio
-        let ratio_chart_x = this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width;
-        this.stackbar_chart_axis = d3.scaleLinear().range([ratio_chart_x, ratio_chart_x + this.stackbar_width]).domain([0, 1]);
-        this.stackbar_chart_axis_annotation = this.svg.append('g').attr('class','axis axis--x')
-            .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
-            .call(d3.axisTop(this.stackbar_chart_axis).ticks(5));
+
+        if(this.viewoption == 'bit_heatmap'){
+            this.bitHeatMapAnnotation = this.svg.append('g').selectAll('.programTreeViewMenu_annotation').data(['sign', 'exponent', 'mantissa'])
+            .enter()
+            .append('text')
+            .text(d=>d)
+            .attr('x', (d, i)=>{
+                if(i==0) 
+                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/128;
+                else if(i == 1)
+                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/8;
+                else 
+                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width* 19/32;
+            })
+            .attr('y', (d, i)=>{
+                return this.top_padding - 20;
+            }) 
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "central")
+            .style('font-size', 8);
+        }
+        else if(this.viewoption == 'heatmap_impact'){
+            let x = this.left_padding + this.blockw * 4 + this.padding;
+            let maxdiff = this.programtreedata.getMaxDiff();
+            let mindiff = this.programtreedata.getMinDiff();
+            let x_axis = d3.scaleLinear().range([x, x + Math.floor(this.bitmap_width/10) * 10]).domain([mindiff, maxdiff]);
+
+            this.impactHeatmapAnnotation = this.svg.append('g').attr('class','axis axis--x')
+                .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
+                .call(d3.axisTop(x_axis).tickValues(d3.range(mindiff, maxdiff, (maxdiff - mindiff)/10)));
+        }
     }
+
 
     is_the_node_a_leaf(data){
         return 'key' in data.values[0] && !(data.values[0].key in this.outcome_color);
@@ -242,6 +285,7 @@ class ProgramTreeView extends BasicView{
         this.programtreecontroller.setNormalizationChangeCallback(this.updateStackChart.bind(this));
         this.programtreecontroller.setTreeStructureChangeCallback(this.treeStructureChangeEvent.bind(this));
         this.programtreecontroller.setfiltercalllback(this.filterData.bind(this));
+        this.programtreecontroller.setViewChangeCallback(this.changeViewEvent.bind(this));
         //this.programtreecontroller.setBitfilterChangeCallback()
     }
 
@@ -274,6 +318,36 @@ class ProgramTreeView extends BasicView{
     treeStructureChangeEvent(pattern){
         this.programtreedata.setHierachicalData(pattern);
         this.draw();
+    }
+
+    changeViewEvent(option){
+
+        this.viewoption = option;
+
+        if(option == 'bit_heatmap'){
+
+            for(let key in this.impact_heatmap_bucket){
+                this.impact_heatmap_bucket[key].clear();
+            }
+
+            for(let key in this.bit_heatmap_bucket){
+                this.bit_heatmap_bucket[key].draw();
+            }
+        }
+        else if(option == 'heatmap_impact'){
+            for(let key in this.bit_heatmap_bucket){
+                this.bit_heatmap_bucket[key].clear();
+            }
+
+            for(let key in this.impact_heatmap_bucket){
+                this.impact_heatmap_bucket[key].draw();
+            }
+        }
+        else{
+
+        }
+
+        this.draw_annotation_heatmap();
     }
 
     filterData(category, items){

@@ -110,7 +110,7 @@ class ProgramViewController{
     bindingViewMenu(){
         //binding view change event.
         $('input:radio[name="view_radio"]').unbind();
-        $('input:radio[name="view_radio"]').change(function () {
+        $('input:radio[name="view_radio"]').change(()=>{
             let option = $('input[name=view_radio]:checked').val();
             this.viewchangecallback(option);
         });

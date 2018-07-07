@@ -66,6 +66,13 @@ class StackBarChart extends standardChildView{
         }
     }
 
+    clean(){
+        if(this.g != undefined){
+            this.g.remove();
+            this.g = undefined;
+        }
+    }
+
     getExperimentCount(){
         return this.sum;
     }

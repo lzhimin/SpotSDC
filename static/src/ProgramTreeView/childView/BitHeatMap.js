@@ -18,14 +18,26 @@ class BitHeatMap extends standardChildView{
         this.rect_h = this.height / this.outcome_categories;
     }
 
+    clear(){
+        if(this.g != undefined){
+            this.g.remove();
+            this.g = undefined;
+        }
+    }
+
 
     draw(){
         this.hist = this.histogram2d();
 
         this.init_color_scale();
 
+        this.clear();
+
+        if(this.g == undefined)
+            this.g = this.svg.append('g');
+
         //background rect
-        this.svg.append('rect')
+        this.g.append('rect')
         .attr('x', this.x)
         .attr('y', this.y)
         .attr('width', this.width)
@@ -33,7 +45,7 @@ class BitHeatMap extends standardChildView{
         .classed('Bit_outcome_heatmap_background_rect', true);
 
         //heatmap rect
-        this.svg.selectAll('.Bit_outcome_heatmap_'+this.uuid+'_rect').data(this.hist).enter()
+        this.g.selectAll('.Bit_outcome_heatmap_'+this.uuid+'_rect').data(this.hist).enter()
         .append('rect')
         .attr('class', 'Bit_outcome_heatmap_rect')
         .attr('width', this.rect_w)
@@ -53,7 +65,7 @@ class BitHeatMap extends standardChildView{
         });
 
         // y-axis
-		this.svg.selectAll('.Bit_outcome_heatmap_'+this.uuid+'_y_label').data(this.categories_label).enter()
+		this.g.selectAll('.Bit_outcome_heatmap_'+this.uuid+'_y_label').data(this.categories_label).enter()
 		.append('text')
 		.text(d=>d)
 		.attr('class', 'Bit_outcome_heatmap_label')
@@ -73,7 +85,7 @@ class BitHeatMap extends standardChildView{
 		//draw dash line for sign bit, exponent bit and mantissa bit
 		let dashline_d = [[this.x + this.rect_w, this.y, this.x + this.rect_w, this.y + this.height], [this.x + this.rect_w * 12, this.y, this.x + this.rect_w * 12, this.y + this.height]];
 		
-		this.svg.selectAll('.HeatMap2d_'+this.uuid+'_dashLine_x').data(dashline_d).enter()
+		this.g.selectAll('.HeatMap2d_'+this.uuid+'_dashLine_x').data(dashline_d).enter()
 		.append('line')
 		.attr('x1', d=>d[0])
 		.attr('y1', d=>d[1])

@@ -1,13 +1,15 @@
 class ProgramTreeData{
 
-    constructor(){
-        
+    constructor(){  
+        this.property = {'maxDiff':-Number.MAX_VALUE, 'minDiff':Number.MAX_VALUE};
     }
 
     setData(data, pattern = []){
         this.data = data;
         this.filterData = this.data;
         this.setHierachicalData(pattern);
+
+        this.parseDataProperty();
     }
 
     //TODO: what's the inter leaf order of the tree?
@@ -47,12 +49,32 @@ class ProgramTreeData{
         return this.filterData.length;
     }
 
+    getMaxDiff(){
+        return this.property.maxDiff;
+    }
+
+    getMinDiff(){
+        return this.property.minDiff;
+    }
+
     getHierachicalData(){
         return this.hierachicalData;
     }
 
     getTreeHeight(){
         return this.pattern.length + 1;
+    }
+
+    parseDataProperty(){
+        this.property = {'maxDiff':-Number.MAX_VALUE, 'minDiff':Number.MAX_VALUE};
+        this.data.forEach(element=>{
+
+            if(element.outcome == 'SDC' && element.diffnormr != 'inf'){
+                let diffnorm = Math.log10(+element.diffnormr);
+                this.property.maxDiff = Math.max(this.property.maxDiff, diffnorm);
+                this.property.minDiff = Math.min(this.property.minDiff, diffnorm);
+            }
+        });
     }
 
     filterDataCallBack(category, filteritems){
@@ -85,5 +107,8 @@ class ProgramTreeData{
 
         //reset the data hierachy
         this.setHierachicalData(this.pattern);
+
+        //reset the data property
+        this.parseDataProperty();
     }
 }

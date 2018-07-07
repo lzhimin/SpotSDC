@@ -10,7 +10,10 @@ class TableView extends BasicView{
 
         this.clean();
 
-        this.table = d3.select('#tableView').append('table');
+        this.table = d3.select('#tableView').append('table')
+            .classed('table', true)
+            .classed('table-condensed ', true)
+            .classed('table-hover', true);
 
         this.data = data;
 
