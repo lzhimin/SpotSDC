@@ -10,3 +10,9 @@
     background-color:white;
 }
 
+
+.sourceCode_execution:before{
+    position: absolute;
+    left: -1em;
+    content: "+";
+}

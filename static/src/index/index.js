@@ -29,6 +29,8 @@ myLayout.registerComponent('SourceCodeView', function(container, state){
     $(container.getElement()[0]).load('../static/src/SourceCodeView/SourceCodeView.html');
     //source code view, subscribe to source code event
     scv = new SourceCodeView(container);
+
+    subscribe('DATASET', scv.setData.bind(scv));
     subscribe('SOURCECODE', scv.setSourceCodeFile.bind(scv));
     subscribe('SOURCECODE_HIGHLIGHT', scv.setHighLightIndex.bind(scv));
 
