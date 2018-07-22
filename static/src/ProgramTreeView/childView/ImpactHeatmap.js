@@ -79,10 +79,6 @@ class ImpactHeatmap extends standardChildView{
 
     sdc_bin(sdc_values, bins){
 
-        let thresholds = d3.range(this.minLogDiff, this.maxLogDiff, (this.maxLogDiff - this.minLogDiff)/this.sdc_bin_size);
-
-        let hist = d3.histogram().domain([this.minLogDiff, this.maxLogDiff]).thresholds(thresholds);
-
         let range = []
         for(let i = 0; i < this.sdc_bin_size; i++){
             range.push(i);

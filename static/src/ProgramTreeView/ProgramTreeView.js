@@ -14,7 +14,7 @@ class ProgramTreeView extends BasicView{
 
         this.colorscale = ['#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5','#08519c','#08306b'];
         
-        this.viewoption = 'smart_bit_heatmap';
+        this.viewoption = 'value_heatmap';
     }
 
     init(){
@@ -140,8 +140,7 @@ class ProgramTreeView extends BasicView{
     draw_leaf_vis(x, y, data, parent){
 
         x = this.left_padding + this.blockw * 4 + this.padding;
-        let current_scale_option = $('input[name=normalize_radio]').val();
-
+    
         this.bit_heatmap_bucket[parent+'_'+data.key] = new BitHeatMap(this.svg, x, y, this.bitmap_width, this.blockh, data);
         this.bit_heatmap_bucket[parent+'_'+data.key].setColormapColor(this.colorscale);
         //this.bit_heatmap_bucket[parent+'_'+data.key].draw();
@@ -153,6 +152,8 @@ class ProgramTreeView extends BasicView{
         this.stackbar_bucket[parent+'_'+data.key].setOutcomeColor(this.outcome_color);
         this.stackbar_bucket[parent+'_'+data.key].draw();
 
+        this.value_heatmap_bucket[parent+'_'+data.key] = new ValueHeatMap(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxInput(), this.programtreedata.getMinInput());
+        this.value_heatmap_bucket[parent+'_'+data.key].setColor(this.colorscale);
 
         this.impact_heatmap_bucket[parent+'_'+data.key] = new ImpactHeatmap(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxDiff(), this.programtreedata.getMinDiff());
         this.impact_heatmap_bucket[parent+'_'+data.key].setOutcomeColor(this.colorscale);
@@ -163,6 +164,8 @@ class ProgramTreeView extends BasicView{
             this.smart_bit_heatmap_bucket[parent+'_'+data.key].draw();
         else if(this.viewoption == 'heatmap_impact')
             this.impact_heatmap_bucket[parent+'_'+data.key].draw();
+        else if(this.viewoption == 'value_heatmap')
+            this.value_heatmap_bucket[parent+'_'+data.key].draw();
          
     }
 
@@ -247,10 +250,6 @@ class ProgramTreeView extends BasicView{
                 return this.outcome_color[d];
             })
             .classed('tree_node' , true);
-
-
-
-
     }
 
     draw_annotation_heatmap(){
@@ -290,16 +289,16 @@ class ProgramTreeView extends BasicView{
         .style('stroke-width', '1px');
 
         this.bitHeatMapAnnotation_colorscale.selectAll('.colorscale_text').data(['0', '0<','100 %']).enter().append('text')
-            .text(d=>d)
-            .attr('x', (d, i)=>{
-                if(i < 2)
-                    return  this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/3 + colorscale_w * i;
-                else 
-                    return this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/3 + colorscale_w * (this.colorscale.length+1);
-            })
-            .attr('y', this.top_padding - 95)
-            .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'central');
+        .text(d=>d)
+        .attr('x', (d, i)=>{
+            if(i < 2)
+                return  this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/3 + colorscale_w * i;
+            else 
+                return this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/3 + colorscale_w * (this.colorscale.length+1);
+        })
+        .attr('y', this.top_padding - 95)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central');
 
 
         if(this.viewoption == 'bit_heatmap'){
@@ -431,6 +430,7 @@ class ProgramTreeView extends BasicView{
 
             for(let key in this.impact_heatmap_bucket){
                 this.impact_heatmap_bucket[key].clear();
+                this.value_heatmap_bucket[key].clear();
                 this.smart_bit_heatmap_bucket[key].clear();
                 this.bit_heatmap_bucket[key].draw();
             }
@@ -439,6 +439,7 @@ class ProgramTreeView extends BasicView{
 
             for(let key in this.impact_heatmap_bucket){
                 this.impact_heatmap_bucket[key].clear();
+                this.value_heatmap_bucket[key].clear();
                 this.bit_heatmap_bucket[key].clear();
                 this.smart_bit_heatmap_bucket[key].draw();
             }
@@ -446,8 +447,17 @@ class ProgramTreeView extends BasicView{
         else if(option == 'heatmap_impact'){
             for(let key in this.bit_heatmap_bucket){
                 this.bit_heatmap_bucket[key].clear();
+                this.value_heatmap_bucket[key].clear();
                 this.smart_bit_heatmap_bucket[key].clear();
                 this.impact_heatmap_bucket[key].draw();
+            }
+        }
+        else if(option == 'value_heatmap'){
+            for(let key in this.bit_heatmap_bucket){
+                this.bit_heatmap_bucket[key].clear();
+                this.value_heatmap_bucket[key].draw();
+                this.smart_bit_heatmap_bucket[key].clear();
+                this.impact_heatmap_bucket[key].clear();
             }
         }
 
