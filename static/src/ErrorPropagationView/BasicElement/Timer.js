@@ -128,36 +128,73 @@ class Timer{
     }
 
     draw_select_time_intervel(){
-        let selected_time_axis = d3.scaleLinear().range([this.x, this.x + this.width]).domain([this.current_time_step, this.current_time_step+50]);
-        
-        if(this.selected_time_axis_g == undefined)
-            this.selected_time_axis_g = this.svg.append('g').attr('class','axis axis--x')
-                .attr("transform", "translate(0,"+ (this.y + 50) + ")")
+        let selected_time_axis = d3.scaleLinear().range([this.x, this.x + this.width]).domain([this.current_time_step, this.current_time_step + 50]);
+        let linefunc = d3.line().x((d, i)=>{return selected_time_axis(i);}).y((d)=>{return this.axis_y(d[1]) + 100;}).curve(d3.curveStepAfter);
+        if(this.selected_time_x_axis_g == undefined){
+            this.selected_time_x_axis_g = this.svg.append('g');
+            this.selected_time_x_axis_g.attr('class','axis axis--x')
+                .attr("transform", "translate(0,"+ (this.y + 100) + ")")
                 .call(d3.axisBottom(selected_time_axis).ticks(20));
-        else
-            this.selected_time_axis_g.call(d3.axisBottom(selected_time_axis).ticks(20));
+            
+            this.selected_time_y_axis_g = this.svg.append('g');
+            this.selected_time_y_axis_g.attr('class', 'axis axis--y')
+                .attr('transform', "translate("+(this.x - 5)+","+ (this.y - 20) + ")")
+                .call(d3.axisLeft(this.axis_y).ticks(4));
 
+            this.selected_time_path_g = this.svg.append('g');
+            this.selected_time_path_g.append('path')
+            .datum(()=>{
+                let data = [];
+
+                for(let i = this.current_time_step; i < this.current_time_step+ 50 && i < this.relativeData.length; i++){
+                    data.push(this.relativeData[i]);
+                }
+                return data;
+            })
+            .classed('timer_error_linechart_line', true)
+            .attr("fill", "none")
+            .attr('d', linefunc);
+        }
+        else{
+            //this.selected_time_axis_g
+            this.selected_time_x_axis_g.call(d3.axisBottom(selected_time_axis).ticks(20));
+            this.selected_time_path_g.remove();
+            this.selected_time_path_g = this.svg.append('g');
+            this.selected_time_path_g.append('path')
+            .datum(()=>{
+                let data = [];
+                for(let i = this.current_time_step; i < this.current_time_step+ 50 && i < this.relativeData.length; i++){
+                    data.push(this.relativeData[i]);
+                }
+                return data;
+            })
+            .classed('timer_error_linechart_line', true)
+            .attr("fill", "none")
+            .attr('d', linefunc);
+        }
         //connecting path
         let path = [];
-        let line = d3.line().x((d, i)=>{return d[0];}).y((d, i)=>{return d[1];});//.curve(d3.curveStepAfter);
-        path.push([this.x, this.y + 50]);
+        let line = d3.line().x((d)=>{return d[0];}).y((d)=>{return d[1];});//.curve(d3.curveStepAfter);
+        path.push([this.x, this.y + 100]);
         path.push([this.x, this.y + 40]);
         //path.push([+this.trigger_rect.attr('x'), this.y + 30]);
         path.push([+this.trigger_rect.attr('x'), this.y]);
         path.push([(+this.trigger_rect.attr('x')) + (+this.trigger_rect.attr('width')), this.y]);
         //path.push([(+this.trigger_rect.attr('x')) + (+this.trigger_rect.attr('width')), this.y + 30]);
         path.push([this.x + this.width, this.y + 40]);
-        path.push([this.x + this.width, this.y + 50]);
+        path.push([this.x + this.width, this.y + 100]);
         
-        if(this.selected_time_axis_connector == undefined)
+        if(this.selected_time_axis_connector == undefined){
             this.selected_time_axis_connector = this.svg.append('path')
             .datum(path)
             .attr('d', line)
             .classed("Timer_trigger", true);
+        }    
         else{
             this.selected_time_axis_connector.datum(path)
             .attr('d', line);
         }
+        //
 
     }
 

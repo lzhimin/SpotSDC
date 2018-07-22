@@ -12,7 +12,7 @@ class ErrorPropagationView extends BasicView{
         this.blockw = 80;
         this.blockh = 20;
 
-        this.y = this.top_padding = 150;
+        this.y = this.top_padding = 230;
         this.x = this.left_padding = 100;
         this.padding = 20;
         this.step_size = 50;
@@ -142,7 +142,7 @@ class ErrorPropagationView extends BasicView{
                 return d[1]!=0?1:0;
             })
             .style('stroke', 'gray')
-            .style('stroke-opacity', 0.2)
+            .style('stroke-opacity', 0.1)
             .style('stroke-width', '1px');
     }
 }

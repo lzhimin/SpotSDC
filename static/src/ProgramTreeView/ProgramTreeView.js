@@ -14,7 +14,7 @@ class ProgramTreeView extends BasicView{
 
         this.colorscale = ['#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5','#08519c','#08306b'];
         
-        this.viewoption = 'bit_heatmap';
+        this.viewoption = 'smart_bit_heatmap';
     }
 
     init(){
@@ -34,6 +34,7 @@ class ProgramTreeView extends BasicView{
 
         this.stackbar_bucket = {};
         this.bit_heatmap_bucket = {};
+        this.smart_bit_heatmap_bucket = {};
         this.impact_heatmap_bucket = {};
         this.value_heatmap_bucket = {};
         this.cdf_bucket = {};
@@ -145,6 +146,9 @@ class ProgramTreeView extends BasicView{
         this.bit_heatmap_bucket[parent+'_'+data.key].setColormapColor(this.colorscale);
         //this.bit_heatmap_bucket[parent+'_'+data.key].draw();
 
+        this.smart_bit_heatmap_bucket[parent+'_'+data.key] = new SmartBitHeatMap(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getLowestProblemBit());
+        this.smart_bit_heatmap_bucket[parent+'_'+data.key].setColormapColor(this.colorscale);
+
         this.stackbar_bucket[parent+'_'+data.key] = new StackBarChart(this.svg, x + this.bitmap_width + this.padding_between_bit_stack, y, this.stackbar_width, this.blockh, data);
         this.stackbar_bucket[parent+'_'+data.key].setOutcomeColor(this.outcome_color);
         this.stackbar_bucket[parent+'_'+data.key].draw();
@@ -155,6 +159,8 @@ class ProgramTreeView extends BasicView{
         
         if(this.viewoption == 'bit_heatmap')
             this.bit_heatmap_bucket[parent+'_'+data.key].draw();
+        else if(this.viewoption == 'smart_bit_heatmap')
+            this.smart_bit_heatmap_bucket[parent+'_'+data.key].draw();
         else if(this.viewoption == 'heatmap_impact')
             this.impact_heatmap_bucket[parent+'_'+data.key].draw();
          
@@ -259,6 +265,9 @@ class ProgramTreeView extends BasicView{
         if(this.bitHeatMapAnnotation_colorscale != undefined)
             this.bitHeatMapAnnotation_colorscale.remove();
 
+        if(this.smartBitHeatMapAnnotation != undefined)
+            this.smartBitHeatMapAnnotation.remove();
+
         let colorscale = ['white'].concat(this.colorscale);
         let colorscale_w = this.bitmap_width/(2 * colorscale.length);
         let colorscale_h = 20;
@@ -267,7 +276,7 @@ class ProgramTreeView extends BasicView{
         this.bitHeatMapAnnotation_colorscale.selectAll('.colorscale').data(colorscale).enter()
         .append('rect')
         .attr('x', (d, i)=>{
-            return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/3 + colorscale_w * i;
+            return this.left_padding + this.blockw * 4 + this.padding*2 + this.bitmap_width/3 + colorscale_w * i;
         })
         .attr('y', (d, i)=>{
             return this.top_padding - 85;
@@ -284,9 +293,9 @@ class ProgramTreeView extends BasicView{
             .text(d=>d)
             .attr('x', (d, i)=>{
                 if(i < 2)
-                    return  this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/3 + colorscale_w * i;
+                    return  this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/3 + colorscale_w * i;
                 else 
-                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/3 + colorscale_w * (this.colorscale.length+1);
+                    return this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/3 + colorscale_w * (this.colorscale.length+1);
             })
             .attr('y', this.top_padding - 95)
             .attr('text-anchor', 'middle')
@@ -302,7 +311,7 @@ class ProgramTreeView extends BasicView{
                 if(i==0) 
                     return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/128;
                 else if(i == 1)
-                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/8;
+                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/7;
                 else 
                     return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width* 19/32;
             })
@@ -311,7 +320,7 @@ class ProgramTreeView extends BasicView{
             }) 
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "central")
-            .style('font-size', 8);
+            .style('font-size', 10);
         }
         else if(this.viewoption == 'heatmap_impact'){
             let x = this.left_padding + this.blockw * 4 + this.padding;
@@ -330,6 +339,32 @@ class ProgramTreeView extends BasicView{
             this.impactHeatmapAnnotation.append('g').attr('class','axis axis--x')
                 .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
                 .call(d3.axisTop(x_axis).tickValues(d3.range(mindiff, maxdiff, (maxdiff - mindiff)/10)));
+        }
+        else if(this.viewoption == 'smart_bit_heatmap'){
+            let lowestbit = this.programtreedata.getLowestProblemBit();
+            this.smartBitHeatMapAnnotation = this.svg.append('g').selectAll('.programTreeViewMenu_annotation').data(['sign', 'exponent', 'mantissa', '<'+lowestbit])
+            .enter()
+            .append('text')
+            .text(d=>d)
+            .attr('x', (d, i)=>{
+                if(i==0) 
+                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / ((64 - lowestbit) * 2);
+                else if(i == 1)
+                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / (64-lowestbit) * 6.5;
+                else if(i == 2)
+                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / (64 - lowestbit) * 13;
+                else if(i == 3)
+                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / (64 - lowestbit) * (64 - lowestbit);
+            })
+            .attr('y', (d, i)=>{
+                return this.top_padding - 20;
+            }) 
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "central")
+            .style('font-size', 10);
+        }
+        else if(this.viewoption == 'value_heatmap'){
+
         }
     }
 
@@ -396,23 +431,24 @@ class ProgramTreeView extends BasicView{
 
             for(let key in this.impact_heatmap_bucket){
                 this.impact_heatmap_bucket[key].clear();
-            }
-
-            for(let key in this.bit_heatmap_bucket){
+                this.smart_bit_heatmap_bucket[key].clear();
                 this.bit_heatmap_bucket[key].draw();
+            }
+        }
+        else if(option == 'smart_bit_heatmap'){
+
+            for(let key in this.impact_heatmap_bucket){
+                this.impact_heatmap_bucket[key].clear();
+                this.bit_heatmap_bucket[key].clear();
+                this.smart_bit_heatmap_bucket[key].draw();
             }
         }
         else if(option == 'heatmap_impact'){
             for(let key in this.bit_heatmap_bucket){
                 this.bit_heatmap_bucket[key].clear();
-            }
-
-            for(let key in this.impact_heatmap_bucket){
+                this.smart_bit_heatmap_bucket[key].clear();
                 this.impact_heatmap_bucket[key].draw();
             }
-        }
-        else{
-
         }
 
         this.draw_annotation_heatmap();

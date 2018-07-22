@@ -1,9 +1,11 @@
-class BitHeatMap extends standardChildView{
+class SmartBitHeatMap extends standardChildView{
 
-    constructor(svg, x, y, width, height, data){
+    constructor(svg, x, y, width, height, data, lowestProblemBit){
         super(svg, x, y, width, height, data);
 
-        this.bit = 64;
+        this.lowestProblemBit = lowestProblemBit
+
+        this.bit = 64 - lowestProblemBit + 1;
 
         this.categories_label = ['M', 'S', 'D'];
 
@@ -24,7 +26,6 @@ class BitHeatMap extends standardChildView{
             this.g = undefined;
         }
     }
-
 
     draw(){
         this.hist = this.histogram2d();
@@ -147,13 +148,16 @@ class BitHeatMap extends standardChildView{
         this.data.values.forEach(element => {
             element.values.forEach(e=>{
                 bit = parseInt(e.bit) - 1;
-                hist2d[bit][outcome_menu[e.outcome]].push(e);
-            })
+                if(bit < this.lowestProblemBit)
+                    hist2d[0][outcome_menu[e.outcome]].push(e);
+                else
+                    hist2d[bit - this.lowestProblemBit+1][outcome_menu[e.outcome]].push(e);
+            });
         });
 
         let hist = [];
         for(let j = 0; j < hist2d[0].length; j++){
-            for(let i = this.bit -1; i > -1; i--){
+            for(let i = this.bit - 1; i > -1; i--){
                 hist.push(hist2d[i][j]);
             }
         }

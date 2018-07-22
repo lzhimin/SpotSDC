@@ -57,6 +57,10 @@ class ProgramTreeData{
         return this.property.minDiff;
     }
 
+    getLowestProblemBit(){
+        return this.property.lowestPBit;
+    }
+
     getHierachicalData(){
         return this.hierachicalData;
     }
@@ -65,14 +69,20 @@ class ProgramTreeData{
         return this.pattern.length + 1;
     }
 
+
+
     parseDataProperty(){
-        this.property = {'maxDiff':-Number.MAX_VALUE, 'minDiff':Number.MAX_VALUE};
+        this.property = {'maxDiff':-Number.MAX_VALUE, 'minDiff':Number.MAX_VALUE, 'lowestPBit':64};
         this.data.forEach(element=>{
 
             if(element.outcome == 'SDC' && element.diffnormr != 'inf'){
                 let diffnorm = Math.log10(+element.diffnormr);
                 this.property.maxDiff = Math.max(this.property.maxDiff, diffnorm);
                 this.property.minDiff = Math.min(this.property.minDiff, diffnorm);
+            }
+
+            if(element.outcome != 'Masked'){
+                this.property.lowestPBit = Math.min(+element.bit-1, this.property.lowestPBit);
             }
         });
     }
