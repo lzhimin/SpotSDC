@@ -57,6 +57,8 @@ class SmartBitHeatMap extends standardChildView{
         .attr('y', (d, i)=>{
             return this.y + this.rect_h * (Math.floor(i / this.col));
         })
+        .attr('rx', 2)
+        .attr('ry', 2)
         .style('fill', (d, i)=>{
             return d == 0 ? 'white':this.get_local_color_scale(i, d);
 			//return d == 0 ? 'white':this.get_global_color_scale(d);
