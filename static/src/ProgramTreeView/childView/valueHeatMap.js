@@ -40,8 +40,8 @@ class ValueHeatMap extends standardChildView{
         this.g.append('rect')
         .attr('x', this.x)
         .attr('y', this.y)
-        .attr('width', this.width)
-        .attr('height', this.height)
+        .attr('width', this.width + 5)
+        .attr('height', this.height + 2)
         .classed('value_heatmap_background_rect', true);
 
         //heatmap rect
@@ -50,7 +50,11 @@ class ValueHeatMap extends standardChildView{
         .attr('class', 'value_heatmap_rect')
         .attr('width', this.rect_w)
         .attr('height', this.rect_h)
+        .attr('rx', 3)
+        .attr('ry', 3)
         .attr('x', (d, i)=>{
+            if((i+1)%11 == 0)
+            return this.x + this.rect_w * (i % this.col) + 5;
             return this.x + this.rect_w * (i % this.col);
         })
         .attr('y', (d, i)=>{

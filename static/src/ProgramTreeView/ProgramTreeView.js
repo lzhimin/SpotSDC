@@ -267,6 +267,9 @@ class ProgramTreeView extends BasicView{
         if(this.smartBitHeatMapAnnotation != undefined)
             this.smartBitHeatMapAnnotation.remove();
 
+        if(this.valueImpactHeatMapAnnotation != undefined)
+            this.valueImpactHeatMapAnnotation.remove();
+
         let colorscale = ['white'].concat(this.colorscale);
         let colorscale_w = this.bitmap_width/(2 * colorscale.length);
         let colorscale_h = 20;
@@ -363,7 +366,33 @@ class ProgramTreeView extends BasicView{
             .style('font-size', 10);
         }
         else if(this.viewoption == 'value_heatmap'){
+            let x = this.left_padding + this.blockw * 4 + this.padding;
+            let maxdiff = this.programtreedata.getMaxInput();
+            let mindiff = this.programtreedata.getMinInput();
+            let x_axis = d3.scaleLinear().range([x, x + this.bitmap_width/11 * 10]).domain([mindiff, maxdiff]);
 
+            this.valueImpactHeatMapAnnotation = this.svg.append('g')
+            this.valueImpactHeatMapAnnotation.append('text').datum(['Input Error']).text(d=>d)
+                .attr('x', (d, i)=>{
+                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/3;
+                })
+                .attr('y', (d, i)=>{
+                    return this.top_padding - 40;
+                });
+            
+            this.valueImpactHeatMapAnnotation.append('text').datum(['nan']).text(d=>d)
+            .attr('x', (d, i)=>{
+                return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width - 5;
+            })
+            .attr('y', (d, i)=>{
+                return this.top_padding - 30;
+            })
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'central');
+
+            this.valueImpactHeatMapAnnotation.append('g').attr('class','axis axis--x')
+                .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
+                .call(d3.axisTop(x_axis).tickValues(d3.range(mindiff, maxdiff, (maxdiff - mindiff)/10)));
         }
     }
 
