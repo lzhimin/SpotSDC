@@ -22,6 +22,10 @@ class Timer{
         return this.current_time_step
     }
 
+    getWidth(){
+        return this.width;
+    }
+
     setTimerStepChangeCallBack(func){
         this.callback = func;
     }
