@@ -86,6 +86,7 @@ class ErrorPropagationView extends BasicView{
         //draw dynamicFlow
         //this.drawDynamicFlow();
         this.drawExecutionLineChart(0);
+        this.drawColorScale();
         //this.drawBitPropagationChart(0);
         //if the propagation view is large than the computer screen view,
         //reset the height of svg 
@@ -110,6 +111,36 @@ class ErrorPropagationView extends BasicView{
             this.setTimerChangeEvent(current_time);
             return true;
         }
+    }
+
+    drawColorScale(){
+        let width = 50;
+        let colorScale = d3.scaleSequential(d3.interpolateOrRd).domain([0, width]);
+
+        if(this.colorscalesvg != undefined)
+            this.colorscalesvg.remove();
+
+        this.colorscalesvg = this.svg.append('g');
+
+        this.colorscalesvg.selectAll('.errorColorScaleBar').data(d3.range(width), (d)=>{return d;})
+        .enter()
+        .append('rect')
+        .attr('x', (d, i)=>{return i * 3+this.x + 400;})
+        .attr('y', 20)
+        .attr('height', 15)
+        .attr('width', 3)
+        .style('fill', (d, i)=>{return colorScale(d);})
+
+        this.colorscalesvg.selectAll('.errorColorScaleBar').data(['0', '1'])
+        .enter()
+        .append('text')
+        .attr('x', (d, i)=>{
+            return i == 0? this.x + 400 : this.x + 400 + width * 3;})
+        .attr('y', 15)
+        .text(d=>d)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central'); 
+
     }
 
     drawExecutionLineChart(current_time){
