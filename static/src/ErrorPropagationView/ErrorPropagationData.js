@@ -56,32 +56,32 @@ class ErrorPropagationData{
 
         //parse error data
         if(this.data[0].line + ':' + this.data[0].var == lineVar){
-            error[0] = this.data[0].value;
+            error[0] = [this.data[i].line+':'+this.data[i].var, this.data[0].value];
         }else{
-            error[0] = 0;
+            error[0] = [this.data[i].line+':'+this.data[i].var, 0];
         }
 
         for(let i = 1; i < this.data.length; i++){
             if(this.data[i].line+':'+this.data[i].var  == lineVar){
-                error.push(this.data[i].value);
+                error.push([this.data[i].line+':'+this.data[i].var, this.data[i].value]);
             }else{
-                error.push(0);
+                error.push([this.data[i].line+':'+this.data[i].var, 0]);
                 //error.push(error[i-1]);
             }
         }
 
         //parse golden value
         if(this.goldenRun[0].line + ':' + this.goldenRun[0].var == lineVar){
-            golden[0] = this.goldenRun[0].value;
+            golden[0] = [this.data[i].line+':'+this.data[i].var, this.goldenRun[0].value];
         }else{
-            golden[0] = 0;
+            golden[0] = [this.data[i].line+':'+this.data[i].var, 0];
         }
 
         for(let i = 1; i < this.goldenRun.length; i++){
             if(this.goldenRun[i].line+':'+this.goldenRun[i].var  == lineVar){
-                golden.push(this.goldenRun[i].value);
+                golden.push([this.data[i].line+':'+this.data[i].var, this.goldenRun[i].value]);
             }else{
-                golden.push(0);
+                golden.push([this.data[i].line+':'+this.data[i].var, 0]);
                 //golden.push(golden[i-1]);
             }
         }

@@ -1,7 +1,6 @@
 class Timer{
 
     constructor(svg, time){
-
         this.width = 500;
         this.height = 50;
 

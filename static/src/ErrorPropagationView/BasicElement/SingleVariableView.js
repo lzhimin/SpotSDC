@@ -33,15 +33,15 @@ class SingleVariableView{
         for(let i = 0; i < l; i++){
 
             if(i < data.golden.length){
-                g = data.golden[i];
+                g = data.golden[i][1];
             }else{
-                g = data.golden[data.golden.length-1];
+                g = data.golden[data.golden.length - 1][1];
             }
 
             if(i < data.error.length){
-                e = data.error[i];
+                e = data.error[i][1];
             }else{
-                e = data.error[data.error.length - 1];
+                e = data.error[data.error.length - 1][1];
             }
 
             if(type == 'absolute'){
@@ -51,9 +51,7 @@ class SingleVariableView{
                 if(e == 0 && g == 0)
                     values.push(0);
                 else{
-                    
-                    //values.push(Math.abs(e - g)/(Math.max(Math.abs(e), Math.abs(g))));
-                    e - g == 0? values.push(0) : values.push(Math.abs(e - g)/d3.max(this.absoluteData));
+                    e - g == 0 ? values.push(0) : values.push(Math.abs(e - g)/d3.max(this.absoluteData));
                 }
             }
         }
@@ -69,6 +67,8 @@ class SingleVariableView{
     }
 
     setData(data){
+        this.golden = data.golden;
+        this.error = data.error;
         this.absoluteData = this.extractDataByType(data, 'absolute');
         this.relativeData = this.extractDataByType(data, 'relative');
     }
@@ -80,6 +80,10 @@ class SingleVariableView{
 
         this.rects.style('fill', (d, i)=>{
             return this.relativeData[timer] == 0? 'white':d3.interpolateReds(this.relativeData[timer]);
+        });
+
+        this.highLightRect.style('display', ()=>{
+            return this.error[timer][0] == this.name? 'block' : 'none';
         });
 
         this.timer = timer;
@@ -133,6 +137,15 @@ class SingleVariableView{
     }
 
     draw(){
+
+        this.highLightRect = this.svg.datum(['highlight']).append('rect')
+        .attr('x', this.x - 25)
+        .attr('y', this.y + this.blockh/2 - 5)
+        .attr('width', 20)
+        .attr('height', 10)
+        .style('display', 'none')
+        .style('fill', '#F4D03F');
+
         this.rects = this.svg.selectAll('.singleVariableRect'+'_'+this.uuid)
         .data(this.name.split(':'))
         .enter()
@@ -221,10 +234,6 @@ class SingleVariableView{
             this.heatmapsvg = this.svg.append('g');
         this.heatmapsvg.html('');
 
-        let x_axis = d3.scaleLinear()
-                        .range([this.x + this.blockw * 1.6, this.x + this.width + this.blockw * 1.6])
-                        .domain([0, data.length]);
-
         this.heatmapsvg.selectAll('.errorHeatmap').data(()=>{
             if(this.timer + this.time_intervel > data.length)
                 return data.slice(this.timer, this.timer + data.length - this.timer);
@@ -244,7 +253,7 @@ class SingleVariableView{
         })
         .attr('height', 10)
         .style('fill', (d)=>{
-            return d!=0?d3.interpolateOrRd(d):'white';
+            return d != 0?d3.interpolateOrRd(d):'white';
         });
     }
 }

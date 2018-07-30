@@ -140,7 +140,6 @@ class ErrorPropagationView extends BasicView{
         .text(d=>d)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central'); 
-
     }
 
     drawExecutionLineChart(current_time){
@@ -177,7 +176,6 @@ class ErrorPropagationView extends BasicView{
             .style('stroke-opacity', 0.1)
             .style('stroke-width', '1px');
     }
-
 
     drawBitPropagationChart(current_time){
 
