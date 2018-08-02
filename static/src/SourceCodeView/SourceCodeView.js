@@ -7,15 +7,14 @@ class SourceCodeView extends BasicView{
         this.sdc_ratio = undefined;
         this.sdc_impact = undefined;
         this.sdc_frequency = undefined;
-
-        this.colorscale = d3.interpolateReds; 
     }
 
     draw(){
         d3.selectAll('#sourceCode_display li')
         .style('background', (d, i)=>{
             if(this.line_number.has((i+1)+''))
-                return this.colorscale(this.sdc_ratio[(i+1)+'']);
+                //return  'rgba(244, 66, 66,'+  this.colorscale(this.sdc_frequency[(i+1)+''])+')';
+                return d3.interpolateOrRd(this.sdc_frequency[(i+1)+'']);
         });
 
         if(this.sourceCodeVis == undefined){
@@ -72,6 +71,7 @@ class SourceCodeView extends BasicView{
 
         this.init_SDC_ratio_in_each_Line();
         this.init_SDC_Ratio_Of_EachLine_In_EachIteration();
+        this.colorscale = d3.scaleLinear().domain(d3.extent(Object.values(this.sdc_frequency))).range([0,1]);
     }
 
     init_SDC_ratio_in_each_Line(){

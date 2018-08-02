@@ -144,7 +144,7 @@ class SingleVariableView{
         .attr('width', 20)
         .attr('height', 10)
         .style('display', 'none')
-        .style('fill', '#F4D03F');
+        .style('fill', '#2c7fb8');
 
         this.rects = this.svg.selectAll('.singleVariableRect'+'_'+this.uuid)
         .data(this.name.split(':'))

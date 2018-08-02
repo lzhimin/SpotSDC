@@ -173,7 +173,7 @@ class ErrorPropagationView extends BasicView{
                 return d[1]!=0?1:0;
             })
             .style('stroke', 'gray')
-            .style('stroke-opacity', 0.1)
+            .style('stroke-opacity', 0.5)
             .style('stroke-width', '1px');
     }
 
