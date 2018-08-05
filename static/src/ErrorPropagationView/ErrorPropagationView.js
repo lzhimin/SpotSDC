@@ -16,7 +16,7 @@ class ErrorPropagationView extends BasicView{
         this.x = this.left_padding = 100;
         this.padding = 20;
         this.step_size = 50;
-        this.path_width = this.width - this.left_padding - this.padding - this.blockw * 1.5;
+        this.path_width = this.width - this.padding - this.blockw * 1.5;
         this.propagationData.setData(data);
 
         d3.select('#ErrorPropagationView').html('');
@@ -30,7 +30,7 @@ class ErrorPropagationView extends BasicView{
             let view = new SingleVariableView(this.svg, d);
 
             view.setData(this.propagationData.getGolden_Error_SequenceValue(d));
-            view.setX(this.x);
+            view.setX(this.x + this.path_width/2 - view.getChartWidth()/2);
             view.setY(this.y + i * (view.getRectHeight() + view.getPadding()));
             this.variableViewBucket[d] = view;
         });
@@ -44,6 +44,38 @@ class ErrorPropagationView extends BasicView{
         this.propagationController.binding();
         this.propagationController.set_change_Relative_And_Absolute_Option_callback(this.draw.bind(this));
         this.propagationController.setTimerStepChangeCallBack(this.update.bind(this));
+    }
+
+    draw(){
+
+        //clean svg
+        this.svg.html('');
+
+        for(let key in this.variableViewBucket){
+            this.variableViewBucket[key].setErrorOption(this.propagationController.getOption());
+            this.variableViewBucket[key].draw();
+            this.variableViewBucket[key].setOnClickEventListener(this.timer.setDisplayVariable.bind(this.timer));
+        }
+        
+        //timer
+        //this.timer.setX(this.variableViewBucket[this.propagationData.seqVar[0]].getLineChartStartX());
+        this.timer.setX(this.x);
+        this.timer.setY(this.y - this.top_padding/2);
+        this.timer.setWidth(Math.floor(this.path_width/this.step_size) * this.step_size);
+        this.timer.setRelativeData(this.propagationData.relativeError);
+        this.timer.draw();
+    
+        //draw dynamicFlow
+        //this.drawDynamicFlow();
+        this.drawExecutionLineChart(0);
+        this.drawColorScale();
+        //this.drawBitPropagationChart(0);
+        //if the propagation view is large than the computer screen view,
+        //reset the height of svg 
+        let currentheight = this.y + (this.variableViewBucket[this.propagationData.seqVar[0]].getRectHeight() + this.variableViewBucket[this.propagationData.seqVar[0]].getPadding()) * this.propagationData.seqVar.length;
+        if(currentheight > this.height){
+            this.svg.attr('height', currentheight + this.variableViewBucket[this.propagationData.seqVar[0]].getPadding() * 2);
+        }
     }
 
     setTimerChangeEvent(time){
@@ -63,37 +95,6 @@ class ErrorPropagationView extends BasicView{
 
     setGoldenRunData(msg, data){
         this.propagationData.setGoldenRunData(data);
-    }
-
-    draw(){
-
-        //clean svg
-        this.svg.html('');
-
-        for(let key in this.variableViewBucket){
-            this.variableViewBucket[key].setErrorOption(this.propagationController.getOption());
-            this.variableViewBucket[key].draw();
-            this.variableViewBucket[key].setOnClickEventListener(this.timer.setDisplayVariable.bind(this.timer));
-        }
-        
-        //timer
-        this.timer.setX(this.variableViewBucket[this.propagationData.seqVar[0]].getLineChartStartX());
-        this.timer.setY(this.y - this.top_padding/2);
-        this.timer.setWidth(Math.floor(this.path_width/this.step_size) * this.step_size);
-        this.timer.setRelativeData(this.propagationData.relativeError);
-        this.timer.draw();
-    
-        //draw dynamicFlow
-        //this.drawDynamicFlow();
-        this.drawExecutionLineChart(0);
-        this.drawColorScale();
-        //this.drawBitPropagationChart(0);
-        //if the propagation view is large than the computer screen view,
-        //reset the height of svg 
-        let currentheight = this.y + (this.variableViewBucket[this.propagationData.seqVar[0]].getRectHeight() + this.variableViewBucket[this.propagationData.seqVar[0]].getPadding()) * this.propagationData.seqVar.length;
-        if(currentheight > this.height){
-            this.svg.attr('height', currentheight + this.variableViewBucket[this.propagationData.seqVar[0]].getPadding() * 2);
-        }
     }
 
     update(step){
@@ -146,13 +147,13 @@ class ErrorPropagationView extends BasicView{
 
         let step_w = Math.floor(this.path_width/this.step_size);
         //let line = d3.line().x((d, i)=>{return d[0];}).y((d, i)=>{return d[1];}).curve(d3.curveStepAfter);
-        let path = [];
+        //let path = [];
         let items = [];
         let item = undefined;
 
         for(let i = 0; i < this.step_size && (current_time + i) < this.propagationData.relativeError.length; i++){  
             item = this.propagationData.relativeError[current_time + i]; 
-            path.push([this.x + this.blockw * 1.6 + i * step_w, this.variableViewBucket[item[0]].getY() + this.blockh/2 - step_w/2]);
+            //path.push([this.x + i * step_w, this.variableViewBucket[item[0]].getY() + this.blockh/2 - step_w/2]);
             items.push(item);
         }
 
@@ -162,10 +163,10 @@ class ErrorPropagationView extends BasicView{
 
         this.excutionLineChart_g.selectAll('.DynamicFlowPath_rect').data(items).enter()
             .append('rect')
-            .attr('x', (d, i)=>{return this.x + this.blockw * 1.6 + i * step_w})
+            .attr('x', (d, i)=>{return this.x +  i * step_w})
             .attr('y', (d, i)=>{return this.variableViewBucket[d[0]].getY() + 3})
             .attr('width', step_w)
-            .attr('height', Math.min(step_w, 10))
+            .attr('height', Math.min(step_w, this.blockh))
             .attr('fill', (d, i)=>{
                 return d[1]!=0?d3.interpolateOrRd(d[1]):'white';
             })

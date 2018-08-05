@@ -15,7 +15,7 @@ class HeatMap1D{
 		this.uuid = uuidv4();
 		
 		//color scale for heatmap
-		this.colorscale = d3.interpolateReds; 
+		this.colorscale = d3.interpolateOrRd; 
 	}
 	
 	

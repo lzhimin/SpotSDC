@@ -14,7 +14,7 @@ class SourceCodeView extends BasicView{
         .style('background', (d, i)=>{
             if(this.line_number.has((i+1)+''))
                 //return  'rgba(244, 66, 66,'+  this.colorscale(this.sdc_frequency[(i+1)+''])+')';
-                return d3.interpolateOrRd(this.sdc_frequency[(i+1)+'']);
+                return d3.interpolateOrRd(this.colorscale(this.sdc_frequency[(i+1)+'']))
         });
 
         if(this.sourceCodeVis == undefined){

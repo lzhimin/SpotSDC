@@ -128,6 +128,10 @@ class SingleVariableView{
         return this.padding;
     }
 
+    getChartWidth(){
+        return this.blockw*1.5;
+    }
+
     getLineChartStartX(){
         return this.x + this.blockw * 1.5 + this.padding;
     }

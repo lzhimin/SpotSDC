@@ -15,6 +15,9 @@ class Timer{
 
         this.trigger_rect_w = 20;
         this.trigger_rect_h = this.height;
+
+
+        this.len_x1 = -25;//the size of len need to be bigger than 10
     }
 
     getCurrentTimeStep(){
@@ -34,10 +37,10 @@ class Timer{
 
         this.trigger_text
         .text((d, i)=>{
-            return i==0 ? this.current_time_step : this.current_time_step + 50;
+            return i==0 ? this.current_time_step - Math.floor(this.len_width/2): this.current_time_step + Math.floor(this.len_width/2);
         })
         .attr('x', (d, i)=>{
-            return i==0 ? this.axis_x(this.current_time_step) : this.axis_x(this.current_time_step + 50);
+            return i==0 ? this.axis_x(this.current_time_step - Math.floor(this.len_width/2)) : this.axis_x(this.current_time_step + Math.floor(this.len_width/2));
         });
         this.trigger_rect.attr('x', this.axis_x(this.current_time_step));
 
@@ -65,7 +68,7 @@ class Timer{
 
         this.axis_x = d3.scaleLinear().range([this.x, this.x + this.width]).domain([0, this.time]);
         this.axis_y = d3.scaleLinear().range([this.y, this.y - this.height]).domain([0, 1]);//relative error the value scale from 0~1
-        this.trigger_rect_w = this.axis_x(50) - this.axis_x(0);
+        this.trigger_rect_w = this.axis_x(this.len_width) - this.axis_x(0);
 
         this.svg.append('g').attr('class','axis axis--x')
             .attr("transform", "translate(0,"+ this.y + ")")
@@ -82,7 +85,7 @@ class Timer{
             .attr("fill", "none")
             .attr('d', this.linefunc);
 
-        this.trigger_rect = this.svg.append('rect').datum(this.current_time_step)
+        this.trigger_rect = this.svg.append('rect').datum(this.current_time_step - Math.floor(this.len_width/2))
         .attr('x', this.x)
         .attr('y', this.y - this.trigger_rect_h)
         .attr('width', this.trigger_rect_w)
@@ -115,7 +118,7 @@ class Timer{
             })
         );
 
-        this.trigger_text = this.svg.selectAll('.time_trigger_annotation_text').data([this.current_time_step, this.current_time_step+50])
+        this.trigger_text = this.svg.selectAll('.time_trigger_annotation_text').data([this.current_time_step - Math.floor(this.len_width/2), this.current_time_step + Math.floor(this.len_width/2)])
         .enter()
         .append('text')
         .text(d=>d)
@@ -127,11 +130,21 @@ class Timer{
         .attr('domain-baseline', 'central')
         .classed('timer_trigger_text', true);
 
+        //init error indication
+        let init_index = this.getFirstErrorIndex();
+        this.svg.append('path').datum([init_index])
+        .attr('d', d3.symbol().size(100).type(d3.symbolTriangle)())
+        .attr('transform',(d)=>{
+            return 'translate('+this.axis_x(d)+','+(this.y+10)+')';
+        })
+        .attr('fill', 'red');
+
+        //timer series lens
         this.draw_select_time_intervel();
     }
 
     draw_select_time_intervel(){
-        let selected_time_axis = d3.scaleLinear().range([this.x, this.x + this.width]).domain([this.current_time_step, this.current_time_step + 50]);
+        let selected_time_axis = d3.scaleLinear().range([this.x, this.x + this.width]).domain([this.current_time_step, this.current_time_step + this.len_width]);
         let linefunc = d3.line().x((d, i)=>{
             return selected_time_axis(d[1]);
         }).y((d)=>{
@@ -153,7 +166,7 @@ class Timer{
             this.selected_time_path_g.append('path')
             .datum(()=>{
                 let data = [];
-                for(let i = this.current_time_step; i < this.current_time_step + 50 && i < this.relativeData.length; i++){
+                for(let i = this.current_time_step; i < this.current_time_step + this.len_width && i < this.relativeData.length; i++){
                     data.push([this.relativeData[i], i]);
                 }
                 return data;
@@ -170,7 +183,7 @@ class Timer{
             this.selected_time_path_g.append('path')
             .datum(()=>{
                 let data = [];
-                for(let i = this.current_time_step; i < this.current_time_step+ 50 && i < this.relativeData.length; i++){
+                for(let i = this.current_time_step; i < this.current_time_step+ this.len_width && i < this.relativeData.length; i++){
                     data.push([this.relativeData[i], i]);
                 }
                 return data;
@@ -227,6 +240,18 @@ class Timer{
 
         this.relativeErrorPath.datum(filterdata)
         .attr('d', this.linefunc);
+    }
+
+    getFirstErrorIndex(){
+
+        let index = -1;
+        for(let i = 0; i < this.relativeData.length; i++){
+            if(this.relativeData[i][1] != 0){
+                index = i;
+                break;
+            }
+        }
+        return index;
     }
 
 }
