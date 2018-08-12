@@ -50,9 +50,6 @@ class BitStackChart extends standardChildView{
             let h_temp = 0;
             this.g.selectAll('.Bit_outcome_heatmap_'+this.uuid+'_rect'+i).data(this.hist2d[index]).enter()
                 .append('rect')
-                //.attr('class', 'Bit_outcome_heatmap_rect')
-                .attr('rx', 2)
-                .attr('ry', 2)
                 .attr('width', this.rect_w)
                 .attr('height', (d, i)=>{
                     return this.rect_h * this.hist2d[index][i].length/d3.sum(this.hist2d[index], (d)=>{return d.length;});

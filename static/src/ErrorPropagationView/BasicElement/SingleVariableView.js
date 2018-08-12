@@ -75,7 +75,7 @@ class SingleVariableView{
 
     setTimerStep(timer){
 
-        if(timer >= this.relativeData.length)
+        if(timer >= this.relativeData.length && timer < 0)
             return;
 
         this.rects.style('fill', (d, i)=>{
@@ -129,7 +129,7 @@ class SingleVariableView{
     }
 
     getChartWidth(){
-        return this.blockw*1.5;
+        return this.blockw * 1.5;
     }
 
     getLineChartStartX(){
@@ -151,7 +151,7 @@ class SingleVariableView{
         .style('fill', '#2c7fb8');
 
         this.rects = this.svg.selectAll('.singleVariableRect'+'_'+this.uuid)
-        .data(this.name.split(':'))
+        .data([this.name])
         .enter()
         .append('rect')
         .attr('x', (d, i)=>{
@@ -160,8 +160,8 @@ class SingleVariableView{
         .attr('y', this.y)
         .attr('rx', 5)
         .attr('ry', 5)
-        .attr('width', (d, i)=>{
-            return i == 0? this.blockw/2:this.blockw;
+        .attr('width', ()=>{
+            return this.blockw/2;
         })
         .attr('height', this.blockh)
         .on('click', (d, i, nodes)=>{
@@ -172,12 +172,12 @@ class SingleVariableView{
         .classed('singleVariableRect', true);
 
         this.texts = this.svg.selectAll('.singleVariableText'+'_'+this.uuid)
-        .data(this.name.split(':'))
+        .data([this.name])
         .enter()
         .append('text')
-        .text(d=>d)
+        .text(d=>d.split(':')[0])
         .attr('x', (d, i)=>{
-            return this.x + (i == 0? this.blockw/4: this.blockw);
+            return this.x + this.blockw/4;
         })
         .attr('y', this.y + this.blockh/2)
         .classed('singleVariableText', true)

@@ -28,7 +28,7 @@ void matvec(double** A, double* p, double* Ap) {
   for (row = 0; row < N; ++row) {
     Ap[row] = 0;
     for (col = 0; col < N; ++col) {
-      Ap[row] += A[row][col] * p[col]; corruptDouble(VAR_INFO_ONLY(Ap),&Ap[row]);
+      Ap[row] += A[row][col] * p[col]; 
     }
   }
 }
@@ -36,14 +36,14 @@ void matvec(double** A, double* p, double* Ap) {
 void waxpby(double a, double* x, double b, double* y, double* r) {
   int i;
   for (i = 0; i < N; ++i) {
-    r[i] = a * x[i] + b * y[i]; corruptDouble(VAR_INFO_ONLY(r),&r[i]);
+    r[i] = a * x[i] + b * y[i]; 
   }
 }
 
 void daxpby(double a, double* x, double b, double* y) {
   int i;
   for (i = 0; i < N; ++i) {
-    y[i] = a * x[i] + b * y[i]; corruptDouble(VAR_INFO_ONLY(y),&y[i]);
+    y[i] = a * x[i] + b * y[i]; 
   }
 }
 
@@ -51,7 +51,7 @@ double dot_r2(double* r) {
   double sum = 0;
   int i;
   for (i = 0; i < N; ++i) {
-    sum += r[i]*r[i]; corruptDouble(VAR_INFO_ONLY(sum),&sum);
+    sum += r[i]*r[i];
   }
   return sum;
 }
@@ -60,7 +60,7 @@ double dot(double* x, double* y) {
   double sum = 0;
   int i;
   for (i = 0; i < N; ++i) {
-    sum += x[i]*y[i]; corruptDouble(VAR_INFO_ONLY(sum),&sum);
+    sum += x[i]*y[i];
   }
   return sum;
 }
@@ -78,23 +78,23 @@ void solve_cg(double** A, double* b, double* x, double* Ap, double* p, double* r
   waxpby(1, x, 0, x, p);
   matvec(A, p, Ap);
   waxpby(1, b, -1, Ap, r);
-  rtrans = dot_r2(r); corruptDouble(VAR_INFO_ONLY(rtrans),&rtrans);
-  normr = sqrt(rtrans); corruptDouble(VAR_INFO_ONLY(normr), &normr);
+  rtrans = dot_r2(r);
+  normr = sqrt(rtrans);
 
   for (k = 1; k <= MAX_ITER && normr > tolerance; ++k) {
     if (k == 1) {
       waxpby(1, r, 0, r, p);
     } else {
-      oldrtrans = rtrans; corruptDouble(VAR_INFO_ONLY(oldrtrans), &oldrtrans);
-      rtrans = dot_r2(r); corruptDouble(VAR_INFO_ONLY(rtrans), &rtrans);
-      double beta = rtrans/oldrtrans; corruptDouble(VAR_INFO_ONLY(beta), &beta);
+      oldrtrans = rtrans;
+      rtrans = dot_r2(r);
+      double beta = rtrans/oldrtrans;
       daxpby(1, r, beta, p);
     }
-    normr = sqrt(rtrans); corruptDouble(VAR_INFO_ONLY(normr), &normr);
+    normr = sqrt(rtrans);
 
     matvec(A, p, Ap);
-    p_ap_dot = dot(Ap, p); corruptDouble(VAR_INFO_ONLY(p_ap_dot), &p_ap_dot);
-    alpha = rtrans/p_ap_dot; corruptDouble(VAR_INFO_ONLY(alpha), &alpha);
+    p_ap_dot = dot(Ap, p);
+    alpha = rtrans/p_ap_dot;
     daxpby(alpha, p, 1, x);
     daxpby(-alpha, Ap, 1, r);
   }
@@ -170,7 +170,7 @@ void readA(double** A, FILE *fp) {
 
   for (i = 0; i < N; i++) {
     for (j = 0; j < N; j++) {
-      fscanf(fp, "%lf", &A[i][j]); corruptDouble(VAR_INFO_ONLY(A),&A[i][j]);
+      fscanf(fp, "%lf", &A[i][j]);
     }
   }
 }
@@ -178,7 +178,7 @@ void readA(double** A, FILE *fp) {
 void readB(double* b, FILE *fp) {
   int i;
   for (i = 0; i < N; i++) {
-    fscanf(fp, "%lf", &b[i]); corruptDouble(VAR_INFO_ONLY(b),&b[i]);
+    fscanf(fp, "%lf", &b[i]);
   }
 }
 

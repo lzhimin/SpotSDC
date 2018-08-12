@@ -5,9 +5,9 @@ class ProgramTreeView extends BasicView{
         this.programtreedata = new ProgramTreeData();
         this.programtreecontroller = new ProgramViewController();
         this.outcome_color = {
-            'DUE': '#cbd5e8',
-            'Masked': '#b3e2cd',
-            'SDC': '#fdcdac'
+            'DUE': '#542788',
+            'Masked': '#99d594',
+            'SDC': '#fc8d59'
         }   
 
         //this.colorscale = ['#feedde', '#fdbe85', '#fd8d3c', '#e6550d', '#a63603']; 
@@ -171,8 +171,7 @@ class ProgramTreeView extends BasicView{
         else if(this.viewoption == 'value_heatmap')
             this.value_heatmap_bucket[parent+'_'+data.key].draw();
         else if(this.viewoption == 'bitStackBarChart')
-            this.bitStackBarChart_bucket[parent+'_'+data.key].draw();
-         
+            this.bitStackBarChart_bucket[parent+'_'+data.key].draw();   
     }
 
     draw_menu(){
@@ -311,6 +310,12 @@ class ProgramTreeView extends BasicView{
 
 
         if(this.viewoption == 'bit_heatmap' || this.viewoption == 'bitStackBarChart'){
+
+            if(this.viewoption == 'bitStackBarChart'){
+                this.bitHeatMapAnnotation_colorscale.attr('display', 'none');
+                this.bitHeatMapAnnotation_colorscale.attr('display', 'none');
+            }
+
             this.bitHeatMapAnnotation = this.svg.append('g').selectAll('.programTreeViewMenu_annotation').data(['sign', 'exponent', 'mantissa'])
             .enter()
             .append('text')
@@ -462,38 +467,37 @@ class ProgramTreeView extends BasicView{
 
         this.viewoption = option;
 
-        if(option == 'bit_heatmap'){
+        for(let key in this.bit_heatmap_bucket){
+            this.impact_heatmap_bucket[key].clear();
+            this.value_heatmap_bucket[key].clear();
+            this.smart_bit_heatmap_bucket[key].clear();
+            this.bit_heatmap_bucket[key].clear();
+            this.bitStackBarChart_bucket[key].clear();
+        }
 
+        if(option == 'bit_heatmap'){
             for(let key in this.impact_heatmap_bucket){
-                this.impact_heatmap_bucket[key].clear();
-                this.value_heatmap_bucket[key].clear();
-                this.smart_bit_heatmap_bucket[key].clear();
                 this.bit_heatmap_bucket[key].draw();
             }
         }
         else if(option == 'smart_bit_heatmap'){
-
             for(let key in this.impact_heatmap_bucket){
-                this.impact_heatmap_bucket[key].clear();
-                this.value_heatmap_bucket[key].clear();
-                this.bit_heatmap_bucket[key].clear();
                 this.smart_bit_heatmap_bucket[key].draw();
             }
         }
         else if(option == 'heatmap_impact'){
             for(let key in this.bit_heatmap_bucket){
-                this.bit_heatmap_bucket[key].clear();
-                this.value_heatmap_bucket[key].clear();
-                this.smart_bit_heatmap_bucket[key].clear();
                 this.impact_heatmap_bucket[key].draw();
             }
         }
         else if(option == 'value_heatmap'){
             for(let key in this.bit_heatmap_bucket){
-                this.bit_heatmap_bucket[key].clear();
                 this.value_heatmap_bucket[key].draw();
-                this.smart_bit_heatmap_bucket[key].clear();
-                this.impact_heatmap_bucket[key].clear();
+            }
+        }
+        else if(option == 'bitStackBarChart'){
+            for(let key in this.bit_heatmap_bucket){
+                this.bitStackBarChart_bucket[key].draw();
             }
         }
 
