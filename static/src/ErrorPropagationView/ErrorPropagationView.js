@@ -63,6 +63,7 @@ class ErrorPropagationView extends BasicView{
         this.timer.setWidth(Math.floor(this.path_width/this.step_size) * this.step_size);
         this.timer.setLengap(this.blockw * 1.5);
         this.timer.setRelativeData(this.propagationData.relativeError);
+        this.timer.setAbsoluteError(this.propagationData.absoluteError);
         this.timer.draw();
     
         //draw dynamicFlow
@@ -83,7 +84,8 @@ class ErrorPropagationView extends BasicView{
             this.variableViewBucket[key].setTimerStep(current);
         }
         
-        this.drawExecutionLineChart(x1, x2, current);
+        //this.drawExecutionLineChart(x1, x2, current);
+        this.timer.updateLenLocation(current);
         //this.drawBitPropagationChart(time);
         publish('SOURCECODE_HIGHLIGHT', this.propagationData.getProgramCurrentExecutedLine(current));
     }
@@ -107,7 +109,7 @@ class ErrorPropagationView extends BasicView{
         else{
             current_time = current_time + step;
             this.timer.setCurrentTimeStep(current_time);
-            this.drawExecutionLineChart(this.timer.len_x1, this.timer.len_x2, this.timer.current_time_step);
+            //this.drawExecutionLineChart(this.timer.len_x1, this.timer.len_x2, this.timer.current_time_step);
             this.setTimerChangeEvent(this.timer.len_x1, this.timer.len_x2, this.timer.current_time_step);
             return true;
         }
@@ -167,7 +169,7 @@ class ErrorPropagationView extends BasicView{
         this.excutionLineChart_g.selectAll('.DynamicFlowPath_Leftrect').data(left_items).enter()
             .append('rect')
             .attr('x', (d)=>{return this.timer.selected_time_axis(d[1]);})
-            .attr('y', (d)=>{return this.variableViewBucket[d[0][0]].getY() + 3})
+            .attr('y', (d)=>{return this.variableViewBucket[d[0][0]].getY() + 3;})
             .attr('width', step_w)
             .attr('height', Math.min(step_w, this.blockh))
             .attr('fill', (d)=>{

@@ -1,10 +1,7 @@
 class ErrorPropagationData{
     constructor(){
-
-        //get golden run 
-        
+        //get golden run  
     }
-
 
     setData(data){
         this.data = data;
@@ -14,6 +11,8 @@ class ErrorPropagationData{
         this.variableDependency = this.extractVariableDynamicDependency();
 
         this.relativeError = this.parseData_relativeError(data);
+
+        this.absoluteError = this.parseData_AbosluteError(data);
     }
 
     setGoldenRunData(data){
@@ -94,6 +93,24 @@ class ErrorPropagationData{
         return this.data[time];
     }
 
+
+    parseData_AbosluteError(){
+        let parseData = [];
+
+        let error = 0;
+
+        let lineVar = '';
+
+        //relative error
+        for(let i = 0; i < this.goldenRun.length; i++){
+            lineVar = this.data[i].line+':'+this.data[i].var;
+            error = Math.abs(+this.data[i].value - +this.goldenRun[i].value);
+            parseData.push([lineVar, error]);
+        }
+        
+        return parseData;
+    }
+
     //data come in float by float,
     //this function parse all the variable into norm formate
     parseData_relativeError(){
@@ -113,18 +130,20 @@ class ErrorPropagationData{
 
         for(let i = 0; i < this.goldenRun.length; i++){
             lineVar = this.data[i].line+':'+this.data[i].var;
-            error = Math.abs(+this.data[i].value -  +this.goldenRun[i].value);
+            error = Math.abs(+this.data[i].value - +this.goldenRun[i].value);
             maxError_variableTable[lineVar] = Math.max(error, +maxError_variableTable[lineVar]);
         }
 
-        //extract the relative error of the execution sequence
+
+        //relative error
         for(let i = 0; i < this.goldenRun.length; i++){
-            lineVar = this.data[i].line+':'+this.data[i].var;
-            if(maxError_variableTable[lineVar] == 0)
-                error = 0;
-            else
-                error = Math.abs(+this.data[i].value -  +this.goldenRun[i].value)/maxError_variableTable[lineVar];
-            parseData.push([lineVar,error]);
+            if((+this.goldenRun[i].value) == 0)
+                error = Math.abs(+this.data[i].value);
+            else{
+                error = Math.abs(+this.data[i].value) / Math.abs(+this.goldenRun[i].value);
+                //error = Math.abs(+this.data[i].value - +this.goldenRun[i].value)/maxError_variableTable[lineVar];
+            }
+            parseData.push([lineVar, error]);
         }
         
         return parseData;
