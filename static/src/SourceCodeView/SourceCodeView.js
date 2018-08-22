@@ -160,14 +160,6 @@ class SourceCodeView extends BasicView{
             else    
                 return '';
         });
-        /*.style('background', (d, i)=>{
-            if(i == +data.line-1)
-                return 'steelblue';
-            else if (this.line_number.has((i+1)+''))
-                return this.colorscale(this.sdc_ratio[(i+1)+'']);
-            else
-                return '#f5f5f5';
-        });*/
     }
 
     setSourceCodeFile(msg, data){

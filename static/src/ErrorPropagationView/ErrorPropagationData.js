@@ -134,9 +134,9 @@ class ErrorPropagationData{
             maxError_variableTable[lineVar] = Math.max(error, +maxError_variableTable[lineVar]);
         }
 
-
         //relative error
         for(let i = 0; i < this.goldenRun.length; i++){
+            lineVar = this.data[i].line+':'+this.data[i].var;
             if((+this.goldenRun[i].value) == 0)
                 error = Math.abs(+this.data[i].value);
             else{

@@ -60,8 +60,8 @@ class ErrorPropagationView extends BasicView{
         //timer
         this.timer.setX(this.x);
         this.timer.setY(this.y - this.top_padding/2);
+        this.timer.setLengap(this.blockw);
         this.timer.setWidth(Math.floor(this.path_width/this.step_size) * this.step_size);
-        this.timer.setLengap(this.blockw * 1.5);
         this.timer.setRelativeData(this.propagationData.relativeError);
         this.timer.setAbsoluteError(this.propagationData.absoluteError);
         this.timer.draw();
@@ -84,7 +84,7 @@ class ErrorPropagationView extends BasicView{
             this.variableViewBucket[key].setTimerStep(current);
         }
         
-        //this.drawExecutionLineChart(x1, x2, current);
+        this.drawExecutionLineChart(x1, x2, current);
         this.timer.updateLenLocation(current);
         //this.drawBitPropagationChart(time);
         publish('SOURCECODE_HIGHLIGHT', this.propagationData.getProgramCurrentExecutedLine(current));
@@ -109,7 +109,7 @@ class ErrorPropagationView extends BasicView{
         else{
             current_time = current_time + step;
             this.timer.setCurrentTimeStep(current_time);
-            //this.drawExecutionLineChart(this.timer.len_x1, this.timer.len_x2, this.timer.current_time_step);
+            this.drawExecutionLineChart(this.timer.len_x1, this.timer.len_x2, this.timer.current_time_step);
             this.setTimerChangeEvent(this.timer.len_x1, this.timer.len_x2, this.timer.current_time_step);
             return true;
         }
@@ -146,6 +146,13 @@ class ErrorPropagationView extends BasicView{
 
     drawExecutionLineChart(x1, x2, current){
 
+        let max = -Number.MAX_VALUE;
+        for(let i  = 0; i < this.propagationData.relativeError.length; i++){
+            max = Math.max(this.propagationData.relativeError[i][1], max);
+        }
+
+        let temp_colorscale = d3.scaleLinear().domain([0, max]).range([0,1])
+
         let step_w = Math.floor(this.path_width/this.step_size);
         let left_items = [];
         let right_items = [];
@@ -168,12 +175,17 @@ class ErrorPropagationView extends BasicView{
         //left rect
         this.excutionLineChart_g.selectAll('.DynamicFlowPath_Leftrect').data(left_items).enter()
             .append('rect')
-            .attr('x', (d)=>{return this.timer.selected_time_axis(d[1]);})
-            .attr('y', (d)=>{return this.variableViewBucket[d[0][0]].getY() + 3;})
+            .attr('x', (d)=>{
+                return this.timer.left_time_axis(d[1]);
+            })
+            .attr('y', (d)=>{
+                return this.variableViewBucket[d[0][0]].getY() + 3;
+            })
             .attr('width', step_w)
             .attr('height', Math.min(step_w, this.blockh))
             .attr('fill', (d)=>{
-                return d[0][1]!=0?d3.interpolateOrRd(d[0][1]):'white';
+                return d[0][1] != 1 ? d3.interpolateOrRd(temp_colorscale(d[0][1])):'white';
+                //return d[0][1]!=0?d3.interpolateOrRd(d[0][1]):'white';
             })
             .attr('fill-opacity', (d)=>{
                 return d[0][1]!=0?1:0;
@@ -185,12 +197,17 @@ class ErrorPropagationView extends BasicView{
         //rigth rect
         this.excutionLineChart_g.selectAll('.DynamicFlowPath_rightrect').data(right_items).enter()
             .append('rect')
-            .attr('x', (d)=>{return this.timer.selected_time_axis(d[1])})
-            .attr('y', (d)=>{return this.variableViewBucket[d[0][0]].getY() + 3})
+            .attr('x', (d)=>{
+                return this.timer.right_time_axis(d[1]);
+            })
+            .attr('y', (d)=>{
+                return this.variableViewBucket[d[0][0]].getY() + 3;
+            })
             .attr('width', step_w)
             .attr('height', Math.min(step_w, this.blockh))
             .attr('fill', (d)=>{
-                return d[0][1] != 0 ? d3.interpolateOrRd(d[0][1]):'white';
+                return d[0][1] != 1 ? d3.interpolateOrRd(temp_colorscale(d[0][1])):'white';
+                //return d[0][1] != 0 ? d3.interpolateOrRd(d[0][1]):'white';
             })
             .attr('fill-opacity', (d)=>{
                 return d[0][1] != 0 ? 1:0;

@@ -41,7 +41,7 @@ class Timer{
     }
 
     setLengap(width){
-        this.len_gap = width * 3;
+        this.len_gap = width;
     }
 
     setCurrentTimeStep(step){
@@ -82,8 +82,8 @@ class Timer{
     setWidth(w){
         this.width = w;
 
-        this.lenPart1_right = this.x + this.width/2  - this.len_gap;
-        this.lenPart2_left = this.x + this.width /2 + this.len_gap;
+        this.lenPart1_right = this.x + this.width/2  - this.len_gap/2;
+        this.lenPart2_left = this.x + this.width /2 + this.len_gap/2;
     }
 
     draw(){
@@ -164,26 +164,28 @@ class Timer{
         this.right_time_axis = d3.scaleLinear().range([this.lenPart2_left, this.x + this.width]).domain([this.current_time_step + 1, this.len_x2]);
 
         let linefunc = d3.line()
-        //.x((d, i)=>{
-        //    return this.left_time_axis(d[1]);
-        //})
         .y((d)=>{
             return this.axis_y(d[0][1]) + 100;
         }).curve(d3.curveStepAfter);
 
 
-        let linefuncLeft = linefunc.x((d)=>{
+        let linefuncLeft = d3.line().y((d)=>{
+            return this.axis_y(d[0][1]) + 100;
+        }).x((d)=>{
             return this.left_time_axis(d[1]);
-        });
-        let linefuncRight = linefunc.x((d)=>{
+        }).curve(d3.curveStepAfter);
+
+        let linefuncRight = d3.line().y((d)=>{
+            return this.axis_y(d[0][1]) + 100;
+        }).x((d)=>{
             return this.right_time_axis(d[1]);
-        });
+        }).curve(d3.curveStepAfter);
 
         if(this.selected_time_x_right_axis_g == undefined){
-            //this.selected_time_x_left_axis_g = this.svg.append('g');
-            //this.selected_time_x_left_axis_g.attr('class','axis axis--x')
-            //    .attr("transform", "translate(0,"+ (this.y + 100) + ")")
-            //    .call(d3.axisBottom(this.left_time_axis).ticks(10));
+            this.selected_time_x_left_axis_g = this.svg.append('g');
+            this.selected_time_x_left_axis_g.attr('class','axis axis--x')
+                .attr("transform", "translate(0,"+ (this.y + 100) + ")")
+                .call(d3.axisBottom(this.left_time_axis).ticks(10));
 
             this.selected_time_x_right_axis_g = this.svg.append('g');
             this.selected_time_x_right_axis_g.attr('class','axis axis--x')
@@ -192,11 +194,11 @@ class Timer{
             
             this.selected_time_y_axis_g = this.svg.append('g');
             this.selected_time_y_axis_g.attr('class', 'axis axis--y')
-                .attr('transform', "translate("+(this.lenPart2_left)+","+ (this.y - 15) + ")")
-                .call(d3.axisLeft(this.axis_y).ticks(4));
+                .attr('transform', "translate("+(this.x + this.width)+","+ (this.y - 15) + ")")
+                .call(d3.axisRight(this.axis_y).ticks(4));
 
-            this.selected_time_path_g = this.svg.append('g');
-            this.selected_time_path_g.append('path')
+            this.selected_time_right_path_g = this.svg.append('g');
+            this.selected_time_right_path_g.append('path')
             .datum(()=>{
                 let data = [];
                 for(let i = this.current_time_step+1; i <= this.len_x2 && i < this.relativeData.length; i++){
@@ -210,13 +212,30 @@ class Timer{
             .classed('timer_error_linechart_line', true)
             .attr("fill", "none")
             .attr('d', linefuncRight);
+
+            this.selected_time_left_path_g = this.svg.append('g');
+            this.selected_time_left_path_g.append('path')
+            .datum(()=>{
+                let data = [];
+                for(let i = this.len_x1; i <this.current_time_step && i < this.relativeData.length; i++){
+                    if(i < 0)
+                        data.push([['undefine',0], i]);
+                    else
+                        data.push([this.relativeData[i], i]);
+                }
+                return data;
+            })
+            .classed('timer_error_linechart_line', true)
+            .attr("fill", "none")
+            .attr('d', linefuncLeft);
         }
         else{
             this.selected_time_x_right_axis_g.call(d3.axisBottom(this.right_time_axis).ticks(10));
-            //this.selected_time_x_axis_g.call(d3.axisBottom(this.selected_time_axis).ticks(20));
-            this.selected_time_path_g.remove();
-            this.selected_time_path_g = this.svg.append('g');
-            this.selected_time_path_g.append('path')
+            this.selected_time_x_left_axis_g.call(d3.axisBottom(this.left_time_axis).ticks(10));
+
+            this.selected_time_right_path_g.remove();
+            this.selected_time_right_path_g = this.svg.append('g');
+            this.selected_time_right_path_g.append('path')
             .datum(()=>{
                 let data = [];
                 for(let i = this.current_time_step+1; i <= this.len_x2 && i < this.relativeData.length; i++){
@@ -232,6 +251,23 @@ class Timer{
             .classed('timer_error_linechart_line', true)
             .attr("fill", "none")
             .attr('d', linefuncRight);
+
+            this.selected_time_left_path_g.remove();
+            this.selected_time_left_path_g = this.svg.append('g');
+            this.selected_time_left_path_g.append('path')
+            .datum(()=>{
+                let data = [];
+                for(let i = this.len_x1; i <this.current_time_step && i < this.relativeData.length; i++){
+                    if(i < 0)
+                        data.push([['undefine',0], i]);
+                    else
+                        data.push([this.relativeData[i], i]);
+                }
+                return data;
+            })
+            .classed('timer_error_linechart_line', true)
+            .attr("fill", "none")
+            .attr('d', linefuncLeft);
         }
         
         
@@ -307,7 +343,7 @@ class Timer{
 
         let index = -1;
         for(let i = 0; i < this.relativeData.length; i++){
-            if(this.relativeData[i][1] != 0){
+            if(this.relativeData[i][1] != 1 && this.relativeData[i][1] != 0){
                 index = i;
                 break;
             }

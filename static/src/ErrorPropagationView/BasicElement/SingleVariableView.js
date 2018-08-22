@@ -129,7 +129,7 @@ class SingleVariableView{
     }
 
     getChartWidth(){
-        return this.blockw * 1.5;
+        return this.blockw;
     }
 
     getLineChartStartX(){
