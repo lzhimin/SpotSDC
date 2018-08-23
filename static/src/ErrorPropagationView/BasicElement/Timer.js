@@ -156,7 +156,7 @@ class Timer{
         .attr('fill', 'red');
 
         //timer series lens
-        this.draw_select_time_intervel();
+        //this.draw_select_time_intervel();
     }
 
     draw_select_time_intervel(){
@@ -336,7 +336,7 @@ class Timer{
             return 'translate('+this.axis_x(this.current_time_step)+','+(this.y-this.trigger_rect_h-10)+') rotate('+180+')'; 
         });
 
-        this.draw_select_time_intervel();
+        //this.draw_select_time_intervel();
     }
 
     getFirstErrorIndex(){

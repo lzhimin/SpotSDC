@@ -52,20 +52,20 @@ class BitStackChart extends standardChildView{
                 .append('rect')
                 .attr('width', this.rect_w)
                 .attr('height', (d, i)=>{
-                    return this.rect_h * this.hist2d[index][i].length/d3.sum(this.hist2d[index], (d)=>{return d.length;});
+                    return this.rect_h * d.length/d3.sum(this.hist2d[index], (d)=>{return d.length;});
                 })
                 .attr('x', (d, i)=>{
                     return this.x + this.rect_w * (this.hist2d.length - index - 1);
                 })
                 .attr('y', (d, i)=>{
-                    h_temp += this.rect_h * this.hist2d[index][i].length/d3.sum(this.hist2d[index], (d)=>{return d.length;});
-                    return this.y + h_temp - this.rect_h * this.hist2d[index][i].length/d3.sum(this.hist2d[index], (d)=>{return d.length;});
+                    h_temp += this.rect_h * d.length/d3.sum(this.hist2d[index], (d)=>{return d.length;});
+                    return this.y + h_temp - this.rect_h * d.length/d3.sum(this.hist2d[index], (d)=>{return d.length;});
                 })
                 .style('fill', (d, i)=>{
                     switch(i){
-                        case 0: return this.color['DUE'];break;
-                        case 1: return this.color['SDC'];break;
-                        case 2: return this.color['Masked'];break;
+                        case 0: return this.color['DUE']; break;
+                        case 1: return this.color['SDC']; break;
+                        case 2: return this.color['Masked']; break;
                     }
                 })
                 .on('click', (d, i)=>{
