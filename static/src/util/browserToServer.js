@@ -4,10 +4,6 @@ function fetchDataset(filename){
     });
 }
 
-function fetchSourceCodeData(){
-
-}
-
 function fetchSingleSimulationData(index){
 
     let psv = d3.dsvFormat(' ');
@@ -32,6 +28,13 @@ function fetchGoldenSimulationData(){
     })
     .get(function(d){
         publish('SINGLE_SIMULATION_GOLDEN', d);
+    });
+}
+
+function fetch_SDC_Over_Time(){
+    d3.csv('../static/data/PropagationErrorAnalysis/SdcImpactOverTime.csv').then(function(data){
+    //d3.csv('../static/data/PropagationErrorAnalysis/SdcRatioOverTime.csv').then(function(data){
+        publish('SDC_OVER_TIME', data);
     });
 }
 

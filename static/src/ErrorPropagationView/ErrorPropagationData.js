@@ -8,11 +8,7 @@ class ErrorPropagationData{
 
         this.seqVar = this.extractProgramVariableExecutionSequence();
 
-        this.variableDependency = this.extractVariableDynamicDependency();
-
-        this.relativeError = this.parseData_relativeError(data);
-
-        this.absoluteError = this.parseData_AbosluteError(data);
+        this.sdc_over_time = this.parseData_sdc_over_time();
     }
 
     setGoldenRunData(data){
@@ -29,25 +25,16 @@ class ErrorPropagationData{
         return seq.sort();
     }
 
-    extractVariableDynamicDependency(){  
-        let currentVar = this.data[0];
-        let nextVar = this.data[0];
-        let flowPath = [];
+    parseData_sdc_over_time(){
 
-        for(let i = 1; i < this.data.length; i++){
-            nextVar = this.data[i];
-
-            if(nextVar.var == currentVar.var && nextVar.line == currentVar.line)
-                continue;
-            
-            if(!flowPath.includes(currentVar.line+':'+currentVar.var+' '+nextVar.line+':'+nextVar.var))
-                flowPath.push(currentVar.line+':'+currentVar.var+' '+nextVar.line+':'+nextVar.var);
-            currentVar = nextVar;
+        let sdc_overtime = [];
+        for(let i = 0; i < this.data.length; i++){
+            sdc_overtime.push([this.data[i].line+':'+this.data[i].var, this.data[i].sdc]);
         }
-
-        return flowPath;
+        return sdc_overtime;
     }
 
+    /*
     getGolden_Error_SequenceValue(lineVar){
 
         let golden = [];
@@ -88,64 +75,8 @@ class ErrorPropagationData{
         return {'error':error, 'golden':golden};
 
     }
-
+    */
     getProgramCurrentExecutedLine(time){
         return this.data[time];
-    }
-
-
-    parseData_AbosluteError(){
-        let parseData = [];
-
-        let error = 0;
-
-        let lineVar = '';
-
-        //relative error
-        for(let i = 0; i < this.goldenRun.length; i++){
-            lineVar = this.data[i].line+':'+this.data[i].var;
-            error = Math.abs(+this.data[i].value - +this.goldenRun[i].value);
-            parseData.push([lineVar, error]);
-        }
-        
-        return parseData;
-    }
-
-    //data come in float by float,
-    //this function parse all the variable into norm formate
-    parseData_relativeError(){
-
-        let parseData = [];
-
-        let error = 0;
-
-        let maxError_variableTable = {};
-
-        let lineVar = '';
-
-        //extract the maximum error of each variable
-        for(let i = 0; i < this.seqVar.length; i++){
-            maxError_variableTable[this.seqVar[i]] = 0;
-        }
-
-        for(let i = 0; i < this.goldenRun.length; i++){
-            lineVar = this.data[i].line+':'+this.data[i].var;
-            error = Math.abs(+this.data[i].value - +this.goldenRun[i].value);
-            maxError_variableTable[lineVar] = Math.max(error, +maxError_variableTable[lineVar]);
-        }
-
-        //relative error
-        for(let i = 0; i < this.goldenRun.length; i++){
-            lineVar = this.data[i].line+':'+this.data[i].var;
-            if((+this.goldenRun[i].value) == 0)
-                error = Math.abs(+this.data[i].value);
-            else{
-                error = Math.abs(+this.data[i].value) / Math.abs(+this.goldenRun[i].value);
-                //error = Math.abs(+this.data[i].value - +this.goldenRun[i].value)/maxError_variableTable[lineVar];
-            }
-            parseData.push([lineVar, error]);
-        }
-        
-        return parseData;
     }
 }

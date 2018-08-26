@@ -88,7 +88,7 @@ class SingleVariableView{
 
         this.timer = timer;
 
-        this.draw_error_heatmap(this.relativeData);
+        //this.draw_error_heatmap(this.relativeData);
     }
 
     setErrorOption(option){
@@ -184,7 +184,7 @@ class SingleVariableView{
         .attr('text-anchor', 'middle')
         .attr('domain-baseline', 'central');
 
-        this.draw_error_heatmap(this.relativeData);
+        //this.draw_error_heatmap(this.relativeData);
         //draw line chart
         //if(this.error_option == 'relative')
         //   this.draw_error_line_chart(this.relativeData);

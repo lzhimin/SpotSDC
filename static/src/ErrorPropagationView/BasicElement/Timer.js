@@ -1,6 +1,6 @@
 class Timer{
 
-    constructor(svg, time){
+    constructor(svg, time, len_width){
         this.width = 500;
         this.height = 50;
 
@@ -14,14 +14,9 @@ class Timer{
         this.trigger_rect_w = 20;
         this.trigger_rect_h = this.height;
 
-        //len's gap
-        this.len_gap = 0;
-
 
         this.current_time_step = 0;
-        this.len_width = 50;//the size of len need to be bigger than 10
-        this.len_x1 = this.current_time_step - Math.floor(this.len_width/2);
-        this.len_x2 = this.current_time_step + Math.floor(this.len_width/2);
+        this.len_width = len_width;
     }
 
     getCurrentTimeStep(){
@@ -71,6 +66,11 @@ class Timer{
         this.absoluteError = data;
     }
 
+    setData(data){
+        this.data = data;
+        this.sdc_ratio_overtime = this.get_sdc_ratio_overtime();
+    }
+
     setX(x){
         this.x = x;
     }
@@ -89,7 +89,7 @@ class Timer{
     draw(){
 
         this.axis_x = d3.scaleLinear().range([this.x, this.x + this.width]).domain([0, this.time]);
-        this.axis_y = d3.scaleLinear().range([this.y, this.y - this.height]).domain([Math.min(0, d3.min(this.sumOfEachVariableErrorOverTime)), Math.max(1, d3.max(this.sumOfEachVariableErrorOverTime))]);//relative error the value scale from 0~1
+        this.axis_y = d3.scaleLinear().range([this.y, this.y - this.height]).domain([d3.min(this.sdc_ratio_overtime), d3.max(this.sdc_ratio_overtime) * 1.5]);
         this.trigger_rect_w = this.axis_x(this.len_width) - this.axis_x(0);
 
         this.svg.append('g').attr('class','axis axis--x')
@@ -102,32 +102,34 @@ class Timer{
 
         this.linefunc = d3.line().x((d, i)=>{return this.axis_x(i);}).y((d, i)=>{return this.axis_y(d);}).curve(d3.curveStepAfter);
         this.relativeErrorPath = this.svg.append('path')
-            .datum(this.sumOfEachVariableErrorOverTime)
+            .datum(this.sdc_ratio_overtime)
             .classed('timer_error_linechart_line', true)
             .attr("fill", "none")
             .attr('d', this.linefunc);
 
-        this.trigger_rect = this.svg.append('rect').datum(this.current_time_step - Math.floor(this.len_width/2))
-        .attr('x', (d)=>{return this.axis_x(d);})
-        .attr('y', this.y - this.trigger_rect_h)
-        .attr('width', this.trigger_rect_w)
-        .attr('height', this.trigger_rect_h)
-        .classed('Timer_trigger', true)
-        .call(d3.drag()
-            .on('drag', (d)=>{
-                if(this.axis_x.invert(d3.event.x) < - Math.floor(this.len_width/2) || (this.axis_x.invert(d3.event.x + this.trigger_rect_w/2) > this.time))
-                    return;
+        this.trigger_rect = this.svg.append('rect').datum(this.current_time_step)
+            .attr('x', (d)=>{
+                return this.axis_x(d);
+            })
+            .attr('y', this.y - this.trigger_rect_h)
+            .attr('width', this.trigger_rect_w)
+            .attr('height', this.trigger_rect_h)
+            .classed('Timer_trigger', true)
+            .call(d3.drag()
+                .on('drag', (d)=>{
+                    if(this.axis_x.invert(d3.event.x) < 0 || (this.axis_x.invert(d3.event.x) > this.time))
+                        return;
 
-                this.trigger_rect.attr('x', d3.event.x);
-                this.updateLenLocation(Math.floor(this.axis_x.invert(d3.event.x)) + Math.floor(this.len_width/2));
+                    this.trigger_rect.attr('x', d3.event.x);
+                    this.updateLenLocation(Math.floor(this.axis_x.invert(d3.event.x)) + Math.floor(this.len_width/2));
                 
-                //call back function.
-                this.callback(this.len_x1, this.len_x2, this.current_time_step);
-                //this.draw_select_time_intervel();
+                    //call back function.
+                    this.callback(this.current_time_step);
+                    //this.draw_select_time_intervel();
             })
         );
 
-        this.trigger_text = this.svg.selectAll('.time_trigger_annotation_text').data([this.len_x1, this.len_x2])
+        this.trigger_text = this.svg.selectAll('.time_trigger_annotation_text').data([this.current_time_step, this.current_time_step+this.len_gap])
         .enter()
         .append('text')
         .text(d=>d)
@@ -138,31 +140,20 @@ class Timer{
         .attr('text-anchor', 'middle')
         .attr('domain-baseline', 'central')
         .classed('timer_trigger_text', true);
+    }
 
-        this.trigger_rect_cur = this.svg.append('path').datum([this.current_time_step])
-        .attr('d', d3.symbol().size(200).type(d3.symbolTriangle)())
-        .attr('transform',(d)=>{
-            return 'translate('+this.axis_x(d)+','+(this.y-this.trigger_rect_h-10)+') rotate('+180+')';
-        })
-        .attr('fill', 'steelblue');
+    get_sdc_ratio_overtime(){
 
-        //init error indication
-        let init_index = this.getFirstErrorIndex();
-        this.svg.append('path').datum([init_index])
-        .attr('d', d3.symbol().size(100).type(d3.symbolTriangle)())
-        .attr('transform',(d)=>{
-            return 'translate('+this.axis_x(d)+','+(this.y+10)+')';
-        })
-        .attr('fill', 'red');
-
-        //timer series lens
-        //this.draw_select_time_intervel();
+        let ratios = [];
+        for(let i = 0; i < this.data.length; i++){
+            ratios.push(+this.data[i][1]);
+        }
+        return ratios;
     }
 
     draw_select_time_intervel(){
-        this.left_time_axis = d3.scaleLinear().range([this.x, this.lenPart1_right]).domain([this.len_x1, this.current_time_step-1]);
-        this.right_time_axis = d3.scaleLinear().range([this.lenPart2_left, this.x + this.width]).domain([this.current_time_step + 1, this.len_x2]);
-
+        this.len_x_axis = d3.scaleLinear().range([this.x, this.x + this.width]).domain([this.current_time_step, this.current_time_step + this.len_gap]);
+        
         let linefunc = d3.line()
         .y((d)=>{
             return this.axis_y(d[0][1]) + 100;
@@ -304,7 +295,7 @@ class Timer{
 
         let filterdata =[];
         for(let i = 0; i < this.relativeData.length; i++){
-            if(this.display_var.has(this.relativeData[i][0]))
+            if(this.display_var.has(this.sdc_ratio_overtime[i][0]))
                 filterdata.push(this.relativeData[i]);
             else{
                 filterdata.push([0, 0]);
@@ -326,15 +317,15 @@ class Timer{
 
         this.trigger_text
         .text((d,i)=>{
-            return i == 0? this.len_x1 : this.len_x2;
+            return i == 0? this.current_time_step : this.current_time_step+this.len_gap;
         })
         .attr('x', (d, i)=>{
-            return i == 0? this.axis_x(this.len_x1) : this.axis_x(this.len_x2);
+            return i == 0? this.axis_x(this.current_time_step) : this.axis_x(this.current_time_step+this.len_gap);
         });
         
-        this.trigger_rect_cur.attr('transform',()=>{ 
-            return 'translate('+this.axis_x(this.current_time_step)+','+(this.y-this.trigger_rect_h-10)+') rotate('+180+')'; 
-        });
+        //this.trigger_rect_cur.attr('transform',()=>{ 
+        //    return 'translate('+this.axis_x(this.current_time_step)+','+(this.y-this.trigger_rect_h-10)+') rotate('+180+')'; 
+        //});
 
         //this.draw_select_time_intervel();
     }

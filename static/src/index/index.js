@@ -20,9 +20,10 @@ myLayout.registerComponent('ErrorPropagationView', function(container, state){
 
     epv = new ErrorPropagationView(container);
     
-    fetchGoldenSimulationData()
-    subscribe('SINGLE_SIMULATION', epv.setData.bind(epv));
-    subscribe('SINGLE_SIMULATION_GOLDEN', epv.setGoldenRunData.bind(epv));
+    //fetchGoldenSimulationData()
+    subscribe('SDC_OVER_TIME', epv.setData.bind(epv));
+    //subscribe('SINGLE_SIMULATION', epv.setData.bind(epv));
+    //subscribe('SINGLE_SIMULATION_GOLDEN', epv.setGoldenRunData.bind(epv));
 });
 
 myLayout.registerComponent('SourceCodeView', function(container, state){
@@ -55,7 +56,7 @@ myLayout.init();
 function changeFile(){
     let filename = $('#program_TreeView_file_selector').val();
     fetchDataset(filename);
-
+    fetch_SDC_Over_Time();
     //public source code file
     publish('SOURCECODE', filename);
 }
