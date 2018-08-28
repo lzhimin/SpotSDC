@@ -88,8 +88,8 @@ class Timer{
 
     draw(){
 
-        this.axis_x = d3.scaleLinear().range([this.x, this.x + this.width]).domain([0, this.time]);
-        this.axis_y = d3.scaleLinear().range([this.y, this.y - this.height]).domain([d3.min(this.sdc_ratio_overtime), d3.max(this.sdc_ratio_overtime) * 1.5]);
+        this.axis_x = d3.scaleLinear().range([this.x, this.x + this.width]).domain([0, this.time]).nice();
+        this.axis_y = d3.scaleLinear().range([this.y, this.y - this.height]).domain([d3.min(this.sdc_ratio_overtime), d3.max(this.sdc_ratio_overtime) * 1.5]).nice();
         this.trigger_rect_w = this.axis_x(this.len_width) - this.axis_x(0);
 
         this.svg.append('g').attr('class','axis axis--x')
