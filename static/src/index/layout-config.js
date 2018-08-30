@@ -12,6 +12,10 @@ let config = {
             type: 'component',
             componentName: 'ErrorPropagationView',
             title:'ErrorPropagationView'
+        },{
+            type: 'component',
+            componentName: 'GrandView',
+            title:'GrandView'
         }]
     },{
         type: 'column',

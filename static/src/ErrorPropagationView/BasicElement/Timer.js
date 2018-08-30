@@ -129,7 +129,7 @@ class Timer{
             })
         );
 
-        this.trigger_text = this.svg.selectAll('.time_trigger_annotation_text').data([this.current_time_step, this.current_time_step+this.len_gap])
+        /*this.trigger_text = this.svg.selectAll('.time_trigger_annotation_text').data([this.current_time_step, this.current_time_step+this.len_gap])
         .enter()
         .append('text')
         .text(d=>d)
@@ -139,7 +139,7 @@ class Timer{
         .attr('y', this.y - this.trigger_rect_h)
         .attr('text-anchor', 'middle')
         .attr('domain-baseline', 'central')
-        .classed('timer_trigger_text', true);
+        .classed('timer_trigger_text', true);*/
     }
 
     get_sdc_ratio_overtime(){
