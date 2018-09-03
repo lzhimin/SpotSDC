@@ -13,8 +13,6 @@ class SingleVariableView{
 
         this.error_option = 'relative';
 
-        //this.time_intervel = 50;
-
         this.timer = 0;
 
         this.uuid = uuidv4();
@@ -45,13 +43,13 @@ class SingleVariableView{
             }
 
             if(type == 'absolute'){
-                e - g != 0 ? values.push(Math.abs(e - g)): values.push(0);
+                values.push(Math.abs(e - g));
             }
             else if(type == 'relative'){
-                if(e == 0 && g == 0)
-                    values.push(0);
+                if(g == 0)
+                    values.push(Math.abs(e - g) * this.impactfactor[i]);
                 else{
-                    e - g == 0 ? values.push(0) : values.push(Math.abs((e - g)/g));
+                    values.push(Math.abs((e - g)/g) * this.impactfactor[i]);
                 }
             }
         }
@@ -66,9 +64,10 @@ class SingleVariableView{
         this.y = y;
     }
 
-    setData(data){
+    setData(data, impactfactor){
         this.golden = data.golden;
         this.error = data.error;
+        this.impactfactor = impactfactor;
         this.absoluteData = this.extractDataByType(data, 'absolute');
         this.relativeData = this.extractDataByType(data, 'relative');
     }
@@ -104,8 +103,11 @@ class SingleVariableView{
         this.onclickeventlistener = func;
     }
 
-    getDownConnectionLocation(){
+    setImpactFactor(data){
+        this.impactfactor = data;
+    }
 
+    getDownConnectionLocation(){
         return [this.x + this.blockw * 1.5, this.y + this.blockh/2];
     }
 

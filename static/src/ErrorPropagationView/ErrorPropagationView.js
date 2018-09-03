@@ -29,7 +29,7 @@ class ErrorPropagationView extends BasicView{
         this.propagationData.seqVar.forEach((d, i)=>{
             let view = new SingleVariableView(this.svg, d);
 
-            view.setData(this.propagationData.getGolden_Error_SequenceValue(d));
+            view.setData(this.propagationData.getGolden_Error_SequenceValue(d), this.propagationData.impactfactor);
             view.setX(this.x + this.path_width/2 - view.getChartWidth()/3);
             view.setY(this.y + i * (view.getRectHeight() + view.getPadding()));
             view.setMaxRelativeError(this.propagationData.getMaxRelativeError());

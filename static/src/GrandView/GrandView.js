@@ -9,8 +9,8 @@ class GrandView extends BasicView{
         }  
 
 
-        this.top_padding = 10;
-        this.left_padding = 10;
+        this.top_padding = 50;
+        this.left_padding = 200;
         this.right_padding = 10;
         this.y = this.top_padding;
         this.x = this.left_padding;
@@ -27,14 +27,14 @@ class GrandView extends BasicView{
 
         this.the_number_of_time_steps = this.data.length/this.bitsize;
 
-        this.rectw = (this.width - this.left_padding - this.right_padding)/this.the_number_of_time_steps;
-        this.recth = this.height*(2/3)/this.bitsize;
+        this.rectw = 5;
+        this.recth = 5;
 
         d3.select('#GrandView').html('');
         d3.select('#GrandView').append('canvas')
             .attr('id', 'grandview_canvas')
             .attr('width', this.width)
-            .attr('height', this.height);
+            .attr('height', this.the_number_of_time_steps * this.recth + this.top_padding * 2);
         
         this.ctx=$('#grandview_canvas')[0].getContext("2d");
         this.draw();
@@ -52,16 +52,11 @@ class GrandView extends BasicView{
         
         for(let i = 0; i < this.the_number_of_time_steps; i++){
             for(let j = 0; j < this.bitsize; j++){
-                //absolute error
-                //if (this.data[i * this.bitsize + j].diffnormr != 'nan')
-                //    this.ctx.fillStyle =  d3.interpolateReds(this.colorscale(Math.log10(+this.data[i * this.bitsize + j].diffnormr)))
-                //else
-                //    this.ctx.fillStyle = 'white';
-
                 //type  
                 this.ctx.fillStyle = this.outcome_color[this.data[i * this.bitsize + j]['outcome']];
-                
-                this.ctx.fillRect(this.x + i * this.rectw, this.y + (this.bitsize - j) * this.recth, this.rectw, this.recth);
+                this.ctx.strokeStyle="#f0f0f0";
+                this.ctx.strokeRect(this.x + (this.bitsize - j) * this.rectw, this.y + i * this.recth, this.rectw, this.recth);
+                this.ctx.fillRect(this.x + (this.bitsize - j) * this.rectw, this.y + i * this.recth, this.rectw, this.recth);
             }
         }
 
