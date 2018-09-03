@@ -1,6 +1,8 @@
 class ErrorPropagationData{
+
     constructor(){
         //get golden run  
+        subscribe('IMPACT_FACTOR', this.setImpactFactor.bind(this));
     }
 
     setData(data){
@@ -17,6 +19,10 @@ class ErrorPropagationData{
 
     setGoldenRunData(data){
         this.goldenRun = data;
+    }
+
+    setImpactFactor(msg, data){
+        this.impactfactor = data;
     }
 
     extractProgramVariableExecutionSequence(){
@@ -55,9 +61,9 @@ class ErrorPropagationData{
 
         //parse error data
         if(this.data[0].line + ':' + this.data[0].var == lineVar){
-            error[0] = [this.data[i].line+':'+this.data[i].var, this.data[0].value];
+            error[0] = [this.data[0].line+':'+this.data[0].var, this.data[0].value];
         }else{
-            error[0] = [this.data[i].line+':'+this.data[i].var, 0];
+            error[0] = [this.data[0].line+':'+this.data[0].var, 0];
         }
 
         for(let i = 1; i < this.data.length; i++){
@@ -71,9 +77,9 @@ class ErrorPropagationData{
 
         //parse golden value
         if(this.goldenRun[0].line + ':' + this.goldenRun[0].var == lineVar){
-            golden[0] = [this.data[i].line+':'+this.data[i].var, this.goldenRun[0].value];
+            golden[0] = [this.data[0].line+':'+this.data[0].var, this.goldenRun[0].value];
         }else{
-            golden[0] = [this.data[i].line+':'+this.data[i].var, 0];
+            golden[0] = [this.data[0].line+':'+this.data[0].var, 0];
         }
 
         for(let i = 1; i < this.goldenRun.length; i++){
@@ -81,7 +87,6 @@ class ErrorPropagationData{
                 golden.push([this.data[i].line+':'+this.data[i].var, this.goldenRun[i].value]);
             }else{
                 golden.push([this.data[i].line+':'+this.data[i].var, 0]);
-                //golden.push(golden[i-1]);
             }
         }
 
@@ -92,7 +97,6 @@ class ErrorPropagationData{
     getProgramCurrentExecutedLine(time){
         return this.data[time];
     }
-
 
     parseData_AbosluteError(){
         let parseData = [];
@@ -140,12 +144,19 @@ class ErrorPropagationData{
             if((+this.goldenRun[i].value) == 0)
                 error = Math.abs(+this.data[i].value);
             else{
-                error = Math.abs(+this.data[i].value) / Math.abs(+this.goldenRun[i].value);
-                //error = Math.abs(+this.data[i].value - +this.goldenRun[i].value)/maxError_variableTable[lineVar];
+                error = Math.abs(+this.data[i].value - +this.goldenRun[i].value) / Math.abs(+this.goldenRun[i].value);
             }
-            parseData.push([lineVar, error]);
+            parseData.push([lineVar, this.impactfactor[i] * error]);
         }
         
         return parseData;
+    }
+
+    getMaxRelativeError(){
+        let max = - Number.MAX_VALUE;
+        for(let i = 0; i < this.relativeError.length; i++){
+            max = Math.max(+this.relativeError[i][1], max);
+        }
+        return max;
     }
 }

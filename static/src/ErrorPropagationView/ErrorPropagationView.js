@@ -30,8 +30,9 @@ class ErrorPropagationView extends BasicView{
             let view = new SingleVariableView(this.svg, d);
 
             view.setData(this.propagationData.getGolden_Error_SequenceValue(d));
-            view.setX(this.x + this.path_width/2 - view.getChartWidth()/2);
+            view.setX(this.x + this.path_width/2 - view.getChartWidth()/3);
             view.setY(this.y + i * (view.getRectHeight() + view.getPadding()));
+            view.setMaxRelativeError(this.propagationData.getMaxRelativeError());
             this.variableViewBucket[d] = view;
         });
 
@@ -86,7 +87,6 @@ class ErrorPropagationView extends BasicView{
         
         this.drawExecutionLineChart(x1, x2, current);
         this.timer.updateLenLocation(current);
-        //this.drawBitPropagationChart(time);
         publish('SOURCECODE_HIGHLIGHT', this.propagationData.getProgramCurrentExecutedLine(current));
     }
 
@@ -103,7 +103,7 @@ class ErrorPropagationView extends BasicView{
 
         let current_time = this.timer.getCurrentTimeStep();
 
-        if(current_time + step > this.propagationData.goldenRun.length || current_time + step < 0){
+        if(current_time + step > this.propagationData.goldenRun.length-1 || current_time + step < 0){
             return false;
         }
         else{
@@ -133,11 +133,12 @@ class ErrorPropagationView extends BasicView{
         .attr('width', 3)
         .style('fill', (d, i)=>{return colorScale(d);})
 
-        this.colorscalesvg.selectAll('.errorColorScaleBar').data(['0', '1'])
+        this.colorscalesvg.selectAll('.errorColorScaleBar').data(['0', this.propagationData.getMaxRelativeError().toFixed(2)])
         .enter()
         .append('text')
         .attr('x', (d, i)=>{
-            return i == 0? this.x + 400 : this.x + 400 + width * 3;})
+            return i == 0? this.x + 400 : this.x + 400 + width * 3;
+        })
         .attr('y', 15)
         .text(d=>d)
         .attr('text-anchor', 'middle')
@@ -184,8 +185,7 @@ class ErrorPropagationView extends BasicView{
             .attr('width', step_w)
             .attr('height', Math.min(step_w, this.blockh))
             .attr('fill', (d)=>{
-                return d[0][1] != 1 ? d3.interpolateOrRd(temp_colorscale(d[0][1])):'white';
-                //return d[0][1]!=0?d3.interpolateOrRd(d[0][1]):'white';
+                return d[0][1]!=0?d3.interpolateOrRd(temp_colorscale(d[0][1])):'white';
             })
             .attr('fill-opacity', (d)=>{
                 return d[0][1]!=0?1:0;
@@ -207,7 +207,6 @@ class ErrorPropagationView extends BasicView{
             .attr('height', Math.min(step_w, this.blockh))
             .attr('fill', (d)=>{
                 return d[0][1] != 1 ? d3.interpolateOrRd(temp_colorscale(d[0][1])):'white';
-                //return d[0][1] != 0 ? d3.interpolateOrRd(d[0][1]):'white';
             })
             .attr('fill-opacity', (d)=>{
                 return d[0][1] != 0 ? 1:0;

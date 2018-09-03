@@ -51,7 +51,7 @@ class SingleVariableView{
                 if(e == 0 && g == 0)
                     values.push(0);
                 else{
-                    e - g == 0 ? values.push(0) : values.push(Math.abs(e - g)/d3.max(this.absoluteData));
+                    e - g == 0 ? values.push(0) : values.push(Math.abs((e - g)/g));
                 }
             }
         }
@@ -79,7 +79,7 @@ class SingleVariableView{
             return;
 
         this.rects.style('fill', (d, i)=>{
-            return this.relativeData[timer] == 0? 'white':d3.interpolateReds(this.relativeData[timer]);
+            return this.relativeData[timer] == 0? 'white':d3.interpolateReds(this.colorscale(this.relativeData[timer]));
         });
 
         this.highLightRect.style('display', ()=>{
@@ -93,6 +93,11 @@ class SingleVariableView{
 
     setErrorOption(option){
         this.error_option = option;
+    }
+
+    setMaxRelativeError(max){
+        this.relativeMax = max;
+        this.colorscale = d3.scaleLinear().domain([0, this.relativeMax]).range([0, 1]);
     }
 
     setOnClickEventListener(func){
@@ -185,11 +190,6 @@ class SingleVariableView{
         .attr('domain-baseline', 'central');
 
         this.draw_error_heatmap(this.relativeData);
-        //draw line chart
-        //if(this.error_option == 'relative')
-        //   this.draw_error_line_chart(this.relativeData);
-        //else
-        //   this.draw_error_line_chart(this.absoluteData);
     }
 
     draw_error_line_chart(data){

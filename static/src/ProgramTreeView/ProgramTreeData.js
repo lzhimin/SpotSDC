@@ -83,6 +83,7 @@ class ProgramTreeData{
                         'lowestPBit':64,
                         'maxIn':-Number.MAX_VALUE,
                         'minIn':Number.MAX_VALUE};
+
         this.data.forEach(element=>{
 
             if(element.outcome == 'SDC' && element.diffnormr != 'inf'){
@@ -102,6 +103,30 @@ class ProgramTreeData{
                 this.property.minIn = Math.min(this.property.minIn, input);
             }
         });
+
+        //extract the impact factor for each location.
+        let output_golden = 3.477474097e-07;
+        let bucket = [];
+        this.impact_factors = [];
+
+        for(let i = 0; i < this.data.length; i++){
+
+            if((i+1) % 64 == 0){
+                this.impact_factors.push(d3.sum(bucket)/bucket.length);
+                bucket = [];
+            }
+
+            if(this.data[i].outcome != 'DUE' && this.data[i].out_xor != 'nan'){
+                if(+this.data[i].out_xor == 0){
+                    bucket.push(0);
+                }
+                else{
+                    bucket.push(Math.abs((+this.data[i].diffnormr - output_golden)/+this.data[i].out_xor));
+                }
+            }
+        }
+
+        publish('IMPACT_FACTOR', this.impact_factors);
     }
 
     filterDataCallBack(category, filteritems){

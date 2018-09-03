@@ -2,15 +2,16 @@ class ProgramTreeView extends BasicView{
 
     constructor(container){
         super(container);
+        
         this.programtreedata = new ProgramTreeData();
+        
         this.programtreecontroller = new ProgramViewController();
+
         this.outcome_color = {
             'DUE': '#542788',
             'Masked': '#99d594',
             'SDC': '#fc8d59'
         }   
-
-        //this.colorscale = ['#feedde', '#fdbe85', '#fd8d3c', '#e6550d', '#a63603']; 
 
         this.colorscale = ['#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5','#08519c','#08306b'];
         
@@ -407,7 +408,6 @@ class ProgramTreeView extends BasicView{
                 .call(d3.axisTop(x_axis).tickValues(d3.range(mindiff, maxdiff, (maxdiff - mindiff)/10)));
         }
     }
-
 
     is_the_node_a_leaf(data){
         return 'key' in data.values[0] && !(data.values[0].key in this.outcome_color);
