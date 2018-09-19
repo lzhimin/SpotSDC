@@ -105,7 +105,6 @@ class ErrorPropagationData{
 
         let lineVar = '';
 
-        //relative error
         for(let i = 0; i < this.goldenRun.length; i++){
             lineVar = this.data[i].line+':'+this.data[i].var;
             error = Math.abs(+this.data[i].value - +this.goldenRun[i].value);
@@ -157,6 +156,15 @@ class ErrorPropagationData{
         for(let i = 0; i < this.relativeError.length; i++){
             max = Math.max(+this.relativeError[i][1], max);
         }
+        return max;
+    }
+
+    getMaxAbsoluteError(){
+        let max = -Number.MAX_VALUE;
+        for(let i = 0; i < this.absoluteError.length; i++){
+            max = Math.max(+this.absoluteError[i][1], max);
+        }
+
         return max;
     }
 }

@@ -41,7 +41,7 @@ class SmartBitHeatMap extends standardChildView{
         this.g.append('rect')
         .attr('x', this.x)
         .attr('y', this.y)
-        .attr('width', this.width)
+        .attr('width', this.width - this.rect_w/2)
         .attr('height', this.height)
         .classed('Bit_outcome_heatmap_background_rect', true);
 
@@ -49,7 +49,12 @@ class SmartBitHeatMap extends standardChildView{
         this.g.selectAll('.Bit_outcome_heatmap_'+this.uuid+'_rect').data(this.hist).enter()
         .append('rect')
         .attr('class', 'Bit_outcome_heatmap_rect')
-        .attr('width', this.rect_w)
+        .attr('width', (d, i)=>{
+            if((i+1)%this.col == 0)
+                return this.rect_w * 0.5
+            else
+                return this.rect_w;
+        })
         .attr('height', this.rect_h)
         .attr('x', (d, i)=>{
             return this.x + this.rect_w * (i % this.col);

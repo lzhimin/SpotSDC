@@ -30,15 +30,16 @@ class ErrorPropagationView extends BasicView{
             let view = new SingleVariableView(this.svg, d);
 
             view.setData(this.propagationData.getGolden_Error_SequenceValue(d), this.propagationData.impactfactor);
-            view.setX(this.x + this.path_width/2 - view.getChartWidth()/3);
+            view.setX(this.x + this.path_width/2 - view.getChartWidth()/2.5);
             view.setY(this.y + i * (view.getRectHeight() + view.getPadding()));
-            view.setMaxRelativeError(this.propagationData.getMaxRelativeError());
+            view.setMaxRelativeError(this.propagationData.getMaxAbsoluteError());
             this.variableViewBucket[d] = view;
         });
 
         //timer 
         this.timer = new Timer(this.svg, this.variableViewBucket[this.propagationData.seqVar[0]].getMaxTimeStep());
-            //timer step change event
+        
+        //timer step change event
         this.timer.setTimerStepChangeCallBack(this.setTimerChangeEvent.bind(this));
 
         //controller 
@@ -148,25 +149,25 @@ class ErrorPropagationView extends BasicView{
     drawExecutionLineChart(x1, x2, current){
 
         let max = -Number.MAX_VALUE;
-        for(let i  = 0; i < this.propagationData.relativeError.length; i++){
-            max = Math.max(this.propagationData.relativeError[i][1], max);
+        for(let i  = 0; i < this.propagationData.absoluteError.length; i++){
+            max = Math.max(this.propagationData.absoluteError[i][1], max);
         }
 
-        let temp_colorscale = d3.scaleLinear().domain([0, max]).range([0,1])
+        let temp_colorscale = d3.scaleLinear().domain([0, max]).range([0,1]).clamp(true);
 
         let step_w = Math.floor(this.path_width/this.step_size);
         let left_items = [];
         let right_items = [];
 
-        for(let i = x1; i < current && i < this.propagationData.relativeError.length; i++){  
+        for(let i = x1; i < current && i < this.propagationData.absoluteError.length; i++){  
             if(i < 0)
                 continue
             else
-                left_items.push([this.propagationData.relativeError[i], i]);
+                left_items.push([this.propagationData.absoluteError[i], i]);
         }
 
-        for(let i = current; i < x2 && i < this.propagationData.relativeError.length; i++){
-            right_items.push([this.propagationData.relativeError[i], i]);
+        for(let i = current; i < x2 && i < this.propagationData.absoluteError.length; i++){
+            right_items.push([this.propagationData.absoluteError[i], i]);
         }
 
         if(this.excutionLineChart_g != undefined)

@@ -75,7 +75,7 @@ class Timer{
     draw(){
 
         this.axis_x = d3.scaleLinear().range([this.x, this.x + this.width]).domain([0, this.time]);
-        this.axis_y = d3.scaleLinear().range([this.y, this.y - this.height]).domain([Math.min(0, d3.min(this.relativeData, (d)=>{return d[1];})), Math.max(1, d3.max(this.relativeData, (d)=>{return d[1];}))]);//relative error the value scale from 0~1
+        this.axis_y = d3.scaleLinear().range([this.y, this.y - this.height]).domain([Math.min(0, d3.min(this.absoluteError, (d)=>{return d[1];})), Math.max(1, d3.max(this.absoluteError, (d)=>{return d[1];}))]);//relative error the value scale from 0~1
         this.trigger_rect_w = this.axis_x(this.len_width) - this.axis_x(0);
 
         this.svg.append('g').attr('class','axis axis--x')
@@ -88,7 +88,7 @@ class Timer{
 
         this.linefunc = d3.line().x((d, i)=>{return this.axis_x(i);}).y((d, i)=>{return this.axis_y(d[1]);}).curve(d3.curveStepAfter);
         this.relativeErrorPath = this.svg.append('path')
-            .datum(this.relativeData)
+            .datum(this.absoluteError)
             .classed('timer_error_linechart_line', true)
             .attr("fill", "none")
             .attr('d', this.linefunc);
@@ -128,7 +128,7 @@ class Timer{
         .call(d3.drag().on('drag', (d)=>{
             let trigger_rect_x = this.trigger_rect.attr('x');    
 
-            if(this.axis_x.invert(d3.event.x) > this.time || (trigger_rect_x + 50) > d3.event.x)
+            if(this.axis_x.invert(d3.event.x) > this.time || (+trigger_rect_x + 50) > d3.event.x)
                 return;
             
             let extend_w = d3.event.x - trigger_rect_x;
@@ -208,11 +208,11 @@ class Timer{
             this.selected_time_right_path_g.append('path')
             .datum(()=>{
                 let data = [];
-                for(let i = this.current_time_step+1; i <= this.len_x2 && i < this.relativeData.length; i++){
+                for(let i = this.current_time_step+1; i <= this.len_x2 && i < this.absoluteError.length; i++){
                     if(i < 0)
                         data.push([['undefine',0], i]);
                     else
-                        data.push([this.relativeData[i], i]);
+                        data.push([this.absoluteError[i], i]);
                 }
                 return data;
             })
@@ -224,11 +224,11 @@ class Timer{
             this.selected_time_left_path_g.append('path')
             .datum(()=>{
                 let data = [];
-                for(let i = this.len_x1; i <this.current_time_step && i < this.relativeData.length; i++){
+                for(let i = this.len_x1; i <this.current_time_step && i < this.absoluteError.length; i++){
                     if(i < 0)
                         data.push([['undefine',0], i]);
                     else
-                        data.push([this.relativeData[i], i]);
+                        data.push([this.absoluteError[i], i]);
                 }
                 return data;
             })
@@ -245,12 +245,12 @@ class Timer{
             this.selected_time_right_path_g.append('path')
             .datum(()=>{
                 let data = [];
-                for(let i = this.current_time_step+1; i <= this.len_x2 && i < this.relativeData.length; i++){
+                for(let i = this.current_time_step+1; i <= this.len_x2 && i < this.absoluteError.length; i++){
                     if(i < 0){
                         data.push[['undefine', 0], i];
                     }
                     else{
-                        data.push([this.relativeData[i], i]);
+                        data.push([this.absoluteError[i], i]);
                     }
                 }
                 return data;
@@ -264,11 +264,11 @@ class Timer{
             this.selected_time_left_path_g.append('path')
             .datum(()=>{
                 let data = [];
-                for(let i = this.len_x1; i <this.current_time_step && i < this.relativeData.length; i++){
+                for(let i = this.len_x1; i <this.current_time_step && i < this.absoluteError.length; i++){
                     if(i < 0)
                         data.push([['undefine',0], i]);
                     else
-                        data.push([this.relativeData[i], i]);
+                        data.push([this.absoluteError[i], i]);
                 }
                 return data;
             })
@@ -310,16 +310,16 @@ class Timer{
         }
 
         let filterdata =[];
-        for(let i = 0; i < this.relativeData.length; i++){
-            if(this.display_var.has(this.relativeData[i][0]))
-                filterdata.push(this.relativeData[i]);
+        for(let i = 0; i < this.absoluteError.length; i++){
+            if(this.display_var.has(this.absoluteError[i][0]))
+                filterdata.push(this.absoluteError[i]);
             else{
                 filterdata.push([0, 0]);
             }
         }
 
         if(this.display_var.size == 0){
-            filterdata = this.relativeData;
+            filterdata = this.absoluteError;
         }
 
         this.relativeErrorPath.datum(filterdata)
@@ -349,8 +349,8 @@ class Timer{
     getFirstErrorIndex(){
 
         let index = -1;
-        for(let i = 0; i < this.relativeData.length; i++){
-            if(this.relativeData[i][1] != 0){
+        for(let i = 0; i < this.absoluteError.length; i++){
+            if(this.absoluteError[i][1] != 0){
                 index = i;
                 break;
             }

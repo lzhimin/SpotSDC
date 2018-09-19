@@ -74,11 +74,11 @@ class SingleVariableView{
 
     setTimerStep(timer){
 
-        if(timer >= this.relativeData.length && timer < 0)
+        if(timer >= this.absoluteData.length && timer < 0)
             return;
 
         this.rects.style('fill', (d, i)=>{
-            return this.relativeData[timer] == 0? 'white':d3.interpolateReds(this.colorscale(this.relativeData[timer]));
+            return this.absoluteData[timer] == 0? 'white':d3.interpolateReds(this.colorscale(this.absoluteData[timer]));
         });
 
         this.highLightRect.style('display', ()=>{
@@ -95,8 +95,8 @@ class SingleVariableView{
     }
 
     setMaxRelativeError(max){
-        this.relativeMax = max;
-        this.colorscale = d3.scaleLinear().domain([0, this.relativeMax]).range([0, 1]);
+        this.absoluteMax = max;
+        this.colorscale = d3.scaleLinear().domain([0, this.absoluteMax]).range([0, 1]);
     }
 
     setOnClickEventListener(func){

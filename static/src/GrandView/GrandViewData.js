@@ -13,6 +13,12 @@ class GrandViewData{
                 d.push(Math.log10(+this.data[i].diffnormr));
         }
 
-        return d3.extent(d);
+        return [0, d3.max(d)];
+    }
+
+
+    getNumberOfDynamicInstruction(){
+        let l = this.data.length;
+        return this.data[l-1].DI;
     }
 }
