@@ -68,7 +68,6 @@ class SourceCodeView extends BasicView{
     }
 
     extractDataProperty(){
-
         this.init_SDC_ratio_in_each_Line();
         this.init_SDC_Ratio_Of_EachLine_In_EachIteration();
         this.colorscale = d3.scaleLinear().domain(d3.extent(Object.values(this.sdc_frequency))).range([0,1]);

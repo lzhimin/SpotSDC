@@ -43,14 +43,18 @@ input{
     stroke-width: 1px;
 }
 
+.tree_node_highlight{
+    fill:orange;
+    stroke-width: 1px;
+}
+
 .programTreeView_text{
     font-size:14;
     user-select: none;
 }
 
 #ProgramTree_impact_chart_menu{
-    display:none;
-    
+    display:none; 
 }
 
 #ProgramTree_Tree_Menu{

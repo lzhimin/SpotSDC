@@ -24,7 +24,7 @@ class ProgramTreeView extends BasicView{
         this.blockw = 60;
         this.blockh = 40;
 
-        this.top_padding = this.y = 150;
+        this.top_padding = this.y = 200;
         this.left_padding = this.x = 20;
         this.padding = 20;
         this.bottom_padding = 10;
@@ -109,17 +109,31 @@ class ProgramTreeView extends BasicView{
     }
 
     draw_node(x, y, h, w, d){
-        this.svg.selectAll('.treenode_'+d.key).data([d.key]).enter().append('rect')
+
+        this.svg.selectAll('.treenode_'+d.key).data([d]).enter().append('rect')
             .attr('width', w)
             .attr('height', h)
             .attr('x', x)
             .attr('y', y)
             .attr('rx', 5)
             .attr('ry', 5)
+            .on('click', function(data){
+
+                let isnum = /^\d+$/.test(data.key);
+
+                if(isnum){
+                    d3.selectAll('.tree_node')
+                    .classed('tree_node', true)
+                    .classed('tree_node_highlight', false);
+                
+                    d3.select(this).classed('tree_node_highlight', true);
+                    publish('SOURCECODE_HIGHLIGHT', {'line':data.key});
+                }
+            })
             .classed('tree_node', true);
 
-        this.svg.selectAll('.treetext_'+d.key).data([d.key]).enter().append('text')
-            .text(d=>d)
+        this.svg.selectAll('.treetext_'+d.key).data([d]).enter().append('text')
+            .text(d=>d.key)
             .attr('x', (d, i)=>{
                 return x + w / 2;
             })
@@ -145,7 +159,6 @@ class ProgramTreeView extends BasicView{
     
         this.bit_heatmap_bucket[parent+'_'+data.key] = new BitHeatMap(this.svg, x, y, this.bitmap_width, this.blockh, data);
         this.bit_heatmap_bucket[parent+'_'+data.key].setColormapColor(this.colorscale);
-        //this.bit_heatmap_bucket[parent+'_'+data.key].draw();
 
         this.smart_bit_heatmap_bucket[parent+'_'+data.key] = new SmartBitHeatMap(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getLowestProblemBit());
         this.smart_bit_heatmap_bucket[parent+'_'+data.key].setColormapColor(this.colorscale);
