@@ -5,7 +5,26 @@ class ErrorPropagationData{
         subscribe('IMPACT_FACTOR', this.setImpactFactor.bind(this));
     }
 
-    setData(data){
+    setSummaryData(data){
+        this.summarydata = data;
+
+        let values = d3.nest();
+        
+        values.key(function (d) {
+            return d.Function;
+        }).key(function (d) {
+            return d.Variable;
+        }).key(function (d) {
+            return d.Line;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+        }).key(function (d) {
+            return d.outcome
+        });
+       
+
+        this.hierachicalData =   {'key':$('#program_TreeView_file_selector').val().split('_')[0], 'values':values.entries(this.summarydata)};
+    }
+
+    setErrorRunData(data){
         this.data = data;
 
         this.seqVar = this.extractProgramVariableExecutionSequence();
@@ -23,35 +42,6 @@ class ErrorPropagationData{
 
     setImpactFactor(msg, data){
         this.impactfactor = data;
-    }
-
-    extractProgramVariableExecutionSequence(){
-        let seq = [];
-        this.data.forEach((d)=>{
-            if(!seq.includes(d.line+':'+d.var)){
-                seq.push(d.line+':'+d.var);
-            }
-        });
-        return seq.sort();
-    }
-
-    extractVariableDynamicDependency(){  
-        let currentVar = this.data[0];
-        let nextVar = this.data[0];
-        let flowPath = [];
-
-        for(let i = 1; i < this.data.length; i++){
-            nextVar = this.data[i];
-
-            if(nextVar.var == currentVar.var && nextVar.line == currentVar.line)
-                continue;
-            
-            if(!flowPath.includes(currentVar.line+':'+currentVar.var+' '+nextVar.line+':'+nextVar.var))
-                flowPath.push(currentVar.line+':'+currentVar.var+' '+nextVar.line+':'+nextVar.var);
-            currentVar = nextVar;
-        }
-
-        return flowPath;
     }
 
     getGolden_Error_SequenceValue(lineVar){
@@ -96,6 +86,52 @@ class ErrorPropagationData{
 
     getProgramCurrentExecutedLine(time){
         return this.data[time];
+    }
+
+    getMaxRelativeError(){
+        let max = - Number.MAX_VALUE;
+        for(let i = 0; i < this.relativeError.length; i++){
+            max = Math.max(+this.relativeError[i][1], max);
+        }
+        return max;
+    }
+
+    getMaxAbsoluteError(){
+        let max = -Number.MAX_VALUE;
+        for(let i = 0; i < this.absoluteError.length; i++){
+            max = Math.max(+this.absoluteError[i][1], max);
+        }
+
+        return max;
+    }
+
+    extractProgramVariableExecutionSequence(){
+        let seq = [];
+        this.data.forEach((d)=>{
+            if(!seq.includes(d.line+':'+d.var)){
+                seq.push(d.line+':'+d.var);
+            }
+        });
+        return seq.sort();
+    }
+
+    extractVariableDynamicDependency(){  
+        let currentVar = this.data[0];
+        let nextVar = this.data[0];
+        let flowPath = [];
+
+        for(let i = 1; i < this.data.length; i++){
+            nextVar = this.data[i];
+
+            if(nextVar.var == currentVar.var && nextVar.line == currentVar.line)
+                continue;
+            
+            if(!flowPath.includes(currentVar.line+':'+currentVar.var+' '+nextVar.line+':'+nextVar.var))
+                flowPath.push(currentVar.line+':'+currentVar.var+' '+nextVar.line+':'+nextVar.var);
+            currentVar = nextVar;
+        }
+
+        return flowPath;
     }
 
     parseData_AbosluteError(){
@@ -149,22 +185,5 @@ class ErrorPropagationData{
         }
         
         return parseData;
-    }
-
-    getMaxRelativeError(){
-        let max = - Number.MAX_VALUE;
-        for(let i = 0; i < this.relativeError.length; i++){
-            max = Math.max(+this.relativeError[i][1], max);
-        }
-        return max;
-    }
-
-    getMaxAbsoluteError(){
-        let max = -Number.MAX_VALUE;
-        for(let i = 0; i < this.absoluteError.length; i++){
-            max = Math.max(+this.absoluteError[i][1], max);
-        }
-
-        return max;
     }
 }

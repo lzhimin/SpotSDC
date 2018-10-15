@@ -10,19 +10,22 @@ class ErrorPropagationView extends BasicView{
         super.init();
 
         this.blockw = 80;
-        this.blockh = 20;
+        this.blockh = 30;
 
         this.y = this.top_padding = 230;
         this.x = this.left_padding = 100;
         this.padding = 20;
         this.step_size = 50;
-        this.path_width = this.width - this.padding - this.blockw * 1.5;
-        this.propagationData.setData(data);
+        this.path_width = this.width - this.padding - this.blockw * 4.5;
+        this.propagationData.setErrorRunData(data);
 
         d3.select('#ErrorPropagationView').html('');
         this.svg = d3.select('#ErrorPropagationView').append('svg')
             .attr('width', this.width)
             .attr('height', this.height);
+
+        
+        this.lineLocation = {};
 
         this.variableViewBucket = {};
         ///init each variable view's and data
@@ -53,14 +56,14 @@ class ErrorPropagationView extends BasicView{
         //clean svg
         this.svg.html('');
 
-        for(let key in this.variableViewBucket){
-            this.variableViewBucket[key].setErrorOption(this.propagationController.getOption());
-            this.variableViewBucket[key].draw();
-            this.variableViewBucket[key].setOnClickEventListener(this.timer.setDisplayVariable.bind(this.timer));
-        }
+        //for(let key in this.variableViewBucket){
+        //    this.variableViewBucket[key].setErrorOption(this.propagationController.getOption());
+        //    this.variableViewBucket[key].draw();
+        //    this.variableViewBucket[key].setOnClickEventListener(this.timer.setDisplayVariable.bind(this.timer));
+        //}
         
         //timer
-        this.timer.setX(this.x);
+        this.timer.setX(this.padding + this.blockw * 4);
         this.timer.setY(this.y - this.top_padding/2);
         this.timer.setLengap(this.blockw);
         this.timer.setWidth(Math.floor(this.path_width/this.step_size) * this.step_size);
@@ -78,25 +81,134 @@ class ErrorPropagationView extends BasicView{
         if(currentheight > this.height){
             this.svg.attr('height', currentheight + this.variableViewBucket[this.propagationData.seqVar[0]].getPadding() * 2);
         }
+
+        this.draw_tree();
+    }
+
+    draw_tree(){
+
+        let hierachicaldata = this.propagationData.hierachicalData;
+        let x = 20, y = this.top_padding, h = 0;
+        let padding = 3;
+
+        hierachicaldata.values.sort(function(a, b){
+            return a.key > b.key;
+        });
+
+        if(this.the_node_is_not_a_leaf(hierachicaldata)){
+            hierachicaldata.values.forEach((d, index)=>{
+                h += this.draw_inner_node(x + this.blockw, y + h, d, hierachicaldata.key);
+                h += padding;
+            });
+        }
+
+        //if the current svg is smaller than the current size of tree
+        if(this.height < this.top_padding + h + this.bottom_padding){
+            this.svg.attr('height', this.top_padding + h + this.bottom_padding);
+        }
+        this.draw_node(x, y, h - padding, this.blockw, hierachicaldata);
+    }
+
+    draw_inner_node(x, y, data, parent){
+
+        let height_of_current_node = 0;
+        //fix the order
+        data.values.sort(function(a, b){
+            return a.key > b.key;
+        });
+
+        if(this.the_node_is_not_a_leaf(data)){
+            //recursive draw the tree node
+            data.values.forEach((d, index)=>{
+                height_of_current_node += this.draw_inner_node(x + this.blockw, y + height_of_current_node, d, parent+'_'+data.key);
+            });
+        }else{
+            //the leaf node
+            height_of_current_node = this.blockh;
+            //record a line of program's location.
+            this.lineLocation[data.key] = y;
+        }
+       
+        this.draw_node(x, y, height_of_current_node, this.blockw, data);
+        return height_of_current_node;
+    }
+
+    draw_node(x, y, h, w, d){
+
+        this.svg.selectAll('.treenode_'+d.key).data([d]).enter().append('rect')
+            .attr('width', w)
+            .attr('height', h)
+            .attr('x', x)
+            .attr('y', y)
+            .attr('rx', 5)
+            .attr('ry', 5)
+            .on('click', function(data){
+
+                let isnum = /^\d+$/.test(data.key);
+
+                if(isnum){
+                    d3.selectAll('.tree_node')
+                    .classed('tree_node', true)
+                    .classed('tree_node_highlight', false);
+                
+                    d3.select(this).classed('tree_node_highlight', true);
+                    publish('SOURCECODE_HIGHLIGHT', {'line':data.key});
+                }
+            })
+            .classed('tree_node', true);
+
+        this.svg.selectAll('.treetext_'+d.key).data([d]).enter().append('text')
+            .text(d=>d.key)
+            .attr('x', (d, i)=>{
+                return x + w / 2;
+            })
+            .attr('y', (d, i)=>{
+                return y + h / 2;
+            })
+            .classed('programTreeView_text', true)
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'central')
+            .style('font-size', (d, i, node)=>{
+                let labelWidth = node[i].getComputedTextLength();
+                if (labelWidth < this.blockw) {
+                    return null;
+                }
+                return ((this.blockw - 4) / labelWidth) + 'em';
+            })
+            .style('pointer-events', 'none');            
+    }
+
+    the_node_is_not_a_leaf(data){
+        //check whether the child node is DUE, SDC, or Masked
+        let outcome_category = new Set(['DUE', 'SDC', 'Masked']);
+        return 'key' in data.values[0] && !(outcome_category.has(data.values[0].key));
     }
 
     setTimerChangeEvent(x1, x2, current){
 
-        for(let key in this.variableViewBucket){
-            this.variableViewBucket[key].setTimerStep(current);
-        }
+        //for(let key in this.variableViewBucket){
+        //    this.variableViewBucket[key].setTimerStep(current);
+        //}
         
         this.drawExecutionLineChart(x1, x2, current);
         this.timer.updateLenLocation(current);
         publish('SOURCECODE_HIGHLIGHT', this.propagationData.getProgramCurrentExecutedLine(current));
     }
 
-    setData(msg, data){
+    //get the random fault injection data information.
+    setSummaryData(msg, data){
+        console.log(msg);
+        this.propagationData.setSummaryData(data);
+    }
+
+    setErrorRunData(msg, data){
+        console.log(msg);
         this.init(data);
         this.draw();
     }
 
     setGoldenRunData(msg, data){
+        console.log(msg);
         this.propagationData.setGoldenRunData(data);
     }
 
@@ -181,7 +293,8 @@ class ErrorPropagationView extends BasicView{
                 return this.timer.left_time_axis(d[1]);
             })
             .attr('y', (d)=>{
-                return this.variableViewBucket[d[0][0]].getY() + 3;
+                return this.lineLocation[d[0][0].split(':')[0]] + 5;
+                //return this.variableViewBucket[d[0][0]].getY() + 3;
             })
             .attr('width', step_w)
             .attr('height', Math.min(step_w, this.blockh))
@@ -202,7 +315,8 @@ class ErrorPropagationView extends BasicView{
                 return this.timer.right_time_axis(d[1]);
             })
             .attr('y', (d)=>{
-                return this.variableViewBucket[d[0][0]].getY() + 3;
+                return this.lineLocation[d[0][0].split(':')[0]] + 5;
+                //return this.variableViewBucket[d[0][0]].getY() + 3;
             })
             .attr('width', step_w)
             .attr('height', Math.min(step_w, this.blockh))

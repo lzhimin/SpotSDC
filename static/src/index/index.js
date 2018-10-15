@@ -20,8 +20,10 @@ myLayout.registerComponent('ErrorPropagationView', function(container, state){
 
     epv = new ErrorPropagationView(container);
     
-    fetchGoldenSimulationData()
-    subscribe('SINGLE_SIMULATION', epv.setData.bind(epv));
+    fetchGoldenSimulationData();
+
+    subscribe('DATASET', epv.setSummaryData.bind(epv));
+    subscribe('SINGLE_SIMULATION', epv.setErrorRunData.bind(epv));
     subscribe('SINGLE_SIMULATION_GOLDEN', epv.setGoldenRunData.bind(epv));
 });
 
