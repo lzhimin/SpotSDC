@@ -105,7 +105,7 @@ class ProgramTreeData{
         });
 
         //extract the impact factor for each location.
-        let output_golden = 3.477474097e-07;
+        //let output_golden = 3.477474097e-07;
         let bucket = [];
         this.impact_factors = [];
 
@@ -121,7 +121,7 @@ class ProgramTreeData{
                     bucket.push(0);
                 }
                 else{
-                    bucket.push(Math.abs((+this.data[i].diffnormr - output_golden)/+this.data[i].out_xor));
+                    bucket.push(Math.abs((+this.data[i].diffnormr)/+this.data[i].out_xor));
                 }
             }
         }

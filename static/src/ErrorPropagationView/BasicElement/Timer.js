@@ -15,12 +15,10 @@ class Timer{
         this.trigger_rect_h = this.height;
 
         //len's gap
-        this.len_gap = 0;
+        this.len_gap = 30;
 
         this.current_time_step = 0;
         this.len_width = 50;//the size of len need to be bigger than 10
-        this.len_x1 = this.current_time_step - Math.floor(this.len_width/2);
-        this.len_x2 = this.current_time_step + Math.floor(this.len_width/2);
     }
 
     getCurrentTimeStep(){
@@ -45,8 +43,8 @@ class Timer{
 
     setCurrentTimeStep(step){
         this.updateLenLocation(step);
-        this.trigger_rect.attr('x', this.axis_x(this.len_x1))
-        this.trigger_rect_resize_element.attr('x', this.axis_x(this.len_x1)+this.trigger_rect_w);       
+        this.trigger_rect.attr('x', this.axis_x(this.current_time_step))
+        this.trigger_rect_resize_element.attr('x', this.axis_x(this.current_time_step)+this.trigger_rect_w);       
     }
 
     setRelativeData(data){
@@ -55,6 +53,10 @@ class Timer{
 
     setAbsoluteError(data){
         this.absoluteError = data;
+    }
+
+    setImpactFactor(factors){
+        this.impactfactor = factors;
     }
 
     setX(x){
@@ -67,16 +69,15 @@ class Timer{
 
     setWidth(w){
         this.width = w;
-
-        this.lenPart1_right = this.x + this.width/2  - this.len_gap/2;
-        this.lenPart2_left = this.x + this.width /2 + this.len_gap/2;
     }
 
     draw(){
 
         this.axis_x = d3.scaleLinear().range([this.x, this.x + this.width]).domain([0, this.time]);
         this.axis_y = d3.scaleLinear().range([this.y, this.y - this.height]).domain([Math.min(0, d3.min(this.absoluteError, (d)=>{return d[1];})), Math.max(1, d3.max(this.absoluteError, (d)=>{return d[1];}))]);//relative error the value scale from 0~1
-        this.trigger_rect_w = this.axis_x(this.len_width) - this.axis_x(0);
+        this.axis_y_impact_factor = d3.scaleLinear().range([this.y, this.y - this.height]).domain(d3.extent(this.impactfactor))
+        
+        this.trigger_rect_w = this.axis_x(this.len_gap) - this.axis_x(0);
 
         this.svg.append('g').attr('class','axis axis--x')
             .attr("transform", "translate(0,"+ this.y + ")")
@@ -86,14 +87,27 @@ class Timer{
             .attr("transform", "translate("+ (this.x - 5) + ", 0)")
             .call(d3.axisLeft(this.axis_y).ticks(4));
 
+        this.svg.append('g').attr('class', 'axis axis-y')
+            .attr('transform', 'translate('+ (this.x + this.width) + ', 0)')
+            .call(d3.axisRight(this.axis_y_impact_factor).ticks(4));
+
         this.linefunc = d3.line().x((d, i)=>{return this.axis_x(i);}).y((d, i)=>{return this.axis_y(d[1]);}).curve(d3.curveStepAfter);
+        this.impactlinefunc = d3.line().x((d, i)=>{return this.axis_x(i);}).y((d, i)=>{return this.axis_y_impact_factor(d);}).curve(d3.curveStepAfter);
+
         this.relativeErrorPath = this.svg.append('path')
             .datum(this.absoluteError)
             .classed('timer_error_linechart_line', true)
             .attr("fill", "none")
             .attr('d', this.linefunc);
+        
+         this.impactFactorPath = this.svg.append('path')
+            .datum(this.impactfactor)
+            //.classed('timer_error_linechart_line', true)
+            .style('stroke', 'orange')
+            .attr("fill", "none")
+            .attr('d', this.impactlinefunc);
 
-        this.trigger_rect = this.svg.append('rect').datum(this.current_time_step - Math.floor(this.len_width/2))
+        this.trigger_rect = this.svg.append('rect').datum(this.current_time_step)
         .attr('x', (d)=>{
             return this.axis_x(d);
         })
@@ -103,20 +117,20 @@ class Timer{
         .classed('Timer_trigger', true)
         .call(d3.drag()
             .on('drag', (d)=>{
-                if(this.axis_x.invert(d3.event.x) < - Math.floor(this.len_width/2) || (this.axis_x.invert(d3.event.x + this.trigger_rect_w/2) > this.time))
+                if(this.axis_x.invert(d3.event.x) > this.time || this.axis_x.invert(d3.event.x) <= 0)
                     return;
 
                 this.trigger_rect.attr('x', d3.event.x);
-                this.updateLenLocation(Math.floor(this.axis_x.invert(d3.event.x)) + Math.floor(this.len_width/2));
+                this.updateLenLocation(Math.floor(this.axis_x.invert(d3.event.x)));
                 
                 this.trigger_rect_resize_element.attr('x', d3.event.x + this.trigger_rect_w);
                 //call back function.
-                this.callback(this.len_x1, this.len_x2, this.current_time_step);
+                this.callback(this.current_time_step);
                 //this.draw_select_time_intervel();
             })
         );
 
-        this.trigger_rect_resize_element = this.svg.append('rect').datum(this.current_time_step - Math.floor(this.len_width/2))
+        this.trigger_rect_resize_element = this.svg.append('rect').datum(this.current_time_step)
         .attr('x', (d)=>{
             return this.axis_x(d) + this.trigger_rect_w;
         })
@@ -134,13 +148,13 @@ class Timer{
             let extend_w = d3.event.x - trigger_rect_x;
 
             this.trigger_rect_resize_element.attr('x', d3.event.x);
-            this.trigger_rect.attr('x', trigger_rect_x -  (extend_w - this.trigger_rect_w)/2)
+            this.trigger_rect.attr('x', trigger_rect_x - (extend_w - this.trigger_rect_w)/2)
             .attr('width',  extend_w);
             this.trigger_rect_w = extend_w;
 
         }));
 
-        this.trigger_text = this.svg.selectAll('.time_trigger_annotation_text').data([this.len_x1, this.len_x2])
+        this.trigger_text = this.svg.selectAll('.time_trigger_annotation_text').data([this.current_time_step, this.current_time_step + this.len_gap])
         .enter()
         .append('text')
         .text(d=>d)
@@ -173,108 +187,88 @@ class Timer{
     }
 
     draw_select_time_intervel(){
-        this.left_time_axis = d3.scaleLinear().range([this.x, this.lenPart1_right]).domain([this.len_x1, this.current_time_step-1]);
-        this.right_time_axis = d3.scaleLinear().range([this.lenPart2_left, this.x + this.width]).domain([this.current_time_step + 1, this.len_x2]);
+        this.selected_time_axis = d3.scaleLinear().range([this.x, this.x + this.width]).domain([this.current_time_step, this.current_time_step + this.len_gap]);
 
-        let linefuncLeft = d3.line().y((d)=>{
+        let linefunc = d3.line().y((d)=>{
             return this.axis_y(d[0][1]) + 100;
         }).x((d)=>{
-            return this.left_time_axis(d[1]);
+            return this.selected_time_axis(d[1]);
         }).curve(d3.curveStepAfter);
 
-        let linefuncRight = d3.line().y((d)=>{
-            return this.axis_y(d[0][1]) + 100;
-        }).x((d)=>{
-            return this.right_time_axis(d[1]);
+
+        let impactlinefunc = d3.line().y((d)=>{
+            return this.axis_y_impact_factor(d[0]) + 100;
+        }).x((d, i)=>{
+            return this.selected_time_axis(d[1]);
         }).curve(d3.curveStepAfter);
 
-        if(this.selected_time_x_right_axis_g == undefined){
-            this.selected_time_x_left_axis_g = this.svg.append('g');
-            this.selected_time_x_left_axis_g.attr('class','axis axis--x')
+        if(this.selected_time_axis_g == undefined){
+            this.selected_time_axis_g = this.svg.append('g');
+            this.selected_time_axis_g.attr('class','axis axis--x')
                 .attr("transform", "translate(0,"+ (this.y + 100) + ")")
-                .call(d3.axisBottom(this.left_time_axis).ticks(10));
-
-            this.selected_time_x_right_axis_g = this.svg.append('g');
-            this.selected_time_x_right_axis_g.attr('class','axis axis--x')
-                .attr("transform", "translate(0,"+ (this.y + 100) + ")")
-                .call(d3.axisBottom(this.right_time_axis).ticks(10));
+                .call(d3.axisBottom(this.selected_time_axis).ticks(Math.min(this.len_gap, 20)));
             
-            this.selected_time_y_right_axis_g = this.svg.append('g');
-            this.selected_time_y_right_axis_g.attr('class', 'axis axis--y')
+            this.selected_time_y_axis_g = this.svg.append('g');
+            this.selected_time_y_axis_g.attr('class', 'axis axis--y')
                 .attr('transform', "translate("+(this.x + this.width)+","+ (this.y - 15) + ")")
                 .call(d3.axisRight(this.axis_y).ticks(4));
 
-            this.selected_time_right_path_g = this.svg.append('g');
-            this.selected_time_right_path_g.append('path')
+            this.selected_time_path_g = this.svg.append('g');
+            this.selected_time_path_g.append('path')
             .datum(()=>{
                 let data = [];
-                for(let i = this.current_time_step+1; i <= this.len_x2 && i < this.absoluteError.length; i++){
-                    if(i < 0)
-                        data.push([['undefine',0], i]);
-                    else
+                for(let i = this.current_time_step + 1; i <= this.current_time_step + this.len_gap && i < this.absoluteError.length; i++){
                         data.push([this.absoluteError[i], i]);
                 }
                 return data;
             })
             .classed('timer_error_linechart_line', true)
             .attr("fill", "none")
-            .attr('d', linefuncRight);
+            .attr('d', linefunc);
 
-            this.selected_time_left_path_g = this.svg.append('g');
-            this.selected_time_left_path_g.append('path')
+            this.selected_time_impact_path_g = this.svg.append('g');
+            this.selected_time_impact_path_g.append('path')
             .datum(()=>{
                 let data = [];
-                for(let i = this.len_x1; i <this.current_time_step && i < this.absoluteError.length; i++){
-                    if(i < 0)
-                        data.push([['undefine',0], i]);
-                    else
-                        data.push([this.absoluteError[i], i]);
+                for(let i = this.current_time_step + 1; i <= this.current_time_step + this.len_gap && i < this.absoluteError.length; i++){
+                        data.push(this.impactfactor[i]);
                 }
                 return data;
             })
-            .classed('timer_error_linechart_line', true)
+            .style('stroke', 'orange')
             .attr("fill", "none")
-            .attr('d', linefuncLeft);
+            .attr('d', this.impactlinefunc);
         }
         else{
-            this.selected_time_x_right_axis_g.call(d3.axisBottom(this.right_time_axis).ticks(10));
-            this.selected_time_x_left_axis_g.call(d3.axisBottom(this.left_time_axis).ticks(10));
+            this.selected_time_axis_g.call(d3.axisBottom(this.selected_time_axis).ticks(Math.min(this.len_gap, 20)));
 
-            this.selected_time_right_path_g.remove();
-            this.selected_time_right_path_g = this.svg.append('g');
-            this.selected_time_right_path_g.append('path')
+            this.selected_time_path_g.remove();
+            this.selected_time_path_g = this.svg.append('g');
+            this.selected_time_path_g.append('path')
             .datum(()=>{
                 let data = [];
-                for(let i = this.current_time_step+1; i <= this.len_x2 && i < this.absoluteError.length; i++){
-                    if(i < 0){
-                        data.push[['undefine', 0], i];
-                    }
-                    else{
-                        data.push([this.absoluteError[i], i]);
-                    }
-                }
-                return data;
-            })
-            .classed('timer_error_linechart_line', true)
-            .attr("fill", "none")
-            .attr('d', linefuncRight);
-
-            this.selected_time_left_path_g.remove();
-            this.selected_time_left_path_g = this.svg.append('g');
-            this.selected_time_left_path_g.append('path')
-            .datum(()=>{
-                let data = [];
-                for(let i = this.len_x1; i <this.current_time_step && i < this.absoluteError.length; i++){
-                    if(i < 0)
-                        data.push([['undefine',0], i]);
-                    else
+                for(let i = this.current_time_step+1; i <= this.current_time_step + this.len_gap && i < this.absoluteError.length; i++){
                         data.push([this.absoluteError[i], i]);
                 }
                 return data;
             })
             .classed('timer_error_linechart_line', true)
             .attr("fill", "none")
-            .attr('d', linefuncLeft);
+            .attr('d', linefunc);
+
+            this.selected_time_impact_path_g.remove();
+            this.selected_time_impact_path_g = this.svg.append('g');
+            this.selected_time_impact_path_g.append('path')
+            .datum(()=>{
+                let data = [];
+                for(let i = this.current_time_step + 1; i <= this.current_time_step + this.len_gap && i < this.absoluteError.length; i++){
+                        data.push([this.impactfactor[i], i]);
+                }
+                return data;
+            })
+            .style('stroke', 'orange')
+            .attr("fill", "none")
+            .attr('d', impactlinefunc);
         }
         
         
@@ -328,15 +322,13 @@ class Timer{
 
     updateLenLocation(step){
         this.current_time_step = step;
-        this.len_x1 = this.current_time_step - Math.floor(this.len_width/2);
-        this.len_x2 = this.current_time_step + Math.floor(this.len_width/2);
 
         this.trigger_text
         .text((d,i)=>{
-            return i == 0? this.len_x1 : this.len_x2;
+            return i == 0? this.current_time_step : this.current_time_step + this.len_gap;
         })
         .attr('x', (d, i)=>{
-            return i == 0? this.axis_x(this.len_x1) : this.axis_x(this.len_x2);
+            return i == 0? this.axis_x(this.current_time_step) : this.axis_x(this.current_time_step + this.len_gap);
         });
         
         this.trigger_rect_cur.attr('transform',()=>{ 

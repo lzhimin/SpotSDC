@@ -15,7 +15,7 @@ class ErrorPropagationView extends BasicView{
         this.y = this.top_padding = 230;
         this.x = this.left_padding = 100;
         this.padding = 20;
-        this.step_size = 50;
+        this.step_size = 30;
         this.path_width = this.width - this.padding - this.blockw * 4.5;
         this.propagationData.setErrorRunData(data);
 
@@ -24,10 +24,10 @@ class ErrorPropagationView extends BasicView{
             .attr('width', this.width)
             .attr('height', this.height);
 
-        
         this.lineLocation = {};
 
         this.variableViewBucket = {};
+
         ///init each variable view's and data
         this.propagationData.seqVar.forEach((d, i)=>{
             let view = new SingleVariableView(this.svg, d);
@@ -45,6 +45,8 @@ class ErrorPropagationView extends BasicView{
         //timer step change event
         this.timer.setTimerStepChangeCallBack(this.setTimerChangeEvent.bind(this));
 
+        this.timer.setImpactFactor(this.propagationData.impactfactor);
+
         //controller 
         this.propagationController.binding();
         this.propagationController.set_change_Relative_And_Absolute_Option_callback(this.draw.bind(this));
@@ -55,26 +57,16 @@ class ErrorPropagationView extends BasicView{
 
         //clean svg
         this.svg.html('');
-
-        //for(let key in this.variableViewBucket){
-        //    this.variableViewBucket[key].setErrorOption(this.propagationController.getOption());
-        //    this.variableViewBucket[key].draw();
-        //    this.variableViewBucket[key].setOnClickEventListener(this.timer.setDisplayVariable.bind(this.timer));
-        //}
         
         //timer
         this.timer.setX(this.padding + this.blockw * 4);
         this.timer.setY(this.y - this.top_padding/2);
-        this.timer.setLengap(this.blockw);
+        //this.timer.setLengap(this.blockw);
         this.timer.setWidth(Math.floor(this.path_width/this.step_size) * this.step_size);
         this.timer.setRelativeData(this.propagationData.relativeError);
         this.timer.setAbsoluteError(this.propagationData.absoluteError);
         this.timer.draw();
-    
-        //draw dynamicFlow
-        this.drawExecutionLineChart(this.timer.len_x1, this.timer.len_x2, this.timer.current_time);
-        this.drawColorScale();
-        
+
         //if the propagation view is large than the computer screen view,
         //reset the height of svg 
         let currentheight = this.y + (this.variableViewBucket[this.propagationData.seqVar[0]].getRectHeight() + this.variableViewBucket[this.propagationData.seqVar[0]].getPadding()) * this.propagationData.seqVar.length;
@@ -83,6 +75,63 @@ class ErrorPropagationView extends BasicView{
         }
 
         this.draw_tree();
+
+        //draw dynamicFlow
+        this.drawExecutionLineChart();
+        this.drawColorScale();
+
+        //draw absolute error distribution histogram
+        this.draw_absolute_value_histogram();
+    }
+
+    draw_absolute_value_histogram(){
+        
+        let error_distribution = [];
+        //get absolute error distribution
+        this.propagationData.absoluteError.forEach((d)=>{
+            if(+d[1] < 1)
+                error_distribution.push(d[1]);
+            else
+                error_distribution.push(Math.log(d[1]));
+        });
+
+        let x_scale = d3.scaleLinear().domain(d3.extent(error_distribution)).range([50, 250]);
+        let bins = d3.histogram().domain(x_scale.domain()).thresholds(x_scale.ticks(10))(error_distribution);
+        let y_scale = d3.scaleLinear().domain(d3.extent(bins, (d)=>{
+            return d.length;
+        })).range([100, 0]);
+
+        let histogram = this.svg.append('g');
+        let bar = histogram.selectAll('.bar').data(bins).enter().append('g')
+            .attr('class', 'bar')
+            .attr('transform', (d)=>{
+                return 'translate('+ x_scale(d.x0)+','+y_scale(d.length)+')';
+            });
+        
+        bar.append('rect')
+            .attr('x', 1)
+            .attr('width', x_scale(bins[0].x1) - x_scale(bins[0].x0) - 1)
+            .attr('height', (d)=>{return 100 - y_scale(d.length);})
+            .style('fill', 'steelblue');
+
+        /*bar.append('text')
+            .attr('dy', '.75em')
+            .attr('y', 6)
+            .attr('x', (x_scale(bins[0].x1) - x_scale(bins[0].x0))/2)
+            .attr('text-anchor', 'middle')
+            .text((d)=>{return d3.format(",.0f")(d.length);});*/
+        
+        histogram.append('g')
+            .attr('class', 'axis axis--x')
+            .attr('transform', 'translate(0,' + 100 + ')')
+            .call(d3.axisBottom(x_scale));
+
+        histogram.append('g')
+            .attr('class', 'axis axis--y')
+            .attr('transform', 'translate(50,' + 0 + ')')
+            .call(d3.axisLeft(y_scale));
+
+        return 0;
     }
 
     draw_tree(){
@@ -184,13 +233,10 @@ class ErrorPropagationView extends BasicView{
         return 'key' in data.values[0] && !(outcome_category.has(data.values[0].key));
     }
 
-    setTimerChangeEvent(x1, x2, current){
+    setTimerChangeEvent(current){
 
-        //for(let key in this.variableViewBucket){
-        //    this.variableViewBucket[key].setTimerStep(current);
-        //}
-        
-        this.drawExecutionLineChart(x1, x2, current);
+        this.current_time_step = current;
+        this.drawExecutionLineChart();
         this.timer.updateLenLocation(current);
         publish('SOURCECODE_HIGHLIGHT', this.propagationData.getProgramCurrentExecutedLine(current));
     }
@@ -215,15 +261,14 @@ class ErrorPropagationView extends BasicView{
     update(step){
 
         let current_time = this.timer.getCurrentTimeStep();
-
         if(current_time + step > this.propagationData.goldenRun.length-1 || current_time + step < 0){
             return false;
         }
         else{
             current_time = current_time + step;
             this.timer.setCurrentTimeStep(current_time);
-            this.drawExecutionLineChart(this.timer.len_x1, this.timer.len_x2, this.timer.current_time_step);
-            this.setTimerChangeEvent(this.timer.len_x1, this.timer.len_x2, this.timer.current_time_step);
+            this.drawExecutionLineChart();
+            this.setTimerChangeEvent(this.timer.current_time_step);
             return true;
         }
     }
@@ -258,7 +303,7 @@ class ErrorPropagationView extends BasicView{
         .attr('dominant-baseline', 'central'); 
     }
 
-    drawExecutionLineChart(x1, x2, current){
+    drawExecutionLineChart(){
 
         let max = -Number.MAX_VALUE;
         for(let i  = 0; i < this.propagationData.absoluteError.length; i++){
@@ -268,33 +313,23 @@ class ErrorPropagationView extends BasicView{
         let temp_colorscale = d3.scaleLinear().domain([0, max]).range([0,1]).clamp(true);
 
         let step_w = Math.floor(this.path_width/this.step_size);
-        let left_items = [];
-        let right_items = [];
+        let items = []
 
-        for(let i = x1; i < current && i < this.propagationData.absoluteError.length; i++){  
-            if(i < 0)
-                continue
-            else
-                left_items.push([this.propagationData.absoluteError[i], i]);
-        }
-
-        for(let i = current; i < x2 && i < this.propagationData.absoluteError.length; i++){
-            right_items.push([this.propagationData.absoluteError[i], i]);
+        for(let i = this.current_time_step; i < this.current_time_step + this.timer.len_gap && i < this.propagationData.absoluteError.length; i++){   
+           items.push([this.propagationData.absoluteError[i], i]);
         }
 
         if(this.excutionLineChart_g != undefined)
             this.excutionLineChart_g.remove();
         this.excutionLineChart_g = this.svg.append('g');
 
-        //left rect
-        this.excutionLineChart_g.selectAll('.DynamicFlowPath_Leftrect').data(left_items).enter()
+        this.excutionLineChart_g.selectAll('.DynamicFlowPath_rect').data(items).enter()
             .append('rect')
             .attr('x', (d)=>{
-                return this.timer.left_time_axis(d[1]);
+                return this.timer.selected_time_axis(d[1]);
             })
             .attr('y', (d)=>{
-                return this.lineLocation[d[0][0].split(':')[0]] + 5;
-                //return this.variableViewBucket[d[0][0]].getY() + 3;
+                return this.lineLocation[d[0][0].split(':')[0]];
             })
             .attr('width', step_w)
             .attr('height', Math.min(step_w, this.blockh))
@@ -303,28 +338,6 @@ class ErrorPropagationView extends BasicView{
             })
             .attr('fill-opacity', (d)=>{
                 return d[0][1]!=0?1:0;
-            })
-            .style('stroke', 'gray')
-            .style('stroke-opacity', 0.5)
-            .style('stroke-width', '1px');
-        
-        //rigth rect
-        this.excutionLineChart_g.selectAll('.DynamicFlowPath_rightrect').data(right_items).enter()
-            .append('rect')
-            .attr('x', (d)=>{
-                return this.timer.right_time_axis(d[1]);
-            })
-            .attr('y', (d)=>{
-                return this.lineLocation[d[0][0].split(':')[0]] + 5;
-                //return this.variableViewBucket[d[0][0]].getY() + 3;
-            })
-            .attr('width', step_w)
-            .attr('height', Math.min(step_w, this.blockh))
-            .attr('fill', (d)=>{
-                return d[0][1] != 1 ? d3.interpolateOrRd(temp_colorscale(d[0][1])):'white';
-            })
-            .attr('fill-opacity', (d)=>{
-                return d[0][1] != 0 ? 1:0;
             })
             .style('stroke', 'gray')
             .style('stroke-opacity', 0.5)
