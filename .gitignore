@@ -1,14 +1,3 @@
-node_modules
-lib
-dist
+static/data/cg_simulation/*
 
-#logs
-logs
-*.log
-npm-debug.log*
-
-# Runtime data
-pids
-*.pid
-
-.DS_Store
+ErrorVis_Poster*
