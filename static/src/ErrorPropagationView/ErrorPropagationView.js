@@ -105,7 +105,7 @@ class ErrorPropagationView extends BasicView{
         let bar = histogram.selectAll('.bar').data(bins).enter().append('g')
             .attr('class', 'bar')
             .attr('transform', (d)=>{
-                return 'translate('+ x_scale(d.x0)+','+y_scale(d.length)+')';
+                return 'translate('+ x_scale(d.x0)+','+(y_scale(d.length)+50)+')';
             });
         
         bar.append('rect')
@@ -113,22 +113,15 @@ class ErrorPropagationView extends BasicView{
             .attr('width', x_scale(bins[0].x1) - x_scale(bins[0].x0) - 1)
             .attr('height', (d)=>{return 100 - y_scale(d.length);})
             .style('fill', 'steelblue');
-
-        /*bar.append('text')
-            .attr('dy', '.75em')
-            .attr('y', 6)
-            .attr('x', (x_scale(bins[0].x1) - x_scale(bins[0].x0))/2)
-            .attr('text-anchor', 'middle')
-            .text((d)=>{return d3.format(",.0f")(d.length);});*/
         
         histogram.append('g')
             .attr('class', 'axis axis--x')
-            .attr('transform', 'translate(0,' + 100 + ')')
+            .attr('transform', 'translate(0,' + 150 + ')')
             .call(d3.axisBottom(x_scale));
 
         histogram.append('g')
             .attr('class', 'axis axis--y')
-            .attr('transform', 'translate(50,' + 0 + ')')
+            .attr('transform', 'translate(50,' + 50 + ')')
             .call(d3.axisLeft(y_scale));
 
         return 0;
