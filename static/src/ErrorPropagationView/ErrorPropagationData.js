@@ -9,7 +9,7 @@ class ErrorPropagationData{
         this.summarydata = data;
 
         let values = d3.nest();
-        
+
         values.key(function (d) {
             return d.Function;
         }).key(function (d) {
@@ -34,6 +34,8 @@ class ErrorPropagationData{
         this.relativeError = this.parseData_relativeError(data);
 
         this.absoluteError = this.parseData_AbosluteError(data);
+
+        this.filteredAbsolutedError =  this.absoluteError.slice();
     }
 
     setGoldenRunData(data){
@@ -42,6 +44,24 @@ class ErrorPropagationData{
 
     setImpactFactor(msg, data){
         this.impactfactor = data;
+    }
+
+    setFilterAbsoluteError(x1, x2){
+
+        this.filteredAbsolutedError = [];
+        this.absoluteError.forEach((d)=>{
+            let error = 0;
+            if(+d[1] < 1)
+                error = d[1];
+            else
+                error = Math.log(d[1]);
+            
+            if(error >= x1 && error <= x2){
+                this.filteredAbsolutedError.push(d);
+            }else{
+                this.filteredAbsolutedError.push([d[0], 0]);
+            }
+        });
     }
 
     getGolden_Error_SequenceValue(lineVar){

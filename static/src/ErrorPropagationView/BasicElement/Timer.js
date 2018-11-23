@@ -83,7 +83,7 @@ class Timer{
             .attr("transform", "translate(0,"+ this.y + ")")
             .call(d3.axisBottom(this.axis_x).ticks(20));
         
-        this.svg.append('g').attr('class','axis axis--y')
+        this.axis_y_axis = this.svg.append('g').attr('class','axis axis--y')
             .attr("transform", "translate("+ (this.x - 5) + ", 0)")
             .call(d3.axisLeft(this.axis_y).ticks(4));
 
@@ -102,7 +102,6 @@ class Timer{
         
          this.impactFactorPath = this.svg.append('path')
             .datum(this.impactfactor)
-            //.classed('timer_error_linechart_line', true)
             .style('stroke', 'orange')
             .attr("fill", "none")
             .attr('d', this.impactlinefunc);
@@ -184,6 +183,22 @@ class Timer{
 
         //timer series lens
         this.draw_select_time_intervel();
+    }
+
+    redraw(){
+
+        this.axis_x = d3.scaleLinear().range([this.x, this.x + this.width]).domain([0, this.time]);
+        this.axis_y = d3.scaleLinear().range([this.y, this.y - this.height]).domain([Math.min(0, d3.min(this.absoluteError, (d)=>{return d[1];})), Math.max(1, d3.max(this.absoluteError, (d)=>{return d[1];}))]);//relative error the value scale from 0~1
+        
+        this.axis_y_axis.call(d3.axisLeft(this.axis_y).ticks(4));
+        this.linefunc = d3.line().x((d, i)=>{return this.axis_x(i);}).y((d, i)=>{return this.axis_y(d[1]);}).curve(d3.curveStepAfter);
+        
+        this.relativeErrorPath.remove();
+        this.relativeErrorPath = this.svg.append('path')
+        .datum(this.absoluteError)
+        .classed('timer_error_linechart_line', true)
+        .attr("fill", "none")
+        .attr('d', this.linefunc);
     }
 
     draw_select_time_intervel(){

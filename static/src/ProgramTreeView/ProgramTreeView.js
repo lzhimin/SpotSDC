@@ -250,7 +250,7 @@ class ProgramTreeView extends BasicView{
                 return ratio_chart_x + this.stackbar_width/1.5;
             })
             .attr('y', (d, i)=>{
-                return this.top_padding - 140 + i * 20 + 7.5;
+                return this.top_padding - 180 + i * 20 + 7.5;
             })
             .attr('dominant-baseline', 'central')
             .style('font-size', 12);
@@ -266,7 +266,7 @@ class ProgramTreeView extends BasicView{
                 return ratio_chart_x + this.stackbar_width;
             })
             .attr('y', (d, i)=>{
-                return this.top_padding - 140 + i * 20;
+                return this.top_padding - 180 + i * 20;
             })
             .attr('width', 15)
             .attr('height', 15)

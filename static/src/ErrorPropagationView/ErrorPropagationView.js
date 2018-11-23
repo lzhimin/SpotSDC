@@ -87,6 +87,7 @@ class ErrorPropagationView extends BasicView{
     draw_absolute_value_histogram(){
         
         let error_distribution = [];
+
         //get absolute error distribution
         this.propagationData.absoluteError.forEach((d)=>{
             if(+d[1] < 1)
@@ -95,8 +96,8 @@ class ErrorPropagationView extends BasicView{
                 error_distribution.push(Math.log(d[1]));
         });
 
-        let x_scale = d3.scaleLinear().domain(d3.extent(error_distribution)).range([50, 250]);
-        let bins = d3.histogram().domain(x_scale.domain()).thresholds(x_scale.ticks(10))(error_distribution);
+        this.x_scale = d3.scaleLinear().domain(d3.extent(error_distribution)).range([50, 250]);
+        let bins = d3.histogram().domain(this.x_scale.domain()).thresholds(this.x_scale.ticks(10))(error_distribution);
         let y_scale = d3.scaleLinear().domain(d3.extent(bins, (d)=>{
             return d.length;
         })).range([100, 0]);
@@ -105,26 +106,52 @@ class ErrorPropagationView extends BasicView{
         let bar = histogram.selectAll('.bar').data(bins).enter().append('g')
             .attr('class', 'bar')
             .attr('transform', (d)=>{
-                return 'translate('+ x_scale(d.x0)+','+(y_scale(d.length)+50)+')';
+                return 'translate('+ this.x_scale(d.x0)+','+(y_scale(d.length)+50)+')';
             });
         
         bar.append('rect')
             .attr('x', 1)
-            .attr('width', x_scale(bins[0].x1) - x_scale(bins[0].x0) - 1)
+            .attr('width', this.x_scale(bins[0].x1) - this.x_scale(bins[0].x0) - 1)
             .attr('height', (d)=>{return 100 - y_scale(d.length);})
             .style('fill', 'steelblue');
         
         histogram.append('g')
             .attr('class', 'axis axis--x')
             .attr('transform', 'translate(0,' + 150 + ')')
-            .call(d3.axisBottom(x_scale));
+            .call(d3.axisBottom(this.x_scale));
 
         histogram.append('g')
             .attr('class', 'axis axis--y')
             .attr('transform', 'translate(50,' + 50 + ')')
             .call(d3.axisLeft(y_scale));
 
+        var brush = d3.brushX().extent([[50, 50], [250, 150]])
+        .on('start brush end',  brushevent.bind(this));
+
+        function brushevent(){
+            let x1, x2;
+            if(d3.event.selection == null){
+                x1 = this.x_scale.invert(50);
+                x2 = this.x_scale.invert(250);
+            }else{
+                x1 = this.x_scale.invert(d3.event.selection[0]);
+                x2 = this.x_scale.invert(d3.event.selection[1]);
+                
+            }
+            this.brushFileterCallback(x1, x2);
+        }
+            
+        
+        histogram.append('g').attr('class', 'brush')
+        .call(brush);
+
         return 0;
+    }
+
+    brushFileterCallback(x1, x2){
+        this.propagationData.setFilterAbsoluteError(x1, x2);
+        this.timer.setAbsoluteError(this.propagationData.filteredAbsolutedError);
+        this.timer.redraw();
     }
 
     draw_tree(){
@@ -299,8 +326,8 @@ class ErrorPropagationView extends BasicView{
     drawExecutionLineChart(){
 
         let max = -Number.MAX_VALUE;
-        for(let i  = 0; i < this.propagationData.absoluteError.length; i++){
-            max = Math.max(this.propagationData.absoluteError[i][1], max);
+        for(let i  = 0; i < this.propagationData.filteredAbsolutedError.length; i++){
+            max = Math.max(this.propagationData.filteredAbsolutedError[i][1], max);
         }
 
         let temp_colorscale = d3.scaleLinear().domain([0, max]).range([0,1]).clamp(true);
@@ -309,7 +336,7 @@ class ErrorPropagationView extends BasicView{
         let items = []
 
         for(let i = this.current_time_step; i < this.current_time_step + this.timer.len_gap && i < this.propagationData.absoluteError.length; i++){   
-           items.push([this.propagationData.absoluteError[i], i]);
+           items.push([this.propagationData.filteredAbsolutedError[i], i]);
         }
 
         if(this.excutionLineChart_g != undefined)
