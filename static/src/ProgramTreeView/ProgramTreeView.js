@@ -117,7 +117,7 @@ class ProgramTreeView extends BasicView{
             .attr('y', y)
             .attr('rx', 5)
             .attr('ry', 5)
-            .on('click', function(data){
+            .on('click', (data, i, node)=>{
 
                 let isnum = /^\d+$/.test(data.key);
 
@@ -126,8 +126,8 @@ class ProgramTreeView extends BasicView{
                     .classed('tree_node', true)
                     .classed('tree_node_highlight', false);
                 
-                    d3.select(this).classed('tree_node_highlight', true);
-                    publish('SOURCECODE_HIGHLIGHT', {'line':data.key});
+                    d3.select(node[0]).classed('tree_node_highlight', true);
+                    publish('SOURCECODE_HIGHLIGHT', {'line':data.key, 'function': this.programtreedata.getFunctionName(data.key)});
                 }
             })
             .classed('tree_node', true);

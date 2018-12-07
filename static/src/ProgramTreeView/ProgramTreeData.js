@@ -77,6 +77,17 @@ class ProgramTreeData{
         return this.pattern.length + 1;
     }
 
+    getFunctionName(line){
+
+        for(let i =0; i < this.data.length; i++){
+            if(line == this.data[i].Line){
+                return this.data[i].Function;
+            }
+        }
+
+        throw "Can't find the data relate to this line of code";
+    }
+
     parseDataProperty(){
         this.property = {'maxDiff':-Number.MAX_VALUE, 
                         'minDiff':Number.MAX_VALUE, 

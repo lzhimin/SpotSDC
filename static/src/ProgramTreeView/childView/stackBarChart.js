@@ -7,7 +7,8 @@ class StackBarChart extends standardChildView{
 
     init(){
         this.data.values.sort((a,b)=>{
-            return a.key > b.key;
+            if(a.key > b.key)return 1;
+            else return -1;
         });
 
         this.sum = 0.0;

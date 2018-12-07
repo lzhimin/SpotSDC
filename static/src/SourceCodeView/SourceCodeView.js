@@ -11,14 +11,18 @@ class SourceCodeView extends BasicView{
 
     draw(){
         d3.selectAll('#sourceCode_display li')
-        .style('background', (d, i)=>{
-            if(this.line_number.has((i+1)+''))
-                //return  'rgba(244, 66, 66,'+  this.colorscale(this.sdc_frequency[(i+1)+''])+')';
-                return d3.interpolateOrRd(this.colorscale(this.sdc_frequency[(i+1)+'']))
+        .on('click', (d, i)=>{
+            if( (i+1) in this.line_number_iter){
+                let k = 0;
+            }
         });
+        //.style('background', (d, i)=>{
+        //    if(this.line_number.has((i+1)+''))
+                //return  'rgba(244, 66, 66,'+  this.colorscale(this.sdc_frequency[(i+1)+''])+')';
+        //        return d3.interpolateOrRd(this.colorscale(this.sdc_frequency[(i+1)+'']))
+        //});
 
         if(this.sourceCodeVis == undefined){
-            
             this.VisWidth = $('#sourceCode_vis')[0].getBoundingClientRect().width,
 			this.VisHeight = $('#sourceCode_display')[0].getBoundingClientRect().height;
             this.sourceCodeVis_svg = d3.select('#sourceCode_vis').append('svg')
@@ -33,22 +37,24 @@ class SourceCodeView extends BasicView{
             this.sourceCodeVis_svg_g = this.sourceCodeVis_svg.append('g');
         }
 
-        //init heatmap
-        this.heatmap = [];
-        let linesnums = $('#sourceCode .linenums li');
-        for(let key in this.line_number_iter){
-            let data = this.line_number_iter[key];
-            let x = linesnums[key-1].getBoundingClientRect().x - this.VisWidth;
-            let y = linesnums[key-1].getBoundingClientRect().top - linesnums[0].getBoundingClientRect().top;
-            let width = this.VisWidth;
-            let height = linesnums[key-1].getBoundingClientRect().height;
-            
-            this.heatmap.push(new HeatMap1D(this.sourceCodeVis_svg_g, 0, y, width, height, data));
-        }
+        //set up the link event.
 
-        this.heatmap.forEach(d=>{
-			d.draw();
-		});
+        //init heatmap
+        //this.heatmap = [];
+        //let linesnums = $('#sourceCode .linenums li');
+        //for(let key in this.line_number_iter){
+        //    let data = this.line_number_iter[key];
+        //    let x = linesnums[key-1].getBoundingClientRect().x - this.VisWidth;
+        //    let y = linesnums[key-1].getBoundingClientRect().top - linesnums[0].getBoundingClientRect().top;
+        //    let width = this.VisWidth;
+        //    let height = linesnums[key-1].getBoundingClientRect().height;
+            
+        //    this.heatmap.push(new HeatMap1D(this.sourceCodeVis_svg_g, 0, y, width, height, data));
+        //}
+
+        //this.heatmap.forEach(d=>{
+		//	d.draw();
+		//});
     }
 
     setData(msg, data){
@@ -153,6 +159,12 @@ class SourceCodeView extends BasicView{
 
         //highlight
         d3.selectAll('#sourceCode_display li')
+        .style('background-color', (d, i)=>{
+            if(i == data.line -1)
+                return "rgb(150, 159, 255)";
+            else
+                return '';
+        })
         .style('list-style-image' ,(d, i)=>{
             if(i == +data.line-1)
                 return 'url("../static/src/resource/image/arrow.png")';
