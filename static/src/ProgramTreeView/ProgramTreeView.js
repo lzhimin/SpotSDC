@@ -16,6 +16,11 @@ class ProgramTreeView extends BasicView{
         this.colorscale = ['#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5','#08519c','#08306b'];
         
         this.viewoption = 'bitStackBarChart';
+
+        this.normalization = 'global';
+
+         //register event
+         subscribe('RESAMPLE', this.Resample.bind(this));
     }
 
     init(){
@@ -236,8 +241,24 @@ class ProgramTreeView extends BasicView{
             .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
             .call(d3.axisTop(this.stackbar_chart_axis).ticks(5));
 
-        //category annotation
+        //SDC frequency
+
+        if(this.stackbar_chart_text_above != undefined)
+            this.stackbar_chart_text_above.remove();
         
+        this.stackbar_chart_text_above = this.svg.append('g').append('text').text('SDC Ratio')
+            .attr('x', (d, i)=>{
+                return ratio_chart_x + this.stackbar_width/2;
+            })
+            .attr('y', (d, i)=>{
+                return this.top_padding - 45;
+            })
+            .attr('dominant-baseline', 'central')
+            .attr('text-anchor', 'middle')
+            .style('font-size', 12);
+        //SDC ratio
+
+        //category annotation
         if(this.stackbar_chart_text != undefined)
             this.stackbar_chart_text.remove();
         this.stackbar_chart_text = this.svg.append('g');
@@ -254,7 +275,8 @@ class ProgramTreeView extends BasicView{
             })
             .attr('dominant-baseline', 'central')
             .style('font-size', 12);
-
+        
+        //outcome color
         if(this.stackbar_chart_rect != undefined)
             this.stackbar_chart_rect.remove();
         this.stackbar_chart_rect = this.svg.append('g');
@@ -335,7 +357,18 @@ class ProgramTreeView extends BasicView{
                 this.bitHeatMapAnnotation_colorscale.attr('display', 'none');
             }
 
-            this.bitHeatMapAnnotation = this.svg.append('g').selectAll('.programTreeViewMenu_annotation').data(['sign', 'exponent', 'mantissa'])
+            this.bitHeatMapAnnotation = this.svg.append('g');
+            this.bitHeatMapAnnotation.append('text').text('Bit Outcome Distribution')
+            .attr('x', (d, i)=>{
+                return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / 2;
+            })
+            .attr('y', (d, i)=>{
+                return this.top_padding - 40;
+            })
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "central");
+
+            this.bitHeatMapAnnotation.selectAll('.programTreeViewMenu_annotation').data(['sign', 'exponent', 'mantissa'])
             .enter()
             .append('text')
             .text(d=>d)
@@ -375,7 +408,18 @@ class ProgramTreeView extends BasicView{
         }
         else if(this.viewoption == 'smart_bit_heatmap'){
             let lowestbit = this.programtreedata.getLowestProblemBit();
-            this.smartBitHeatMapAnnotation = this.svg.append('g').selectAll('.programTreeViewMenu_annotation').data(['sign', 'exponent', 'mantissa', '<'+lowestbit])
+            this.smartBitHeatMapAnnotation = this.svg.append('g')
+            this.smartBitHeatMapAnnotation.append('text').text('Bit Outcome Distribution')
+            .attr('x', (d, i)=>{
+                return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / 2;
+            })
+            .attr('y', (d, i)=>{
+                return this.top_padding - 40;
+            })
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "central");
+
+            this.smartBitHeatMapAnnotation.selectAll('.programTreeViewMenu_annotation').data(['sign', 'exponent', 'mantissa', '<'+lowestbit])
             .enter()
             .append('text')
             .text(d=>d)
@@ -452,6 +496,7 @@ class ProgramTreeView extends BasicView{
 
     updateStackChart(option){
         if(option == 'global'){
+            this.stackbar_chart_text_above.text('The Number of Fault Injections');
             let maxsize = 0;
             for(let key in  this.stackbar_bucket){
                 maxsize = Math.max(maxsize, this.stackbar_bucket[key].getExperimentCount());
@@ -465,6 +510,7 @@ class ProgramTreeView extends BasicView{
 
             this.stackbar_chart_axis.domain([0, maxsize]);
         }else if(option == 'local'){
+            this.stackbar_chart_text_above.text('SDC Ratio');
             for(let key in this.stackbar_bucket){
                 this.stackbar_bucket[key].setGlobalFlag(false);
                 this.stackbar_bucket[key].draw();
@@ -530,6 +576,14 @@ class ProgramTreeView extends BasicView{
 
     filterData(category, items){
         this.programtreedata.filterDataCallBack(category, items);
+        this.draw();
+    }
+
+    Resample(msg, data){
+        for(let i = 0; i < data.length; i++){
+            this.programtreedata.data.push(data[i]);
+        }
+        this.programtreedata.setData(this.programtreedata.data, this.programtreedata.pattern);
         this.draw();
     }
 }

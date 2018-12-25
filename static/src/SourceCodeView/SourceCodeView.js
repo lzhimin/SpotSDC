@@ -10,12 +10,6 @@ class SourceCodeView extends BasicView{
     }
 
     draw(){
-        d3.selectAll('#sourceCode_display li')
-        .on('click', (d, i)=>{
-            if( (i+1) in this.line_number_iter){
-                let k = 0;
-            }
-        });
         //.style('background', (d, i)=>{
         //    if(this.line_number.has((i+1)+''))
                 //return  'rgba(244, 66, 66,'+  this.colorscale(this.sdc_frequency[(i+1)+''])+')';

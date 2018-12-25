@@ -1,4 +1,4 @@
-class BitHeatMap extends standardChildView{
+class SampleView extends standardChildView{
 
     constructor(svg, x, y, width, height, data){
         super(svg, x, y, width, height, data);
@@ -24,6 +24,7 @@ class BitHeatMap extends standardChildView{
             this.g = undefined;
         }
     }
+
 
     draw(){
         this.hist = this.histogram2d();
@@ -56,8 +57,8 @@ class BitHeatMap extends standardChildView{
             return this.y + this.rect_h * (Math.floor(i / this.col));
         })
         .style('fill', (d, i)=>{
-            //return d == 0 ? 'white':this.get_local_color_scale(i, d);
-			return d == 0 ? 'white':this.get_global_color_scale(d);
+            return d == 0 ? 'white':this.get_local_color_scale(i, d);
+			//return d == 0 ? 'white':this.get_global_color_scale(d);
         })
         .on('click', (d, i)=>{
             publish('SUBSETDATA', d);
@@ -93,39 +94,7 @@ class BitHeatMap extends standardChildView{
 		.style('stroke', 'black')
 		.style('stroke-width', '1px')
 		.style('stroke-opacity', 0.4)
-        .style('stroke-dasharray', '5,5'); 
-
-        //draw sampling operation.
-        this.g.selectAll('path')
-        .data(['symbolCross'])
-        .enter()
-        .append('path')
-        .attr('transform', (d, i)=>{
-            return 'translate(' + (this.x + this.width + 10) + ','+ (this.y+this.height/2) +')';
-        })
-        .attr('d', (d)=>{
-            return d3.symbol().size(100).type(d3[d])();
-        })
-        .style('fill', 'gray')
-        .on('click', (d)=>{
-            this.info = this.getDataLocation();
-            this.resample = [];
-        
-            let callback = function(data){
-                this.sample = data.filter((d)=>{
-                    return d.Function == this.info.function && 
-                        d.Variable == this.info.variable &&
-                        d.Line == this.info.line;
-                });
-
-                this.InsertResampleData(this.sample);
-
-                publish('RESAMPLE', this.sample)
-            }
-
-            let filename = 
-            d3.csv('../static/data/cg_complete.csv').then(callback.bind(this));
-        });   
+		.style('stroke-dasharray', '5,5');   
     }
 
     setColormapColor(color){
@@ -190,21 +159,5 @@ class BitHeatMap extends standardChildView{
         }
 
         return hist;
-    }
-
-    getDataLocation(){
-        let item = this.data.values[0].values[0];
-        return {'function':item.Function, 'line':item.Line, 'variable':item.Variable};
-    }
-
-    InsertResampleData(data){
-        let sample = {'key':'resample','values':[]};
-
-        for(let i = 0; i < data.length; i++){
-            sample.values = data;
-        }
-
-        this.data.values.push(sample);
-        this.draw();
     }
 }
