@@ -108,12 +108,19 @@ class ProgramViewController{
     }
 
     bindingViewMenu(){
-        //binding view change event.
-        $('input:radio[name="view_radio"]').unbind();
-        $('input:radio[name="view_radio"]').change(()=>{
-            let option = $('input[name=view_radio]:checked').val();
+
+        $("#view_options").unbind();
+        $("#view_options").change(()=>{
+            let option = $("#view_options").val();
             this.viewchangecallback(option);
-        });
+        })
+
+        //binding view change event.
+        //$('input:radio[name="view_radio"]').unbind();
+        //$('input:radio[name="view_radio"]').change(()=>{
+        //    let option = $('input[name=view_radio]:checked').val();
+        //    this.viewchangecallback(option);
+        //});
     }
 
     bindingNormalizationMenu(){

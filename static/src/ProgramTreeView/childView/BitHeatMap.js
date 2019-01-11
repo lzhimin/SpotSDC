@@ -118,12 +118,21 @@ class BitHeatMap extends standardChildView{
                         d.Line == this.info.line;
                 });
 
+                //random sample 10%
+                let resample_set = [];
+
+                for(let i = 0; i < this.sample.length * 0.1; i++){
+                    let index = parseInt(Math.random() * this.sample.length);
+                    resample_set.push(this.sample[index])
+                }
+
+                this.sample = resample_set;
+
                 this.InsertResampleData(this.sample);
 
                 publish('RESAMPLE', this.sample)
             }
 
-            let filename = 
             d3.csv('../static/data/cg_complete.csv').then(callback.bind(this));
         });   
     }

@@ -1,3 +1,6 @@
+//import {SDCImpactDistribution} from "./childView/SDCImpactDistribution.js" 
+
+
 class ProgramTreeView extends BasicView{
 
     constructor(container){
@@ -45,6 +48,7 @@ class ProgramTreeView extends BasicView{
         this.value_heatmap_bucket = {};
         this.bitStackBarChart_bucket = {};
         this.valueStack_bucket = {};
+        this.SDC_Impact_dist_bucket = {};
 
         //this.callbackBinding();
 
@@ -178,6 +182,10 @@ class ProgramTreeView extends BasicView{
         this.impact_heatmap_bucket[parent+'_'+data.key] = new ImpactHeatmap(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxDiff(), this.programtreedata.getMinDiff());
         this.impact_heatmap_bucket[parent+'_'+data.key].setOutcomeColor(this.colorscale);
 
+        this.SDC_Impact_dist_bucket[parent+'_'+data.key] = new SDCImpactDistribution(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxDiff(), this.programtreedata.getMinDiff());
+        this.SDC_Impact_dist_bucket[parent+'_'+data.key].setOutcomeColor(this.colorscale);
+
+
         this.bitStackBarChart_bucket[parent+'_'+data.key] = new BitStackChart(this.svg, x, y, this.bitmap_width, this.blockh, data);
         this.bitStackBarChart_bucket[parent+'_'+data.key].setOutcomeColor(this.outcome_color);
         
@@ -196,13 +204,15 @@ class ProgramTreeView extends BasicView{
             this.bitStackBarChart_bucket[parent+'_'+data.key].draw();  
         else if(this.viewoption == 'value_stackChart')
             this.valueStack_bucket[parent+'_'+data.key].draw();  
+        else if(this.viewoption == "error_output_dist")
+            this.SDC_Impact_dist_bucket[parent+'_'+data.key].draw(); 
     }
 
     draw_menu(){
         
         //let x = this.x + this.programtreedata.getTreeHeight() * this.blockw + this.left_padding;
         let x = this.left_padding + this.blockw * 4 + this.padding;
-        let y = 100;
+        //let y = 100;
 
         //draw tree menu
         d3.select('#ProgramTree_Tree_Menu')
@@ -324,7 +334,7 @@ class ProgramTreeView extends BasicView{
         this.bitHeatMapAnnotation_colorscale.selectAll('.colorscale').data(colorscale).enter()
         .append('rect')
         .attr('x', (d, i)=>{
-            return this.left_padding + this.blockw * 4 + this.padding*2 + this.bitmap_width/3 + colorscale_w * i;
+            return this.left_padding + this.blockw * 4 + this.padding*2 + this.bitmap_width/5 + colorscale_w * i;
         })
         .attr('y', (d, i)=>{
             return this.top_padding - 85;
@@ -341,9 +351,9 @@ class ProgramTreeView extends BasicView{
         .text(d=>d)
         .attr('x', (d, i)=>{
             if(i == 0)
-                return  this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/3;
+                return  this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/5;
             else 
-                return this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/3 + colorscale_w * this.colorscale.length;
+                return this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/5 + colorscale_w * this.colorscale.length;
         })
         .attr('y', this.top_padding - 95)
         .attr('text-anchor', 'middle')
@@ -440,7 +450,7 @@ class ProgramTreeView extends BasicView{
             .attr("dominant-baseline", "central")
             .style('font-size', 10);
         }
-        else if(this.viewoption == 'value_heatmap' || this.viewoption == 'value_stackChart'){
+        /*else if(this.viewoption == 'value_heatmap' || this.viewoption == 'value_stackChart'){
             let x = this.left_padding + this.blockw * 4 + this.padding;
             let maxdiff = this.programtreedata.getMaxInput();
             let mindiff = this.programtreedata.getMinInput();
@@ -468,7 +478,7 @@ class ProgramTreeView extends BasicView{
             this.valueImpactHeatMapAnnotation.append('g').attr('class','axis axis--x')
                 .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
                 .call(d3.axisTop(x_axis).tickValues(d3.range(mindiff, maxdiff, (maxdiff - mindiff)/10)));
-        }
+        }*/
     }
 
     is_the_node_a_leaf(data){
@@ -570,7 +580,11 @@ class ProgramTreeView extends BasicView{
                 this.valueStack_bucket[key].draw();
             }
         }
-
+        else if(option == 'error_output_dist'){
+            for(let key  in this.SDC_Impact_dist_bucket){
+                this.SDC_Impact_dist_bucket[key].draw();
+            }
+        }
         this.draw_annotation_heatmap();
     }
 

@@ -57,14 +57,18 @@
 
     <div class='ProgramTreeViewMenu_div' id='ProgramTree_impact_chart_menu'>
         <div >
-            <label> view options </label><br>
-            <label style='font-weight:normal;'> <input type='radio' name='view_radio'  value='smart_bit_heatmap'> Smart Bit </label><br>
+            <label> View Options </label><br>
+            <select id="view_options">
+                <option value="smart_bit_heatmap"> Smart Bit</option>
+                <option value="bitStackBarChart" selected> Bit Outcome Dist. </option>
+                <option value="bit_heatmap"> Fault Injection Sample Dist. </option>
+                <option value="heatmap_impact"> SDC Impact Dist.</option>
+                <option value="error_output_dist"> Error Output Dist.</option>
+            </select><br>
+            <!--label style='font-weight:normal;'> <input type='radio' name='view_radio'  value='smart_bit_heatmap'> Smart Bit </label><br>
             <label style='font-weight:normal;'> <input type='radio' name='view_radio'  checked value='bitStackBarChart'> bitStack </label><br>
             <label style='font-weight:normal;'> <input type='radio' name='view_radio'  value='bit_heatmap'> Bit </label><br>
-            <!--label style='font-weight:normal;'> <input type='radio' name='view_radio'  value='value_heatmap'> Value </label><br-->
-            <!--label style='font-weight:normal;'> <input type='radio' name='view_radio'  value='value_stackChart'> ValueStack </label-->
-            <label style='font-weight:normal;'> <input type='radio' name='view_radio'  value='heatmap_impact'> Impact </label><br>
-            <label ></label>
+            <label style='font-weight:normal;'> <input type='radio' name='view_radio'  value='heatmap_impact'> Impact </label><br-->
         </div>
         
     </div>
