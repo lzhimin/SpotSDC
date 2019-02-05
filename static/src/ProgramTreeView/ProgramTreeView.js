@@ -47,6 +47,7 @@ class ProgramTreeView extends BasicView{
         this.impact_heatmap_bucket = {};
         this.value_heatmap_bucket = {};
         this.bitStackBarChart_bucket = {};
+        this.smart_bitStackBarChart_bucket = {};
         this.valueStack_bucket = {};
         this.SDC_Impact_dist_bucket = {};
 
@@ -56,22 +57,30 @@ class ProgramTreeView extends BasicView{
         d3.select('#ProgramTreeViewCanvas').html('');
         this.svg = d3.select('#ProgramTreeViewCanvas').append('svg')
             .attr('width', this.width)
-            .attr('height', this.height);
+            .attr('height', this.height + 80);
     }
 
     draw(){
 
         this.init();
         //reset all the content on canvas
+        this.draw_summary();
         this.draw_tree();
         this.draw_menu();
         this.draw_annotation();
     }
 
+    draw_summary(){
+        let x = this.left_padding + this.blockw * 4;
+        let y = this.top_padding;
+
+        this.draw_leaf_vis(x, y, this.programtreedata.getSummaryData(), "data_summary");        
+    }
+
     draw_tree(){
 
         let hierachicaldata = this.programtreedata.getHierachicalData();
-        let x = this.left_padding, y = this.top_padding, h=0;
+        let x = this.left_padding, y = this.top_padding + 80, h=0;
         let padding = 3;
 
         hierachicaldata.values.sort(function(a, b){
@@ -89,8 +98,8 @@ class ProgramTreeView extends BasicView{
         }
 
         //if the current svg is smaller than the current size of tree
-        if(this.height < this.top_padding + h + this.bottom_padding){
-            this.svg.attr('height', this.top_padding + h + this.bottom_padding);
+        if(this.height < this.top_padding + h + this.bottom_padding + 80){
+            this.svg.attr('height', this.top_padding + h + this.bottom_padding + 80);
         }
         this.draw_node(x, y, h - padding, this.blockw, hierachicaldata);
     }
@@ -182,12 +191,15 @@ class ProgramTreeView extends BasicView{
         this.impact_heatmap_bucket[parent+'_'+data.key] = new ImpactHeatmap(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxDiff(), this.programtreedata.getMinDiff());
         this.impact_heatmap_bucket[parent+'_'+data.key].setOutcomeColor(this.colorscale);
 
-        this.SDC_Impact_dist_bucket[parent+'_'+data.key] = new SDCImpactDistribution(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxDiff(), this.programtreedata.getMinDiff());
+        this.SDC_Impact_dist_bucket[parent+'_'+data.key] = new SDCImpactDistribution(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxSDCImpact(), this.programtreedata.getMinSDCImpact());
         this.SDC_Impact_dist_bucket[parent+'_'+data.key].setOutcomeColor(this.colorscale);
 
 
         this.bitStackBarChart_bucket[parent+'_'+data.key] = new BitStackChart(this.svg, x, y, this.bitmap_width, this.blockh, data);
         this.bitStackBarChart_bucket[parent+'_'+data.key].setOutcomeColor(this.outcome_color);
+      
+        this.smart_bitStackBarChart_bucket[parent+'_'+data.key] = new SmartValueBarChart(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getLowestProblemBit());
+        this.smart_bitStackBarChart_bucket[parent+'_'+data.key].setOutcomeColor(this.outcome_color);
         
         this.valueStack_bucket[parent+'_'+data.key] = new valueStack(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxDiff(), this.programtreedata.getMinDiff())
         this.valueStack_bucket[parent+'_'+data.key].setOutcomeColor(this.outcome_color);
@@ -196,7 +208,7 @@ class ProgramTreeView extends BasicView{
             this.bit_heatmap_bucket[parent+'_'+data.key].draw();
         else if(this.viewoption == 'smart_bit_heatmap')
             this.smart_bit_heatmap_bucket[parent+'_'+data.key].draw();
-        else if(this.viewoption == 'heatmap_impact')
+        else if(this.viewoption == 'error_output_dist')
             this.impact_heatmap_bucket[parent+'_'+data.key].draw();
         else if(this.viewoption == 'value_heatmap')
             this.value_heatmap_bucket[parent+'_'+data.key].draw();
@@ -204,8 +216,10 @@ class ProgramTreeView extends BasicView{
             this.bitStackBarChart_bucket[parent+'_'+data.key].draw();  
         else if(this.viewoption == 'value_stackChart')
             this.valueStack_bucket[parent+'_'+data.key].draw();  
-        else if(this.viewoption == "error_output_dist")
+        else if(this.viewoption == "SDC_impact_dist")
             this.SDC_Impact_dist_bucket[parent+'_'+data.key].draw(); 
+        else if(this.viewoption == "smart_bitStackBarChart")
+            this.smart_bitStackBarChart_bucket[parent+'_'+data.key].draw();
     }
 
     draw_menu(){
@@ -218,7 +232,7 @@ class ProgramTreeView extends BasicView{
         d3.select('#ProgramTree_Tree_Menu')
         .style('display', 'block')
         .style('position', 'absolute')
-        .style('top', this.top_padding + $('#ProgramTreeViewMenu').height() - 20)
+        .style('top', this.top_padding + $('#ProgramTreeViewMenu').height() + 60)
         .style('left', this.left_padding + this.blockw);
 
         d3.selectAll('.tree_attribute').style('width', this.blockw - 3);
@@ -238,12 +252,26 @@ class ProgramTreeView extends BasicView{
         .style('left', x + this.bitmap_width + this.padding_between_bit_stack);
     }
 
-    draw_annotation(){
-        this.draw_annotation_heatmap();
-        this.draw_annotation_stackchart();        
+    draw_annotation(x, y){
+        this.draw_annotation_heatmap(x, y);
+        this.draw_summary_annotation(x, y);
+        this.draw_annotation_stackchart(x, y);        
     }
 
-    draw_annotation_stackchart(){
+    draw_summary_annotation(x, y){
+        this.svg.append('g').append("text").text("Summary")
+            .attr('x', (d, i)=>{
+                return this.left_padding + this.blockw * 2 + this.padding * 2;
+            })
+            .attr('y', (d, i)=>{
+                return this.top_padding + 10;
+            })
+            .attr("dominant-baseline", "central")
+            .attr("text-anchor", "middle")
+            .style("font-size", 15);
+    }
+
+    draw_annotation_stackchart(x, y){
         //ratio
         let ratio_chart_x = this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width;
         this.stackbar_chart_axis = d3.scaleLinear().range([ratio_chart_x, ratio_chart_x + this.stackbar_width]).domain([0, 1]);
@@ -310,9 +338,8 @@ class ProgramTreeView extends BasicView{
 
     draw_annotation_heatmap(){
 
-        if(this.impactHeatmapAnnotation!=undefined){
+        if(this.impactHeatmapAnnotation!=undefined)
             this.impactHeatmapAnnotation.remove();
-        }
         
         if(this.bitHeatMapAnnotation != undefined)
             this.bitHeatMapAnnotation.remove();
@@ -360,9 +387,9 @@ class ProgramTreeView extends BasicView{
         .attr('dominant-baseline', 'central');
 
 
-        if(this.viewoption == 'bit_heatmap' || this.viewoption == 'bitStackBarChart'){
+        if(this.viewoption == 'bit_heatmap' || this.viewoption == 'smart_bitStackBarChart' || this.viewoption == 'bitStackBarChart'){
 
-            if(this.viewoption == 'bitStackBarChart'){
+            if(this.viewoption == 'bitStackBarChart' || this.viewoption == 'smart_bitStackBarChart'){
                 this.bitHeatMapAnnotation_colorscale.attr('display', 'none');
                 this.bitHeatMapAnnotation_colorscale.attr('display', 'none');
             }
@@ -397,14 +424,15 @@ class ProgramTreeView extends BasicView{
             .attr("dominant-baseline", "central")
             .style('font-size', 10);
         }
-        else if(this.viewoption == 'heatmap_impact' ){
+        else if(this.viewoption == "error_output_dist" || this.viewoption == "SDC_impact_dist"){
             let x = this.left_padding + this.blockw * 4 + this.padding;
-            let maxdiff = this.programtreedata.getMaxDiff();
-            let mindiff = this.programtreedata.getMinDiff();
+            let maxdiff = this.viewoption == "error_output_dist" ? this.programtreedata.getMaxDiff() : 10;
+            let mindiff = this.viewoption == "error_output_dist" ? this.programtreedata.getMinDiff() : 0;
+            let labeltext = this.viewoption == "error_output_dist"?"Output Distribution(log10)" : "SDC Impact Distribution(log10)";
             let x_axis = d3.scaleLinear().range([x, x + Math.floor(this.bitmap_width/10) * 10]).domain([mindiff, maxdiff]);
 
             this.impactHeatmapAnnotation = this.svg.append('g')
-            this.impactHeatmapAnnotation.append('text').datum(['Output Distribution']).text(d=>d)
+            this.impactHeatmapAnnotation.append('text').datum([labeltext]).text(d=>d)
                 .attr('x', (d, i)=>{
                     return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/2;
                 })
@@ -548,6 +576,7 @@ class ProgramTreeView extends BasicView{
             this.bit_heatmap_bucket[key].clear();
             this.bitStackBarChart_bucket[key].clear();
             this.valueStack_bucket[key].clear();
+            this.smart_bitStackBarChart_bucket[key].clear();
         }
 
         if(option == 'bit_heatmap'){
@@ -560,7 +589,7 @@ class ProgramTreeView extends BasicView{
                 this.smart_bit_heatmap_bucket[key].draw();
             }
         }
-        else if(option == 'heatmap_impact'){
+        else if(option == 'error_output_dist'){
             for(let key in this.bit_heatmap_bucket){
                 this.impact_heatmap_bucket[key].draw();
             }
@@ -580,7 +609,12 @@ class ProgramTreeView extends BasicView{
                 this.valueStack_bucket[key].draw();
             }
         }
-        else if(option == 'error_output_dist'){
+        else if(option == 'smart_bitStackBarChart'){
+            for(let key  in this.smart_bitStackBarChart_bucket){
+                this.smart_bitStackBarChart_bucket[key].draw();
+            }
+        }
+        else if(option == 'SDC_impact_dist'){
             for(let key  in this.SDC_Impact_dist_bucket){
                 this.SDC_Impact_dist_bucket[key].draw();
             }

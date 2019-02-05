@@ -34,21 +34,21 @@ class SourceCodeView extends BasicView{
         //set up the link event.
 
         //init heatmap
-        //this.heatmap = [];
-        //let linesnums = $('#sourceCode .linenums li');
-        //for(let key in this.line_number_iter){
-        //    let data = this.line_number_iter[key];
-        //    let x = linesnums[key-1].getBoundingClientRect().x - this.VisWidth;
-        //    let y = linesnums[key-1].getBoundingClientRect().top - linesnums[0].getBoundingClientRect().top;
-        //    let width = this.VisWidth;
-        //    let height = linesnums[key-1].getBoundingClientRect().height;
+        this.heatmap = [];
+        let linesnums = $('#sourceCode .linenums li');
+        for(let key in this.line_number_iter){
+            let data = this.line_number_iter[key];
+            let x = linesnums[key-1].getBoundingClientRect().x - this.VisWidth;
+            let y = linesnums[key-1].getBoundingClientRect().top - linesnums[0].getBoundingClientRect().top;
+            let width = this.VisWidth;
+            let height = linesnums[key-1].getBoundingClientRect().height;
             
-        //    this.heatmap.push(new HeatMap1D(this.sourceCodeVis_svg_g, 0, y, width, height, data));
-        //}
+            this.heatmap.push(new HeatMap1D(this.sourceCodeVis_svg_g, 0, y, width, height, data));
+        }
 
-        //this.heatmap.forEach(d=>{
-		//	d.draw();
-		//});
+        this.heatmap.forEach(d=>{
+			d.draw();
+		});
     }
 
     setData(msg, data){

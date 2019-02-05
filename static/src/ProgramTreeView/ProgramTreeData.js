@@ -41,6 +41,14 @@ class ProgramTreeData{
         this.hierachicalData =  {'key':$('#program_TreeView_file_selector').val().split('_')[0], 'values':values.entries(this.filterData)};
     }
 
+    getSummaryData(){
+        let structure = d3.nest().key((d)=>{
+            return d.outcome;
+        });
+
+        return {"values":structure.entries(this.filterData)};
+    }
+
     getData(){
         return this.filterData;
     }
@@ -51,6 +59,14 @@ class ProgramTreeData{
 
     getMaxDiff(){
         return this.property.maxDiff;
+    }
+
+    getMaxSDCImpact(){
+        return this.property.maxSDCImpact;
+    }
+
+    getMinSDCImpact(){
+        return this.property.minSDCImpact;
     }
 
     getMinDiff(){
@@ -93,14 +109,20 @@ class ProgramTreeData{
                         'minDiff':Number.MAX_VALUE, 
                         'lowestPBit':64,
                         'maxIn':-Number.MAX_VALUE,
-                        'minIn':Number.MAX_VALUE};
+                        'minIn':Number.MAX_VALUE,
+                        'maxSDCImpact':-Number.MAX_VALUE,
+                        'minSDCImpact':Number.MAX_VALUE};
 
         this.data.forEach(element=>{
-
             if(element.outcome == 'SDC' && element.diffnormr != 'inf'){
                 let diffnorm = Math.log10(+element.diffnormr);
                 this.property.maxDiff = Math.max(this.property.maxDiff, diffnorm);
                 this.property.minDiff = Math.min(this.property.minDiff, diffnorm);
+
+                if(element.out_xor != 'nan'){
+                    this.property.maxSDCImpact = Math.max(this.property.maxSDCImpact, Math.abs(+element.diffnormr/+element.out_xor));
+                    this.property.minSDCImpact = Math.min(this.property.minSDCImpact, Math.abs(+element.diffnormr/+element.out_xor));
+                }
             }
 
             if(element.outcome != 'Masked'){
@@ -108,7 +130,7 @@ class ProgramTreeData{
             }
 
             if(element.out_xor != 'nan' && Math.abs(+element.out_xor) != 0){
-                //if the out_xor is not zero,how to handle infinity/nan
+                //if the out_xor is not zero, how to handle infinity/nan.
                 let input = Math.log10(Math.abs(+element.out_xor));
                 this.property.maxIn = Math.max(this.property.maxIn, input);
                 this.property.minIn = Math.min(this.property.minIn, input);

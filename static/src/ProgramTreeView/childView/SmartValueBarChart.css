@@ -1,0 +1,18 @@
+.stackBarChart_rect{
+    fill:white;
+    stroke: gray;
+    stroke-width: 1px;
+}
+
+.stackBarChart_rect_highlight{
+    fill:white;
+    stroke:steelblue;
+    stroke-width: 2px;
+}
+
+.stackBarChart_rect_click{
+    fill:white;
+    stroke:yellowgreen;
+    stroke-width: 2px;
+}
+

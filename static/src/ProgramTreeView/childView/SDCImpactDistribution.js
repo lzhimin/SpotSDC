@@ -1,17 +1,16 @@
 class SDCImpactDistribution extends standardChildView{
-    constructor(svg, x, y, width, height, data, maxDiff, minDiff){
+    
+    constructor(svg, x, y, width, height, data, maxSDCImpact, minSDCImpact){
         super(svg, x, y, width, height, data);
 
         this.threshold = 0.07;
-        this.maxLogDiff = maxDiff;
-        this.minLogDiff = minDiff;
+        this.maxSDCImpact = maxSDCImpact;
+        this.minSDCImpact = minSDCImpact;
         this.sdc_bin_size = 10;
-
         this.hist = this.histogram1D();
     }
 
     clear(){
-
         if(this.g != undefined)
             this.g.remove();
     }
@@ -20,12 +19,12 @@ class SDCImpactDistribution extends standardChildView{
         this.outcomeColor = color;
     }
 
-    setMaxDiff(v){
-        this.maxLogDiff = v;
+    setMaxSDCImpact(v){
+        this.maxSDCImpact = v;
     }
 
-    setMinDiff(v){
-        this.minLogDiff = v;
+    setMinSDCImpact(v){
+        this.minSDCImpact = v;
     }
 
     draw(){
@@ -70,27 +69,33 @@ class SDCImpactDistribution extends standardChildView{
 
         this.data.values.forEach(element => {
             if(element.key == 'SDC'){
-                this.sdc_bin(element.values, sdc_distribution);
+                this.sdcImpact_bin(element.values, sdc_distribution);
             }
         }); 
         
         return sdc_distribution;
     }
+    /**
+     * @param {*} sdc_values 
+     * @param {*} bins 
+     */
 
-    sdc_bin(sdc_values, bins){
+    sdcImpact_bin(sdc_values, bins){
 
         let range = []
         for(let i = 0; i < this.sdc_bin_size; i++){
             range.push(i);
         }
-
-        let scale = d3.scaleQuantize().domain([this.minLogDiff, this.maxLogDiff]).range(range);
+        let scale = d3.scaleQuantize().domain([0, 10]).range(range);
 
         sdc_values.forEach((d)=>{
-            if(d.diffnormr!='inf')
-                bins[scale(Math.log10(+d.diffnormr))].push(d);
-            else
-                bins[bins.length - 1].push(d);
+            if(d.out_xor != 'nan' && d.diffnormr !='inf'){
+                let SDCImpact = Math.abs(+d.diffnormr/+d.out_xor);
+                if(SDCImpact < 10)
+                    bins[0].push(d);
+                else
+                    bins[scale(Math.log10(SDCImpact))].push(d);
+            }
         });
     }
 }
