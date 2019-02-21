@@ -132,8 +132,13 @@ class BitHeatMap extends standardChildView{
 
                 publish('RESAMPLE', this.sample)
             }
+            //get the name of current data set
+            let dataname = $("#program_TreeView_file_selector").val();
 
-            d3.csv('../static/data/cg_complete.csv').then(callback.bind(this));
+            if(dataname.split("_")[0] == "cg")
+                d3.csv('../static/data/cg_complete.csv').then(callback.bind(this));
+            else if(dataname.split("_")[0] == "fft")
+                d3.csv('../static/data/fft_exhaust.csv').then(callback.bind(this));
         });   
     }
 

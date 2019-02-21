@@ -92,7 +92,7 @@ class Timer{
             .call(d3.axisRight(this.axis_y_impact_factor).ticks(4));
 
         this.linefunc = d3.line().x((d, i)=>{return this.axis_x(i);}).y((d, i)=>{return this.axis_y(d[1]);}).curve(d3.curveStepAfter);
-        this.impactlinefunc = d3.line().x((d, i)=>{return this.axis_x(i);}).y((d, i)=>{return this.axis_y_impact_factor(d);}).curve(d3.curveStepAfter);
+        //this.impactlinefunc = d3.line().x((d, i)=>{return this.axis_x(i);}).y((d, i)=>{return this.axis_y_impact_factor(d);}).curve(d3.curveStepAfter);
 
         this.relativeErrorPath = this.svg.append('path')
             .datum(this.absoluteError)
@@ -100,11 +100,11 @@ class Timer{
             .attr("fill", "none")
             .attr('d', this.linefunc);
         
-         this.impactFactorPath = this.svg.append('path')
-            .datum(this.impactfactor)
-            .style('stroke', 'orange')
-            .attr("fill", "none")
-            .attr('d', this.impactlinefunc);
+        //this.impactFactorPath = this.svg.append('path')
+        //    .datum(this.impactfactor)
+        //    .style('stroke', 'orange')
+        //    .attr("fill", "none")
+        //    .attr('d', this.impactlinefunc);
 
         this.trigger_rect = this.svg.append('rect').datum(this.current_time_step)
         .attr('x', (d)=>{
@@ -211,11 +211,11 @@ class Timer{
         }).curve(d3.curveStepAfter);
 
 
-        let impactlinefunc = d3.line().y((d)=>{
-            return this.axis_y_impact_factor(d[0]) + 100;
-        }).x((d, i)=>{
-            return this.selected_time_axis(d[1]);
-        }).curve(d3.curveStepAfter);
+        //let impactlinefunc = d3.line().y((d)=>{
+        //    return this.axis_y_impact_factor(d[0]) + 100;
+        //}).x((d, i)=>{
+        //    return this.selected_time_axis(d[1]);
+        //}).curve(d3.curveStepAfter);
 
         if(this.selected_time_axis_g == undefined){
             this.selected_time_axis_g = this.svg.append('g');
@@ -241,18 +241,18 @@ class Timer{
             .attr("fill", "none")
             .attr('d', linefunc);
 
-            this.selected_time_impact_path_g = this.svg.append('g');
-            this.selected_time_impact_path_g.append('path')
-            .datum(()=>{
-                let data = [];
-                for(let i = this.current_time_step + 1; i <= this.current_time_step + this.len_gap && i < this.absoluteError.length; i++){
-                        data.push(this.impactfactor[i]);
-                }
-                return data;
-            })
-            .style('stroke', 'orange')
-            .attr("fill", "none")
-            .attr('d', this.impactlinefunc);
+            //this.selected_time_impact_path_g = this.svg.append('g');
+            //this.selected_time_impact_path_g.append('path')
+            //.datum(()=>{
+            //    let data = [];
+            //    for(let i = this.current_time_step + 1; i <= this.current_time_step + this.len_gap && i < this.absoluteError.length; i++){
+            //            data.push(this.impactfactor[i]);
+            //    }
+            //    return data;
+            //})
+            //.style('stroke', 'orange')
+            //.attr("fill", "none")
+            //.attr('d', this.impactlinefunc);
         }
         else{
             this.selected_time_axis_g.call(d3.axisBottom(this.selected_time_axis).ticks(Math.min(this.len_gap, 20)));
@@ -271,19 +271,19 @@ class Timer{
             .attr("fill", "none")
             .attr('d', linefunc);
 
-            this.selected_time_impact_path_g.remove();
-            this.selected_time_impact_path_g = this.svg.append('g');
-            this.selected_time_impact_path_g.append('path')
-            .datum(()=>{
-                let data = [];
-                for(let i = this.current_time_step + 1; i <= this.current_time_step + this.len_gap && i < this.absoluteError.length; i++){
-                        data.push([this.impactfactor[i], i]);
-                }
-                return data;
-            })
-            .style('stroke', 'orange')
-            .attr("fill", "none")
-            .attr('d', impactlinefunc);
+            //this.selected_time_impact_path_g.remove();
+            //this.selected_time_impact_path_g = this.svg.append('g');
+            //this.selected_time_impact_path_g.append('path')
+            //.datum(()=>{
+            //    let data = [];
+            //    for(let i = this.current_time_step + 1; i <= this.current_time_step + this.len_gap && i < this.absoluteError.length; i++){
+            //            data.push([this.impactfactor[i], i]);
+            //    }
+            //    return data;
+            //})
+            //.style('stroke', 'orange')
+            //.attr("fill", "none")
+            //.attr('d', impactlinefunc);
         }
         
         

@@ -10,11 +10,11 @@ class SourceCodeView extends BasicView{
     }
 
     draw(){
-        //.style('background', (d, i)=>{
-        //    if(this.line_number.has((i+1)+''))
+        d3.selectAll("#sourceCode_display li").style('background', (d, i)=>{
+            if(this.line_number.has((i+1)+''))
                 //return  'rgba(244, 66, 66,'+  this.colorscale(this.sdc_frequency[(i+1)+''])+')';
-        //        return d3.interpolateOrRd(this.colorscale(this.sdc_frequency[(i+1)+'']))
-        //});
+                return d3.interpolateOrRd(this.colorscale(this.sdc_frequency[(i+1)+'']))
+        });
 
         if(this.sourceCodeVis == undefined){
             this.VisWidth = $('#sourceCode_vis')[0].getBoundingClientRect().width,

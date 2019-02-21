@@ -53,7 +53,7 @@ class GrandView extends BasicView{
 
     draw(){
         
-        this.colorscale = d3.scaleLinear().domain(this.grandviewdata.getMaxMin_Absolute()).range([0,1]).clamp(true);
+        /*this.colorscale = d3.scaleLinear().domain(this.grandviewdata.getMaxMin_Absolute()).range([0,1]).clamp(true);
 
 
         //for(let i = 0; i < this.data.length; i++){
@@ -64,7 +64,7 @@ class GrandView extends BasicView{
 
             this.ctx.strokeRect(this.x + (+this.data[i].DI - 1) * this.rectw, this.y + (this.bitsize - +this.data[i].bit)  * this.rectw, this.rectw, this.recth);
             this.ctx.fillRect(this.x + (+this.data[i].DI - 1) * this.rectw, this.y + (this.bitsize - +this.data[i].bit) * this.rectw, this.rectw, this.recth);
-        }
+        }*/
 
 
        /* for(let i = 0; i < this.the_number_of_time_steps; i++){

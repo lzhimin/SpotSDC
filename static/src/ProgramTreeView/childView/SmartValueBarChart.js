@@ -5,7 +5,7 @@ class SmartValueBarChart extends standardChildView{
 
         this.lowestProblemBit = lowestProblemBit
 
-        this.bit = 64 - lowestProblemBit + 1;
+        this.bit = 64;//- lowestProblemBit + 1;
 
         this.categories_label = ['M', 'S', 'D'];
 
@@ -30,8 +30,7 @@ class SmartValueBarChart extends standardChildView{
 
     draw(){
         this.histogram2d();
-
-        //this.init_color_scale();
+        this.init_scale();
 
         this.clear();
 
@@ -54,71 +53,41 @@ class SmartValueBarChart extends standardChildView{
                 .append('rect')
                 .attr('width', this.rect_w)
                 .attr('height', (d, i)=>{
-                    return this.rect_h * this.hist2d[index][i].length/d3.sum(this.hist2d[index], (d)=>{return d.length;});
+                    let h = this.globalscale(this.hist2d[index][i].length);
+                    return h;
                 })
                 .attr('x', (d, i)=>{
                     return this.x + this.rect_w * (this.hist2d.length - index - 1);
                 })
                 .attr('y', (d, i)=>{
-                    h_temp += this.rect_h * this.hist2d[index][i].length/d3.sum(this.hist2d[index], (d)=>{return d.length;});
-                    return this.y + h_temp - this.rect_h * this.hist2d[index][i].length/d3.sum(this.hist2d[index], (d)=>{return d.length;});
+                    let h = this.globalscale(this.hist2d[index][i].length);
+                    h_temp += h;
+                    return this.y + this.rect_h - h_temp;
                 })
                 .style('fill', (d, i)=>{
                     switch(i){
-                        case 0: return this.color['DUE'];
+                        case 0: return this.color['Masked'];
                         case 1: return this.color['SDC'];
-                        case 2: return this.color['Masked'];
+                        case 2: return this.color['DUE'];
                     }
                 })
                 .on('click', (d, i)=>{
                     publish('SUBSETDATA', d);
                 });
+
+            //this.g.selectAll('.Bit_outcome_heatmap_'+this.uuid+'_rect'+index).data([0, this.max_number_of_sample])
+            //.append('text')
+            //.text((d)=>{return d;})
+            //.attr('x', this.x)
+            //.attr('y', (d, i)=>{
+            //    return i==0? this.y: this.y + this.rect_h;
+            //})
+            //.attr("dominant-baseline", "central")
+            //.attr("text-anchor", "middle")
+            //.style("font-size", 12);
         }
 
         //heatmap rect
-        /*this.g.selectAll('.Bit_outcome_heatmap_'+this.uuid+'_rect').data(this.hist).enter()
-        .append('rect')
-        .attr('class', 'Bit_outcome_heatmap_rect')
-        .attr('width', this.rect_w)
-        .attr('height', this.rect_h)
-        .attr('x', (d, i)=>{
-            return this.x + this.rect_w * (i % this.col);
-        })
-        .attr('y', (d, i)=>{
-            return this.y + this.rect_h * (Math.floor(i / this.col));
-        })
-        .style('fill', (d, i)=>{
-
-            switch(i){
-                case 0: return this.color['DUE'];break;
-                case 1: return this.color['SDC'];break;
-                case 2: return this.color['Masked'];break;
-            }
-            //return d == 0 ? 'white':this.get_local_color_scale(i, d);
-			//return d == 0 ? 'white':this.get_global_color_scale(d);
-        })
-        .on('click', (d, i)=>{
-            publish('SUBSETDATA', d);
-        });*/
-
-        // y-axis
-		/*this.g.selectAll('.Bit_outcome_heatmap_'+this.uuid+'_y_label').data(this.categories_label).enter()
-		.append('text')
-		.text(d=>d)
-		.attr('class', 'Bit_outcome_heatmap_label')
-		.attr('x', (d, i)=>{
-			return this.x - 5;
-		})
-		.attr('y', (d, i)=>{
-			if(i == 0)
-				return this.y + this.height - this.rect_h/2;
-			else
-				return this.y  + this.height - this.rect_h * (i + 0.5)
-		})
-		.attr("text-anchor", "middle")
-		.attr("dominant-baseline", "central")
-		.attr('font-size', 7);	*/
-		
 		//draw dash line for sign bit, exponent bit and mantissa bit
 		let dashline_d = [[this.x + this.rect_w, this.y, this.x + this.rect_w, this.y + this.height], [this.x + this.rect_w * 12, this.y, this.x + this.rect_w * 12, this.y + this.height]];
 		
@@ -131,35 +100,36 @@ class SmartValueBarChart extends standardChildView{
 		.style('stroke', 'black')
 		.style('stroke-width', '1px')
 		.style('stroke-opacity', 0.4)
-		.style('stroke-dasharray', '5,5');   
+        .style('stroke-dasharray', '5,5');
+        
+        this.chart_axis = d3.scaleLinear().domain([0, this.max_number_of_sample]).range([this.rect_h, 0]);
+        this.chart_axis_annotation = this.g.append('g').attr('class','bitbarchart_axis')
+            .attr("transform", "translate("+(this.x )+","+ this.y + ")")
+            .call(d3.axisLeft(this.chart_axis).ticks(2));
     }
 
     setOutcomeColor(color){
         this.color  = color;
     }
 
-    init_color_scale(){
-		this.globalcolorscale = d3.scaleQuantize().domain(d3.extent(this.hist, (d)=>{return d.length;})).range(this.color);
-		this.local_color_scale = new Array(this.bit);
-		
-		for(let i = 0; i < this.col; i++){
-			this.local_color_scale[i] = this.init_local_color_scale(i);
-		}
+    init_scale(){
+        this.max_number_of_sample = d3.max(this.hist, (d)=>{return d.length;});
+		this.globalscale = d3.scaleLinear().domain([0, this.max_number_of_sample]).range([0, this.rect_h]);
 	}
 
-	init_local_color_scale(i){
-		let col = i % this.col;
+	//init_local_color_scale(i){
+	//	let col = i % this.col;
 		
-		let data = [];
+	//	let data = [];
 		
-		for(let i = 0; i < this.row; i++){
-			data.push(this.hist[i * this.col + col]);
-		}
+	//	for(let i = 0; i < this.row; i++){
+	//		data.push(this.hist[i * this.col + col]);
+	//	}
 	
-		let colorscale = d3.scaleQuantize().domain([0, d3.sum(data, (d)=>{return d.length;})]).range(this.color);
+	//	let colorscale = d3.scaleQuantize().domain([0, d3.sum(data, (d)=>{return d.length;})]).range(this.color);
         
-        return colorscale;
-	}
+    //    return colorscale;
+	//}
 
 	get_global_color_scale(d){
 		return this.globalcolorscale(d.length);
@@ -179,27 +149,23 @@ class SmartValueBarChart extends standardChildView{
             hist2d.push([[], [], []]);
         }
 
-        let bit = 0, outcome_menu = {'DUE':0, 'SDC': 1, 'Masked': 2};
+        let bit = 0, outcome_menu = {'DUE':2, 'SDC': 1, 'Masked': 0};
 
         this.data.values.forEach(element => {
             element.values.forEach(e=>{
                 bit = parseInt(e.bit) - 1;
-                if(bit < this.lowestProblemBit)
-                    hist2d[0][outcome_menu[e.outcome]].push(e);
-                else
-                    hist2d[bit - this.lowestProblemBit+1][outcome_menu[e.outcome]].push(e);
+                hist2d[bit][outcome_menu[e.outcome]].push(e);
             });
         });
 
         let hist = [];
-        for(let j = 0; j < hist2d[0].length; j++){
-            for(let i = this.bit - 1; i > -1; i--){
-                hist.push(hist2d[i][j]);
-            }
+        //for(let j = 0; j < hist2d[0].length; j++){
+        for(let i = this.bit - 1; i > -1; i--){
+            hist.push(hist2d[i][0].concat(hist2d[i][1]).concat(hist2d[i][2]));
         }
+        //}
 
         this.hist = hist;
-
         this.hist2d = hist2d;
     }
 }

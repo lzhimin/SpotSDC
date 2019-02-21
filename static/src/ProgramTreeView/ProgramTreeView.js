@@ -30,16 +30,16 @@ class ProgramTreeView extends BasicView{
         super.init();
 
         this.blockw = 60;
-        this.blockh = 40;
+        this.blockh = 50;
 
         this.top_padding = this.y = 200;
         this.left_padding = this.x = 20;
-        this.padding = 20;
-        this.bottom_padding = 10;
+        this.padding = 40;
+        this.bottom_padding = 15;
 
         this.padding_between_bit_stack = 20;
-        this.bitmap_width = 250;
-        this.stackbar_width = 200;
+        this.bitmap_width = 500;
+        this.stackbar_width = 300;
 
         this.stackbar_bucket = {};
         this.bit_heatmap_bucket = {};
@@ -273,7 +273,7 @@ class ProgramTreeView extends BasicView{
 
     draw_annotation_stackchart(x, y){
         //ratio
-        let ratio_chart_x = this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width;
+        let ratio_chart_x = this.left_padding + this.blockw * 4 + this.padding * 1.5 + this.bitmap_width;
         this.stackbar_chart_axis = d3.scaleLinear().range([ratio_chart_x, ratio_chart_x + this.stackbar_width]).domain([0, 1]);
         this.stackbar_chart_axis_annotation = this.svg.append('g').attr('class','axis axis--x')
             .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
@@ -405,7 +405,7 @@ class ProgramTreeView extends BasicView{
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "central");
 
-            this.bitHeatMapAnnotation.selectAll('.programTreeViewMenu_annotation').data(['sign', 'exponent', 'mantissa'])
+            this.bitHeatMapAnnotation.selectAll('.programTreeViewMenu_annotation').data(['Sign', 'Exponent', 'Mantissa'])
             .enter()
             .append('text')
             .text(d=>d)
@@ -413,7 +413,7 @@ class ProgramTreeView extends BasicView{
                 if(i==0) 
                     return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/128;
                 else if(i == 1)
-                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/7;
+                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width * 6.5/64;
                 else 
                     return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width* 19/32;
             })
@@ -422,7 +422,7 @@ class ProgramTreeView extends BasicView{
             }) 
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "central")
-            .style('font-size', 10);
+            .style('font-size', 12);
         }
         else if(this.viewoption == "error_output_dist" || this.viewoption == "SDC_impact_dist"){
             let x = this.left_padding + this.blockw * 4 + this.padding;
@@ -478,35 +478,6 @@ class ProgramTreeView extends BasicView{
             .attr("dominant-baseline", "central")
             .style('font-size', 10);
         }
-        /*else if(this.viewoption == 'value_heatmap' || this.viewoption == 'value_stackChart'){
-            let x = this.left_padding + this.blockw * 4 + this.padding;
-            let maxdiff = this.programtreedata.getMaxInput();
-            let mindiff = this.programtreedata.getMinInput();
-            let x_axis = d3.scaleLinear().range([x, x + this.bitmap_width/11 * 10]).domain([mindiff, maxdiff]);
-
-            this.valueImpactHeatMapAnnotation = this.svg.append('g')
-            this.valueImpactHeatMapAnnotation.append('text').datum(['Input Error Distribution']).text(d=>d)
-                .attr('x', (d, i)=>{
-                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width/3;
-                })
-                .attr('y', (d, i)=>{
-                    return this.top_padding - 40;
-                });
-            
-            this.valueImpactHeatMapAnnotation.append('text').datum(['nan']).text(d=>d)
-            .attr('x', (d, i)=>{
-                return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width - 5;
-            })
-            .attr('y', (d, i)=>{
-                return this.top_padding - 30;
-            })
-            .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'central');
-
-            this.valueImpactHeatMapAnnotation.append('g').attr('class','axis axis--x')
-                .attr("transform", "translate(0,"+ (this.top_padding - 20) + ")")
-                .call(d3.axisTop(x_axis).tickValues(d3.range(mindiff, maxdiff, (maxdiff - mindiff)/10)));
-        }*/
     }
 
     is_the_node_a_leaf(data){
