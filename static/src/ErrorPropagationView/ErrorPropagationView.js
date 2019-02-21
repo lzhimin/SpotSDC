@@ -88,12 +88,9 @@ class ErrorPropagationView extends BasicView{
         
         let error_distribution = [];
 
-        //get absolute error distribution
+        //Get absolute error distribution
         this.propagationData.absoluteError.forEach((d)=>{
-            if(+d[1] < 1)
-                error_distribution.push(d[1]);
-            else
-                error_distribution.push(Math.log(d[1]));
+            error_distribution.push(d[1]);
         });
 
         this.x_scale = d3.scaleLinear().domain(d3.extent(error_distribution)).range([50, 250]);
@@ -118,12 +115,24 @@ class ErrorPropagationView extends BasicView{
         histogram.append('g')
             .attr('class', 'axis axis--x')
             .attr('transform', 'translate(0,' + 150 + ')')
-            .call(d3.axisBottom(this.x_scale));
+            .call(d3.axisBottom(this.x_scale).ticks(5));
 
         histogram.append('g')
             .attr('class', 'axis axis--y')
-            .attr('transform', 'translate(50,' + 50 + ')')
-            .call(d3.axisLeft(y_scale));
+            .attr('transform', 'translate(50,50)')
+            .call(d3.axisLeft(y_scale).ticks(5));
+        
+        histogram.append('g')
+            .append('text')
+            .text('Error(log) Density Distribution Histogram')
+            .attr('class', 'histogram_anotation') 
+            .attr('transform', 'translate(35, 200)');
+
+        histogram.append('g')
+            .append('text')
+            .text('Frequency')
+            .attr('class', 'histogram_anotation') 
+            .attr('transform', 'translate(35, 40)');
 
         var brush = d3.brushX().extent([[50, 50], [250, 150]])
         .on('start brush end',  brushevent.bind(this));
@@ -135,12 +144,10 @@ class ErrorPropagationView extends BasicView{
                 x2 = this.x_scale.invert(250);
             }else{
                 x1 = this.x_scale.invert(d3.event.selection[0]);
-                x2 = this.x_scale.invert(d3.event.selection[1]);
-                
+                x2 = this.x_scale.invert(d3.event.selection[1]); 
             }
             this.brushFileterCallback(x1, x2);
         }
-            
         
         histogram.append('g').attr('class', 'brush')
         .call(brush);
@@ -279,7 +286,6 @@ class ErrorPropagationView extends BasicView{
     }
 
     update(step){
-
         let current_time = this.timer.getCurrentTimeStep();
         if(current_time + step > this.propagationData.goldenRun.length-1 || current_time + step < 0){
             return false;
@@ -311,7 +317,7 @@ class ErrorPropagationView extends BasicView{
         .attr('width', 3)
         .style('fill', (d, i)=>{return colorScale(d);})
 
-        this.colorscalesvg.selectAll('.errorColorScaleBar').data(['0', this.propagationData.getMaxRelativeError().toFixed(2)])
+        this.colorscalesvg.selectAll('.errorColorScaleBar').data(['0', this.propagationData.getMaxAbsoluteError().toFixed(2)])
         .enter()
         .append('text')
         .attr('x', (d, i)=>{

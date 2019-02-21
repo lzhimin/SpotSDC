@@ -7,7 +7,6 @@ class ErrorPropagationData{
 
     setSummaryData(data){
         this.summarydata = data;
-
         let values = d3.nest();
 
         values.key(function (d) {
@@ -20,7 +19,6 @@ class ErrorPropagationData{
             return d.outcome
         });
        
-
         this.hierachicalData =   {'key':$('#program_TreeView_file_selector').val().split('_')[0], 'values':values.entries(this.summarydata)};
     }
 
@@ -33,7 +31,9 @@ class ErrorPropagationData{
 
         this.relativeError = this.parseData_relativeError(data);
 
-        this.absoluteError = this.parseData_AbosluteError(data);
+        this.absoluteError = this.parseData_Aboslute_Log_Error(data);//this.parseData_AbosluteError(data);
+
+        this.absolute_log_error = this.parseData_Aboslute_Log_Error(data);
 
         this.filteredAbsolutedError =  this.absoluteError.slice();
     }
@@ -47,15 +47,10 @@ class ErrorPropagationData{
     }
 
     setFilterAbsoluteError(x1, x2){
-
         this.filteredAbsolutedError = [];
         this.absoluteError.forEach((d)=>{
-            let error = 0;
-            if(+d[1] < 1)
-                error = d[1];
-            else
-                error = Math.log(d[1]);
-            
+            let error = d[1];
+           
             if(error >= x1 && error <= x2){
                 this.filteredAbsolutedError.push(d);
             }else{
@@ -65,7 +60,6 @@ class ErrorPropagationData{
     }
 
     getGolden_Error_SequenceValue(lineVar){
-
         let golden = [];
         let error = [];
 
@@ -101,7 +95,6 @@ class ErrorPropagationData{
         }
 
         return {'error':error, 'golden':golden};
-
     }
 
     getProgramCurrentExecutedLine(time){
@@ -120,8 +113,8 @@ class ErrorPropagationData{
         let max = -Number.MAX_VALUE;
         for(let i = 0; i < this.absoluteError.length; i++){
             max = Math.max(+this.absoluteError[i][1], max);
+            //console.log(this.absoluteError[i][1]);
         }
-
         return max;
     }
 
@@ -156,14 +149,36 @@ class ErrorPropagationData{
 
     parseData_AbosluteError(){
         let parseData = [];
-
         let error = 0;
-
         let lineVar = '';
 
         for(let i = 0; i < this.goldenRun.length; i++){
             lineVar = this.data[i].line+':'+this.data[i].var;
-            error = Math.abs(+this.data[i].value - +this.goldenRun[i].value);
+
+            if(Math.abs(+this.data[i].value - +this.goldenRun[i].value) == 0){
+                error = 0;
+            }
+            else
+                error = Math.abs(+this.data[i].value - +this.goldenRun[i].value);
+            parseData.push([lineVar, error]);
+        }
+        
+        return parseData;
+    }
+
+    parseData_Aboslute_Log_Error(){
+        let parseData = [];
+        let error = 0;
+        let lineVar = '';
+
+        for(let i = 0; i < this.goldenRun.length; i++){
+            lineVar = this.data[i].line+':'+this.data[i].var;
+
+            if(Math.abs(+this.data[i].value - +this.goldenRun[i].value) < 1){
+                error = Math.abs(+this.data[i].value - +this.goldenRun[i].value);
+            }
+            else
+                error = Math.log10(Math.abs(+this.data[i].value - +this.goldenRun[i].value));
             parseData.push([lineVar, error]);
         }
         
@@ -173,13 +188,9 @@ class ErrorPropagationData{
     //data come in float by float,
     //this function parse all the variable into norm formate
     parseData_relativeError(){
-
         let parseData = [];
-
         let error = 0;
-
         let maxError_variableTable = {};
-
         let lineVar = '';
 
         //extract the maximum error of each variable

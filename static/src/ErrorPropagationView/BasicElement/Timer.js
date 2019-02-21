@@ -72,10 +72,8 @@ class Timer{
     }
 
     draw(){
-
         this.axis_x = d3.scaleLinear().range([this.x, this.x + this.width]).domain([0, this.time]);
-        this.axis_y = d3.scaleLinear().range([this.y, this.y - this.height]).domain([Math.min(0, d3.min(this.absoluteError, (d)=>{return d[1];})), Math.max(1, d3.max(this.absoluteError, (d)=>{return d[1];}))]);//relative error the value scale from 0~1
-        this.axis_y_impact_factor = d3.scaleLinear().range([this.y, this.y - this.height]).domain(d3.extent(this.impactfactor))
+        this.axis_y = d3.scaleLinear().range([this.y, this.y - this.height]).domain([Math.min(0, d3.min(this.absoluteError, (d)=>{return d[1];})), Math.max(1, d3.max(this.absoluteError, (d)=>{return d[1];}))]);
         
         this.trigger_rect_w = this.axis_x(this.len_gap) - this.axis_x(0);
 
@@ -84,27 +82,16 @@ class Timer{
             .call(d3.axisBottom(this.axis_x).ticks(20));
         
         this.axis_y_axis = this.svg.append('g').attr('class','axis axis--y')
-            .attr("transform", "translate("+ (this.x - 5) + ", 0)")
+            .attr("transform", "translate("+ (this.x) + ", 0)")
             .call(d3.axisLeft(this.axis_y).ticks(4));
 
-        this.svg.append('g').attr('class', 'axis axis-y')
-            .attr('transform', 'translate('+ (this.x + this.width) + ', 0)')
-            .call(d3.axisRight(this.axis_y_impact_factor).ticks(4));
-
         this.linefunc = d3.line().x((d, i)=>{return this.axis_x(i);}).y((d, i)=>{return this.axis_y(d[1]);}).curve(d3.curveStepAfter);
-        //this.impactlinefunc = d3.line().x((d, i)=>{return this.axis_x(i);}).y((d, i)=>{return this.axis_y_impact_factor(d);}).curve(d3.curveStepAfter);
-
+        
         this.relativeErrorPath = this.svg.append('path')
             .datum(this.absoluteError)
             .classed('timer_error_linechart_line', true)
             .attr("fill", "none")
             .attr('d', this.linefunc);
-        
-        //this.impactFactorPath = this.svg.append('path')
-        //    .datum(this.impactfactor)
-        //    .style('stroke', 'orange')
-        //    .attr("fill", "none")
-        //    .attr('d', this.impactlinefunc);
 
         this.trigger_rect = this.svg.append('rect').datum(this.current_time_step)
         .attr('x', (d)=>{
@@ -134,7 +121,7 @@ class Timer{
             return this.axis_x(d) + this.trigger_rect_w;
         })
         .attr('y', this.y - this.trigger_rect_h)
-        .attr('width', 5)
+        .attr('width', 0)
         .attr('height', this.trigger_rect_h)
         .attr('fill', 'green')
         .attr("cursor", "ew-resize")
@@ -202,20 +189,14 @@ class Timer{
     }
 
     draw_select_time_intervel(){
+       
         this.selected_time_axis = d3.scaleLinear().range([this.x, this.x + this.width]).domain([this.current_time_step, this.current_time_step + this.len_gap]);
-
+       
         let linefunc = d3.line().y((d)=>{
             return this.axis_y(d[0][1]) + 100;
         }).x((d)=>{
             return this.selected_time_axis(d[1]);
         }).curve(d3.curveStepAfter);
-
-
-        //let impactlinefunc = d3.line().y((d)=>{
-        //    return this.axis_y_impact_factor(d[0]) + 100;
-        //}).x((d, i)=>{
-        //    return this.selected_time_axis(d[1]);
-        //}).curve(d3.curveStepAfter);
 
         if(this.selected_time_axis_g == undefined){
             this.selected_time_axis_g = this.svg.append('g');
@@ -225,8 +206,8 @@ class Timer{
             
             this.selected_time_y_axis_g = this.svg.append('g');
             this.selected_time_y_axis_g.attr('class', 'axis axis--y')
-                .attr('transform', "translate("+(this.x + this.width)+","+ (this.y - 15) + ")")
-                .call(d3.axisRight(this.axis_y).ticks(4));
+                .attr('transform', "translate("+(this.x)+","+ (this.y - 15) + ")")
+                .call(d3.axisLeft(this.axis_y).ticks(4));
 
             this.selected_time_path_g = this.svg.append('g');
             this.selected_time_path_g.append('path')
@@ -240,22 +221,10 @@ class Timer{
             .classed('timer_error_linechart_line', true)
             .attr("fill", "none")
             .attr('d', linefunc);
-
-            //this.selected_time_impact_path_g = this.svg.append('g');
-            //this.selected_time_impact_path_g.append('path')
-            //.datum(()=>{
-            //    let data = [];
-            //    for(let i = this.current_time_step + 1; i <= this.current_time_step + this.len_gap && i < this.absoluteError.length; i++){
-            //            data.push(this.impactfactor[i]);
-            //    }
-            //    return data;
-            //})
-            //.style('stroke', 'orange')
-            //.attr("fill", "none")
-            //.attr('d', this.impactlinefunc);
         }
         else{
             this.selected_time_axis_g.call(d3.axisBottom(this.selected_time_axis).ticks(Math.min(this.len_gap, 20)));
+            this.selected_time_y_axis_g.call(d3.axisLeft(this.axis_y).ticks(4));
 
             this.selected_time_path_g.remove();
             this.selected_time_path_g = this.svg.append('g');
@@ -270,32 +239,17 @@ class Timer{
             .classed('timer_error_linechart_line', true)
             .attr("fill", "none")
             .attr('d', linefunc);
-
-            //this.selected_time_impact_path_g.remove();
-            //this.selected_time_impact_path_g = this.svg.append('g');
-            //this.selected_time_impact_path_g.append('path')
-            //.datum(()=>{
-            //    let data = [];
-            //    for(let i = this.current_time_step + 1; i <= this.current_time_step + this.len_gap && i < this.absoluteError.length; i++){
-            //            data.push([this.impactfactor[i], i]);
-            //    }
-            //    return data;
-            //})
-            //.style('stroke', 'orange')
-            //.attr("fill", "none")
-            //.attr('d', impactlinefunc);
         }
         
-        
         //connecting path
-        /*let path = [];
+        let path = [];
         let line = d3.line().x((d)=>{return d[0];}).y((d)=>{return d[1];});//.curve(d3.curveStepAfter);
         path.push([this.x, this.y + 100]);
         path.push([this.x, this.y + 40]);
-        //path.push([+this.trigger_rect.attr('x'), this.y + 30]);
+        
         path.push([+this.trigger_rect.attr('x'), this.y]);
         path.push([(+this.trigger_rect.attr('x')) + (+this.trigger_rect.attr('width')), this.y]);
-        //path.push([(+this.trigger_rect.attr('x')) + (+this.trigger_rect.attr('width')), this.y + 30]);
+        
         path.push([this.x + this.width, this.y + 40]);
         path.push([this.x + this.width, this.y + 100]);
         
@@ -308,7 +262,7 @@ class Timer{
         else{
             this.selected_time_axis_connector.datum(path)
             .attr('d', line);
-        }*/
+        }
     }
 
     setDisplayVariable(variable){
