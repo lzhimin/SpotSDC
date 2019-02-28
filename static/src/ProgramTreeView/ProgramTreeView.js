@@ -11,7 +11,7 @@ class ProgramTreeView extends BasicView{
         this.programtreecontroller = new ProgramViewController();
 
         this.outcome_color = {
-            'DUE': '#542788',
+            'Crash': '#542788',
             'Masked': '#1b9e77',
             'SDC': '#d95f02'
         }   
@@ -136,9 +136,7 @@ class ProgramTreeView extends BasicView{
             .attr('rx', 5)
             .attr('ry', 5)
             .on('click', (data, i, node)=>{
-
                 let isnum = /^\d+$/.test(data.key);
-
                 if(isnum){
                     d3.selectAll('.tree_node')
                     .classed('tree_node', true)
@@ -146,6 +144,9 @@ class ProgramTreeView extends BasicView{
                 
                     d3.select(node[0]).classed('tree_node_highlight', true);
                     publish('SOURCECODE_HIGHLIGHT', {'line':data.key, 'function': this.programtreedata.getFunctionName(data.key)});
+                }else{
+                    //collapse operation
+                    
                 }
             })
             .classed('tree_node', true);
@@ -428,7 +429,7 @@ class ProgramTreeView extends BasicView{
             let x = this.left_padding + this.blockw * 4 + this.padding;
             let maxdiff = this.viewoption == "error_output_dist" ? this.programtreedata.getMaxDiff() : 10;
             let mindiff = this.viewoption == "error_output_dist" ? this.programtreedata.getMinDiff() : 0;
-            let labeltext = this.viewoption == "error_output_dist"?"Output Distribution(log10)" : "SDC Impact Distribution(log10)";
+            let labeltext = this.viewoption == "error_output_dist"?"SDC Error Output Distribution(log10)" : "SDC Impact Distribution(log10)";
             let x_axis = d3.scaleLinear().range([x, x + Math.floor(this.bitmap_width/10) * 10]).domain([mindiff, maxdiff]);
 
             this.impactHeatmapAnnotation = this.svg.append('g')

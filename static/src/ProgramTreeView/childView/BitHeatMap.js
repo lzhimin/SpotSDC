@@ -121,7 +121,7 @@ class BitHeatMap extends standardChildView{
                 //random sample 10%
                 let resample_set = [];
 
-                for(let i = 0; i < this.sample.length * 0.1; i++){
+                for(let i = 0; i < 20; i++){
                     let index = parseInt(Math.random() * this.sample.length);
                     resample_set.push(this.sample[index])
                 }

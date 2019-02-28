@@ -55,6 +55,10 @@ class Timer{
         this.absoluteError = data;
     }
 
+    setGlobalVariable(data){
+        this.globalVariable = data;
+    }
+
     setImpactFactor(factors){
         this.impactfactor = factors;
     }
@@ -72,6 +76,7 @@ class Timer{
     }
 
     draw(){
+        //draw the error variation over the program execution
         this.axis_x = d3.scaleLinear().range([this.x, this.x + this.width]).domain([0, this.time]);
         this.axis_y = d3.scaleLinear().range([this.y, this.y - this.height]).domain([Math.min(0, d3.min(this.absoluteError, (d)=>{return d[1];})), Math.max(1, d3.max(this.absoluteError, (d)=>{return d[1];}))]);
         
@@ -167,6 +172,68 @@ class Timer{
             return 'translate('+this.axis_x(d)+','+(this.y+10)+')';
         })
         .attr('fill', 'red');
+
+        //draw global variable change over time
+        this.global_axis_x = d3.scaleLinear().range([this.x, this.x + this.width]).domain([0, this.time]);
+        this.global_axis_y = d3.scaleLog().range([this.y, this.y - this.height]).domain([1, d3.max(this.globalVariable)]);
+
+        this.svg.append('g').attr('class','axis axis--x')
+            .attr("transform", "translate(0,"+ this.y + ")")
+            .call(d3.axisBottom(this.axis_x).ticks(20));
+        
+        this.axis_y_axis = this.svg.append('g').attr('class','axis axis--y')
+            .attr("transform", "translate("+ (this.x+this.width) + ",0)")
+            .call(d3.axisRight(this.global_axis_y).ticks(4));
+
+        this.globallinefunc = d3.line()
+            .x((d, i)=>{return this.global_axis_x(i);})
+            .y((d, i)=>{
+                //handle log scale with value smaller than 1
+                if(d < 1)
+                    return this.global_axis_y(d+1);
+                return this.global_axis_y(d);
+            })
+            .curve(d3.curveStepAfter);
+        
+        this.normrErrorPath = this.svg.append("g").append("path")
+            .datum(this.globalVariable)
+            .classed('global_error_linechart_line', true)
+            .attr("fill", "none")
+            .attr('d', this.globallinefunc)
+            .style('stroke', 'purple');
+
+        //draw annotation
+        this.svg.append('g').selectAll('.annotationLine').data(["error", "converge metric"]).enter()
+            .append('rect')
+            .attr('width', 50)
+            .attr('height', 4)
+            .attr('x', this.x + this.width - 300)
+            .attr('y', (d,i)=>{
+                return i* 20 + 10;
+            })
+            .attr('fill', (d, i)=>{
+                return i==0?"steelblue":"purple";
+            });
+        
+        this.svg.append('g').selectAll('.annotationLine').data(["error(E)", "converge metric(CM)"]).enter()
+            .append('text')
+            .text((d)=>{return d;})
+            .attr('x', this.x + this.width - 245)
+            .attr('y', (d,i)=>{
+                return i* 20 + 15;
+            })
+            //.attr('text-anchor', 'middle');//
+            .attr('domain-baseline', 'central');
+        
+        this.svg.append('g').selectAll('.annotationLine').data(["(E)", "(CM)"]).enter()
+            .append('text')
+            .text((d)=>{return d;})
+            .attr('x', (d, i)=>{
+                return i == 0? this.x : this.x + this.width;
+            })
+            .attr('y', 50)
+            .attr('text-anchor', 'middle')
+            .attr('domain-baseline', 'central');
 
         //timer series lens
         this.draw_select_time_intervel();

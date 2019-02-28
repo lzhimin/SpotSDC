@@ -46,7 +46,10 @@ class StackBarChart extends standardChildView{
             .classed('stackbar_'+this.uuid+'_rect', true)
             .classed('stackBarChart_rect', true)
             .style('fill', (d)=>{
-                return this.outcomecolor[d.key];
+                if(d.key == "DUE")
+                    return this.outcomecolor["Crash"];
+                else
+                    return this.outcomecolor[d.key];
             });
         }else{
             this.g.selectAll('.stackbar_'+this.uuid+'_rect').data(this.data.values)
