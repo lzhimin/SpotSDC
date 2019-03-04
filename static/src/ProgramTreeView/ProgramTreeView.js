@@ -146,7 +146,7 @@ class ProgramTreeView extends BasicView{
                     publish('SOURCECODE_HIGHLIGHT', {'line':data.key, 'function': this.programtreedata.getFunctionName(data.key)});
                 }else{
                     //collapse operation
-                    
+                    alert(data.key);
                 }
             })
             .classed('tree_node', true);
