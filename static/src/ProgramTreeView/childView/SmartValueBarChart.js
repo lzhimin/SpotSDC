@@ -68,7 +68,7 @@ class SmartValueBarChart extends standardChildView{
                     switch(i){
                         case 0: return this.color['Masked'];
                         case 1: return this.color['SDC'];
-                        case 2: return this.color['Crash'];
+                        case 2: return this.color['DUE'];
                     }
                 })
                 .on('click', (d, i)=>{

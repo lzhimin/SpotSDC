@@ -43,6 +43,13 @@ input{
     stroke-width: 1px;
 }
 
+.tree_node_collapse{
+    fill:gray;
+    fill-opacity: 0.5;
+    stroke: gray;
+    stroke-width: 1px;
+}
+
 .tree_node_highlight{
     fill:orange;
     stroke-width: 1px;

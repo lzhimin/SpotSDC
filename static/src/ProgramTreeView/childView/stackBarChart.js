@@ -8,7 +8,7 @@ class StackBarChart extends standardChildView{
     init(){
         this.data.values.sort((a,b)=>{
             if(a.key > b.key)return 1;
-            else return -1;
+           else return -1;
         });
 
         this.sum = 0.0;
@@ -20,6 +20,7 @@ class StackBarChart extends standardChildView{
     draw(){
         this.init();
         let loc_x = this.x;
+        //
         
         if(this.g == undefined){
             this.g = this.svg.append('g');
@@ -46,10 +47,7 @@ class StackBarChart extends standardChildView{
             .classed('stackbar_'+this.uuid+'_rect', true)
             .classed('stackBarChart_rect', true)
             .style('fill', (d)=>{
-                if(d.key == "DUE")
-                    return this.outcomecolor["Crash"];
-                else
-                    return this.outcomecolor[d.key];
+                return this.outcomecolor[d.key];
             });
         }else{
             this.g.selectAll('.stackbar_'+this.uuid+'_rect').data(this.data.values)

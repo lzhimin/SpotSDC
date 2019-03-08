@@ -31,12 +31,12 @@ class ProgramTreeData{
             for (let i = 0; i < this.pattern.length; i++)
                 values.key(function (d) {
                     return d[pattern[i]];
-                });
+                }).sortKeys(d3.ascending);
         }
 
         values.key(function (d) {
             return d.outcome
-        });
+        }).sortKeys(d3.ascending);
 
         this.hierachicalData =  {'key':$('#program_TreeView_file_selector').val().split('_')[0], 'values':values.entries(this.filterData)};
     }
