@@ -57,7 +57,7 @@ class BitHeatMap extends standardChildView{
         })
         .style('fill', (d, i)=>{
             //return d == 0 ? 'white':this.get_local_color_scale(i, d);
-			return d == 0 ? 'white':this.get_global_color_scale(d);
+			//return d == 0 ? 'white':this.get_global_color_scale(d);
         })
         .on('click', (d, i)=>{
             publish('SUBSETDATA', d);
