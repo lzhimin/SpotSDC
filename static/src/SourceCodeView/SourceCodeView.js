@@ -16,6 +16,7 @@ class SourceCodeView extends BasicView{
                 return d3.interpolateOrRd(this.colorscale(this.sdc_frequency[(i+1)+'']))
         });
 
+        /*
         if(this.sourceCodeVis == undefined){
             this.VisWidth = $('#sourceCode_vis')[0].getBoundingClientRect().width,
 			this.VisHeight = $('#sourceCode_display')[0].getBoundingClientRect().height;
@@ -48,7 +49,7 @@ class SourceCodeView extends BasicView{
 
         this.heatmap.forEach(d=>{
 			d.draw();
-		});
+		});*/
     }
 
     setData(msg, data){

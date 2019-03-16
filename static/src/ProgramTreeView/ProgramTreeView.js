@@ -16,10 +16,17 @@ class ProgramTreeView extends BasicView{
             'SDC': '#d95f02'
         }   
 
-        this.colorscale = ['#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5','#08519c','#08306b'];
+        this.colorscale = ['#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5','#08519c','#08306b'];
         
-        //this.colorscale = d3.interpolateViridis;//['#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5','#08519c','#08306b'];
+        //this.colorscale = [];
+        //for(let i = 1; i <= 10; i++){
+        //    this.colorscale.push(d3.interpolateViridis(i/10.0));
+            //this.colorscale.push(d3.interpolateViridis(i/20.0));
+            //this.colorscale.push(d3.interpolateCool(i/20.0));
+            //this.colorscale.push(d3.interpolateSpectral((20-i)/20.0));
+        //}
 
+        
         this.viewoption = 'bitStackBarChart';
 
         this.normalization = 'global';
@@ -288,16 +295,7 @@ class ProgramTreeView extends BasicView{
     }
 
     draw_summary_annotation(x, y){
-        let g = this.svg.append('g')
-        
-        //g.append('rect')
-        //    .attr('width', this.blockw * 4)
-        //    .attr('height', this.blockh)
-        //    .attr('x', this.left_padding)
-        //    .attr('y', this.top_padding)
-        //    .attr('rx', 5)
-        //    .attr('ry', 5)
-        //    .attr('class',"tree_node");
+        let g = this.svg.append('g');
         
         g.append("text").text("Fault Injection Summary")
             .attr('x', (d, i)=>{
@@ -398,6 +396,8 @@ class ProgramTreeView extends BasicView{
         let colorscale_h = 20;
        
         this.bitHeatMapAnnotation_colorscale = this.svg.append('g');
+
+
         this.bitHeatMapAnnotation_colorscale.selectAll('.colorscale').data(colorscale).enter()
         .append('rect')
         .attr('x', (d, i)=>{
@@ -414,17 +414,46 @@ class ProgramTreeView extends BasicView{
         .style('stroke', 'gray')
         .style('stroke-width', '1px');
 
-        this.bitHeatMapAnnotation_colorscale.selectAll('.colorscale_text').data(['0<','100 %']).enter().append('text')
+        this.bitHeatMapAnnotation_colorscale.selectAll('.colorscale_text').data(()=>{
+            let data = ['0%<'];
+            for(let i = 1; i <= this.colorscale.length; i++){
+                data.push(parseInt(100.0/this.colorscale.length * i)+'%');
+            }
+            return data;
+        }).enter().append('text')
         .text(d=>d)
         .attr('x', (d, i)=>{
-            if(i == 0)
-                return  this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/5;
-            else 
-                return this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/5 + colorscale_w * this.colorscale.length;
+            return this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/5 + colorscale_w * i;
         })
         .attr('y', this.top_padding - 95)
         .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'central');
+        .attr('dominant-baseline', 'central')
+        .style('font-size', '10px');
+
+        //empty space color map
+        this.bitHeatMapAnnotation_colorscale
+        .append('rect')
+        .attr('x', (d, i)=>{
+            return this.left_padding + this.blockw * 4 + this.padding*2 + this.bitmap_width/5 + colorscale_w * -2;
+        })
+        .attr('y', (d, i)=>{
+            return this.top_padding - 85;
+        })
+        .attr('width', colorscale_w)
+        .attr('height', colorscale_h)
+        .attr('fill', 'white')
+        .style('stroke', 'gray')
+        .style('stroke-width', '1px');
+
+        this.bitHeatMapAnnotation_colorscale.append('text')
+        .text('0%')
+        .attr('x', (d, i)=>{
+            return  this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/5 + colorscale_w * -1.5;
+        })
+        .attr('y', this.top_padding - 95)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .style('font-size', '10px');
 
 
         if(this.viewoption == 'bit_heatmap' || this.viewoption == 'smart_bitStackBarChart' || this.viewoption == 'bitStackBarChart'){

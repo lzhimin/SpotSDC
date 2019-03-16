@@ -57,10 +57,10 @@ class ErrorPropagationView extends BasicView{
 
         //clean svg
         this.svg.html('');
-        if($('input[name=propagatation_error_radio]:checked').val() == "propagation_dynamic")
+        //if($('input[name=propagatation_error_radio]:checked').val() == "propagation_dynamic")
             this.draw_dynamic();
-        else
-            this.draw_static();
+        //else
+        //    this.draw_static();
         
     }
 

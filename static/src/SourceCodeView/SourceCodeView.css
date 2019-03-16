@@ -10,18 +10,18 @@
     overflow: auto;
 }
 
-
+/*
 #sourceCode_vis{
     width: 20%;
     float: left;
 }
 
 #sourceCode_menu{
-    height:10%;
-}
+   height:10%;
+}*/
 
 #sourceCode_display{
-    width: 78%;
+    width: 100%;
     float: left;
 }
 .sourceCode_even_line{

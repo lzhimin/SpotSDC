@@ -67,9 +67,9 @@ class valueStack extends standardChildView{
             })
             .style('fill', (d, i)=>{
                 switch(i){
-                    case 0: return this.color['DUE'];break;
-                    case 1: return this.color['SDC'];break;
-                    case 2: return this.color['Masked'];break;
+                    case 0: return this.color['DUE'];
+                    case 1: return this.color['SDC'];
+                    case 2: return this.color['Masked'];
                 }
             })
             .on('click', (d, i)=>{
