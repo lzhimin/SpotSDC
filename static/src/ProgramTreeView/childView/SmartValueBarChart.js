@@ -74,17 +74,6 @@ class SmartValueBarChart extends standardChildView{
                 .on('click', (d, i)=>{
                     publish('SUBSETDATA', d);
                 });
-
-            //this.g.selectAll('.Bit_outcome_heatmap_'+this.uuid+'_rect'+index).data([0, this.max_number_of_sample])
-            //.append('text')
-            //.text((d)=>{return d;})
-            //.attr('x', this.x)
-            //.attr('y', (d, i)=>{
-            //    return i==0? this.y: this.y + this.rect_h;
-            //})
-            //.attr("dominant-baseline", "central")
-            //.attr("text-anchor", "middle")
-            //.style("font-size", 12);
         }
 
         //heatmap rect
@@ -106,6 +95,68 @@ class SmartValueBarChart extends standardChildView{
         this.chart_axis_annotation = this.g.append('g').attr('class','bitbarchart_axis')
             .attr("transform", "translate("+(this.x )+","+ this.y + ")")
             .call(d3.axisLeft(this.chart_axis).ticks(2));
+        
+        //draw sampling operation.
+        this.g.append('g').selectAll('path')
+        .data(['symbolCross'])
+        .enter()
+        .append('path')
+        .attr('transform', (d, i)=>{
+            return 'translate(' + (this.x + this.width + 10) + ','+ (this.y + this.height/2) +')';
+        })
+        .attr('d', (d)=>{
+            return d3.symbol().size(100).type(d3[d])();
+        })
+        .style('fill', 'gray')
+        .on('click', (d)=>{
+            this.info = this.getDataLocation();
+            this.resample = [];
+        
+            let callback = function(data){
+                this.sample = data.filter((d)=>{
+                    return d.Function == this.info.function && 
+                        d.Variable == this.info.variable &&
+                        d.Line == this.info.line;
+                });
+
+                //random sample 10%
+                let resample_set = [];
+
+                for(let i = 0; i < 20; i++){
+                    let index = parseInt(Math.random() * this.sample.length);
+                    resample_set.push(this.sample[index])
+                }
+
+                this.sample = resample_set;
+
+                this.InsertResampleData(this.sample);
+
+                publish('RESAMPLE', this.sample)
+            }
+            //get the name of current data set
+            let dataname = $("#program_TreeView_file_selector").val();
+
+            if(dataname.split("_")[0] == "cg")
+                d3.csv('../static/data/cg_complete.csv').then(callback.bind(this));
+            else if(dataname.split("_")[0] == "fft")
+                d3.csv('../static/data/fft_exhaust.csv').then(callback.bind(this));
+        });  
+    }
+
+    getDataLocation(){
+        let item = this.data.values[0].values[0];
+        return {'function':item.Function, 'line':item.Line, 'variable':item.Variable};
+    }
+    
+    InsertResampleData(data){
+        let sample = {'key':'resample','values':[]};
+
+        for(let i = 0; i < data.length; i++){
+            sample.values = data;
+        }
+
+        this.data.values.push(sample);
+        this.draw();
     }
 
     setOutcomeColor(color){
@@ -116,20 +167,6 @@ class SmartValueBarChart extends standardChildView{
         this.max_number_of_sample = d3.max(this.hist, (d)=>{return d.length;});
 		this.globalscale = d3.scaleLinear().domain([0, this.max_number_of_sample]).range([0, this.rect_h]);
 	}
-
-	//init_local_color_scale(i){
-	//	let col = i % this.col;
-		
-	//	let data = [];
-		
-	//	for(let i = 0; i < this.row; i++){
-	//		data.push(this.hist[i * this.col + col]);
-	//	}
-	
-	//	let colorscale = d3.scaleQuantize().domain([0, d3.sum(data, (d)=>{return d.length;})]).range(this.color);
-        
-    //    return colorscale;
-	//}
 
 	get_global_color_scale(d){
 		return this.globalcolorscale(d.length);

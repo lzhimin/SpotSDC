@@ -12,10 +12,6 @@ let config = {
             type: 'component',
             componentName: 'ErrorPropagationView',
             title:'ErrorPropagationView'
-        },{
-            type: 'component',
-            componentName: 'GrandView',
-            title:'GrandView'
         }]
     },{
         type: 'column',
@@ -25,6 +21,10 @@ let config = {
         },{
             type: 'component',
             componentName: 'TableView'
+        },{
+            type: 'component',
+            componentName: 'ScatterPlot',
+            title:'ScatterPlot'
         }]
       }]
   }]

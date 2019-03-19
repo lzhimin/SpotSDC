@@ -4,8 +4,8 @@ let myLayout = new GoldenLayout(config);
 //scv: source code view
 //tv: table view
 //epv: error propagation view
-//gv: grand analysis view
-let ptv, scv, tv, epv, gv;
+//sp: individual scatter plot
+let ptv, scv, tv, epv, sp;
 
 myLayout.registerComponent('ProgramTreeView', function(container, state){
     $(container.getElement()[0]).load('../static/src/ProgramTreeView/ProgramTreeView.html');
@@ -27,16 +27,13 @@ myLayout.registerComponent('ErrorPropagationView', function(container, state){
     subscribe('SINGLE_SIMULATION_GOLDEN', epv.setGoldenRunData.bind(epv));
 });
 
-myLayout.registerComponent('GrandView', function(container, state){
+myLayout.registerComponent('ScatterPlot', function(container, state){
     //error propagation view subscribe to single simulation data
-    $(container.getElement()[0]).load('../static/src/GrandView/GrandView.html');
+    $(container.getElement()[0]).load('../static/src/ScatterPlot/ScatterPlot.html');
 
-    gv = new GrandView(container);
-    //epv = new ErrorPropagationView(container);
+    sp = new ScatterPlot(container);
     
-    //fetchGoldenSimulationData()
-    subscribe('DATASET', gv.setData.bind(gv));
-    //subscribe('SINGLE_SIMULATION_GOLDEN', epv.setGoldenRunData.bind(epv));
+    subscribe('SUBSETDATA', sp.setData.bind(sp));
 });
 
 myLayout.registerComponent('SourceCodeView', function(container, state){

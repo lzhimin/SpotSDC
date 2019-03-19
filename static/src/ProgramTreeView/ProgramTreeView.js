@@ -86,7 +86,15 @@ class ProgramTreeView extends BasicView{
         let x = this.left_padding + this.blockw * 4;
         let y = this.top_padding;
 
-        this.draw_leaf_vis(x, y, this.programtreedata.getSummaryData(), "data_summary");        
+        this.draw_leaf_vis(x, y, this.programtreedata.getSummaryData(), "data_summary");    
+        
+        //draw axis?
+        if(this.viewoption == 'bit_heatmap' || this.viewoption == 'smart_bitStackBarChart' || this.viewoption == 'bitStackBarChart'){
+            let chart_axis = d3.scaleLinear().domain([64, 1]).range([x, x + this.bitmap_width - 5]);
+            this.svg.append('g').attr('class','bitbarchart_axis')
+                .attr("transform", "translate("+(this.left_padding*2)+','+ (y + this.blockh - 8) + ")")
+                .call(d3.axisBottom(chart_axis).ticks(16));
+        }
     }
 
     draw_tree(){
@@ -171,6 +179,8 @@ class ProgramTreeView extends BasicView{
                 
                     d3.select(node[0]).classed('tree_node_highlight', true);
                     publish('SOURCECODE_HIGHLIGHT', {'line':data.key, 'function': this.programtreedata.getFunctionName(data.key)});
+                    //console.log(this.hierachy_aggregation(data));
+                    publish('SUBSETDATA', this.hierachy_aggregation(data))
                 }else{
                     //collapse or expand operation
                     if(this.collapse_node.has(data.key)){
@@ -342,7 +352,10 @@ class ProgramTreeView extends BasicView{
         this.stackbar_chart_text.selectAll('.stackbar_chart_text').data(Object.keys(this.outcome_color).sort())
             .enter()
             .append('text')
-            .text(d=>d)
+            .text((d)=>{
+                if (d=='DUE') return "Crash";
+                else return d;
+            })
             .attr('x', (d, i)=>{
                 return ratio_chart_x + this.stackbar_width/1.5;
             })
@@ -464,7 +477,12 @@ class ProgramTreeView extends BasicView{
             }
 
             this.bitHeatMapAnnotation = this.svg.append('g');
-            this.bitHeatMapAnnotation.append('text').text('Bit Outcome Distribution')
+            this.bitHeatMapAnnotation.append('text').text(()=>{
+                if(this.viewoption == 'smart_bitStackBarChart')
+                    return 'Sample Distribution';
+                else
+                    return 'Bit Outcome Distribution'
+            })
             .attr('x', (d, i)=>{
                 return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / 2;
             })
