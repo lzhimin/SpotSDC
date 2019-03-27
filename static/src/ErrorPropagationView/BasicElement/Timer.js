@@ -157,17 +157,11 @@ class Timer{
         .attr('domain-baseline', 'central')
         .classed('timer_trigger_text', true);
 
-        this.trigger_rect_cur = this.svg.append('path').datum([this.current_time_step])
-        .attr('d', d3.symbol().size(200).type(d3.symbolTriangle)())
-        .attr('transform',(d)=>{
-            return 'translate('+this.axis_x(d)+','+(this.y-this.trigger_rect_h-10)+') rotate('+180+')';
-        })
-        .attr('fill', 'steelblue');
 
         //init error indication
         let init_index = this.getFirstErrorIndex();
         this.svg.append('path').datum([init_index])
-        .attr('d', d3.symbol().size(100).type(d3.symbolTriangle)())
+        .attr('d', d3.symbol().size(200).type(d3.symbolTriangle)())
         .attr('transform',(d)=>{
             return 'translate('+this.axis_x(d)+','+(this.y+10)+')';
         })
@@ -365,10 +359,6 @@ class Timer{
         })
         .attr('x', (d, i)=>{
             return i == 0? this.axis_x(this.current_time_step) : this.axis_x(this.current_time_step + this.len_gap);
-        });
-        
-        this.trigger_rect_cur.attr('transform',()=>{ 
-            return 'translate('+this.axis_x(this.current_time_step)+','+(this.y-this.trigger_rect_h-10)+') rotate('+180+')'; 
         });
 
         this.draw_select_time_intervel();

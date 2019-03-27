@@ -58,10 +58,7 @@ class ErrorPropagationView extends BasicView{
         //clean svg
         this.svg.html('');
         //if($('input[name=propagatation_error_radio]:checked').val() == "propagation_dynamic")
-            this.draw_dynamic();
-        //else
-        //    this.draw_static();
-        
+        this.draw_dynamic();
     }
 
     draw_dynamic(){
@@ -151,7 +148,7 @@ class ErrorPropagationView extends BasicView{
         
         histogram.append('g')
             .append('text')
-            .text('Error(log) Density Distribution Histogram')
+            .text('Error(log) Distribution Histogram')
             .attr('class', 'histogram_anotation') 
             .attr('transform', 'translate(35, 200)');
 
@@ -188,7 +185,7 @@ class ErrorPropagationView extends BasicView{
         this.timer.redraw();
     }
 
-    draw_tree(x=20, y=230){
+    draw_tree(x=20, y=250){
 
         let hierachicaldata = this.propagationData.hierachicalData;
         let h = 0;

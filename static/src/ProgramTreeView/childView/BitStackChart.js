@@ -83,7 +83,7 @@ class BitStackChart extends standardChildView{
 		.attr('y2', d=>d[3])
 		.style('stroke', 'black')
 		.style('stroke-width', '1px')
-		.style('stroke-opacity', 0.4)
+		.style('stroke-opacity', 1)
         .style('stroke-dasharray', '5,5'); 
         
         this.chart_axis = d3.scaleLinear().domain([0, 1]).range([this.rect_h, 0]);

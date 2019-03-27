@@ -127,8 +127,41 @@ class ScatterPlot extends BasicView{
                 return this.margin.top + 30 * i + 7;
             })
             .attr('dominant-baseline', 'central');
-        }
+    }
+
+    drawContourPlot(){
+        this.x_axis = d3.scaleLinear().domain([0, d3.max(this.data, (d)=>{return d.x;})]).range([this.margin.left, this.width-this.margin.right]);
+        this.y_axis = d3.scaleLinear().domain([0, d3.max(this.data, (d)=>{return d.y;})]).range([this.height - this.margin.top, this.margin.bottom]);
+
+        this.chart_axis_x = this.chart.append('g').attr('class','scatterplot_axis')
+            .attr("transform", "translate(0,"+ (this.height-this.margin.bottom) + ")")
+            .call(d3.axisBottom(this.x_axis).ticks(10));
+
+        this.chart_axis_y = this.chart.append('g').attr('class','scatterplot_axis')
+            .attr("transform", "translate("+this.margin.left+",0)")
+            .call(d3.axisLeft(this.y_axis).ticks(10));
+
+        //compute the density data
+        let densityData = d3.contourDensity().x((d)=>{
+            return this.x_axis(d.x);
+        }).y((d)=>{
+            return this.y_axis(d.y);
+        }).size([this.width - this.margin.right - this.margin.left, this.height - this.margin.top - this.margin.bottom])
+        .bandwidth(20)(this.data);
 
 
-        
+        let color = d3.scaleLinear()
+        .domain([0, d3.max(densityData, (d)=>{return d.value;})])
+        .range(['white', '#69b3a2']);
+
+        this.chart.insert("g", "g")
+            .selectAll('path')
+            .data(densityData)
+            .enter()
+            .append('path')
+            .attr('d', d3.geoPath())
+            .attr('fill', (d)=>{
+                return color(d.value);
+            });
+    }
 }

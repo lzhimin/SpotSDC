@@ -515,7 +515,7 @@ class ProgramTreeView extends BasicView{
             let x = this.left_padding + this.blockw * 4 + this.padding;
             let maxdiff = this.viewoption == "error_output_dist" ? this.programtreedata.getMaxDiff() : 10;
             let mindiff = this.viewoption == "error_output_dist" ? this.programtreedata.getMinDiff() : 0;
-            let labeltext = this.viewoption == "error_output_dist"?"SDC Error Output Distribution(log10)" : "SDC Impact Distribution(log10)";
+            let labeltext = this.viewoption == "error_output_dist"?"SDC Impact Distribution(log10)" : "SDC Impact Distribution(log10)";
             let x_axis = d3.scaleLinear().range([x, x + Math.floor(this.bitmap_width/10) * 10]).domain([mindiff, maxdiff]);
 
             this.impactHeatmapAnnotation = this.svg.append('g')
