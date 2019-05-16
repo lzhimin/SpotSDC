@@ -16,11 +16,22 @@ class ProgramTreeView extends BasicView{
             'SDC': '#d95f02'
         }   
 
-        this.colorscale = ['#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5','#08519c','#08306b'];
+        this.colorscale = ['#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5','#08519c','#08306b'];
+        
+        //this.colorscale = [];
+        //for(let i = 1; i <= 10; i++){
+        //    this.colorscale.push(d3.interpolateViridis(i/10.0));
+            //this.colorscale.push(d3.interpolateViridis(i/20.0));
+            //this.colorscale.push(d3.interpolateCool(i/20.0));
+            //this.colorscale.push(d3.interpolateSpectral((20-i)/20.0));
+        //}
+
         
         this.viewoption = 'bitStackBarChart';
 
         this.normalization = 'global';
+
+        this.collapse_node = new Set();
 
          //register event
          subscribe('RESAMPLE', this.Resample.bind(this));
@@ -68,13 +79,22 @@ class ProgramTreeView extends BasicView{
         this.draw_tree();
         this.draw_menu();
         this.draw_annotation();
+    
     }
 
     draw_summary(){
         let x = this.left_padding + this.blockw * 4;
         let y = this.top_padding;
 
-        this.draw_leaf_vis(x, y, this.programtreedata.getSummaryData(), "data_summary");        
+        this.draw_leaf_vis(x, y, this.programtreedata.getSummaryData(), "data_summary");    
+        
+        //draw axis?
+        if(this.viewoption == 'bit_heatmap' || this.viewoption == 'smart_bitStackBarChart' || this.viewoption == 'bitStackBarChart'){
+            let chart_axis = d3.scaleLinear().domain([64, 1]).range([x, x + this.bitmap_width - 5]);
+            this.svg.append('g').attr('class','bitbarchart_axis')
+                .attr("transform", "translate("+(this.left_padding*2)+','+ (y + this.blockh - 8) + ")")
+                .call(d3.axisBottom(chart_axis).ticks(16));
+        }
     }
 
     draw_tree(){
@@ -102,6 +122,7 @@ class ProgramTreeView extends BasicView{
             this.svg.attr('height', this.top_padding + h + this.bottom_padding + 80);
         }
         this.draw_node(x, y, h - padding, this.blockw, hierachicaldata);
+    
     }
 
     draw_inner_node(x, y, data, parent){
@@ -112,15 +133,29 @@ class ProgramTreeView extends BasicView{
             return a.key > b.key;
         });
 
-        if(this.is_the_node_a_leaf(data)){
+        if(this.is_the_node_a_leaf(data) && !this.collapse_node.has(data.key)){
             //recursive draw the tree node
             data.values.forEach((d, index)=>{
                 height_of_current_node += this.draw_inner_node(x + this.blockw, y + height_of_current_node, d, parent+'_'+data.key);
             });
         }
         else{
-            height_of_current_node = this.blockh;
-            this.draw_leaf_vis(x + this.blockw + this.padding, y, data, parent+'_'+data.key);
+            if(this.collapse_node.has(data.key)){
+                height_of_current_node = this.blockh;
+                let rs =  this.hierachy_aggregation(data);
+                rs = d3.nest().key(function (d) {
+                    return d.outcome
+                }).sortKeys(d3.ascending).entries(rs);
+
+                let item = {'key': data.key};
+                item['values'] = rs;
+
+                this.draw_leaf_vis(this.left_padding + this.blockw * 4, y, item, data.key); 
+
+            }else{
+                height_of_current_node = this.blockh;
+                this.draw_leaf_vis(x + this.blockw + this.padding, y, data, parent+'_'+data.key);
+            }
         }
         this.draw_node(x, y, height_of_current_node, this.blockw, data);
         return height_of_current_node;
@@ -136,9 +171,7 @@ class ProgramTreeView extends BasicView{
             .attr('rx', 5)
             .attr('ry', 5)
             .on('click', (data, i, node)=>{
-
                 let isnum = /^\d+$/.test(data.key);
-
                 if(isnum){
                     d3.selectAll('.tree_node')
                     .classed('tree_node', true)
@@ -146,9 +179,22 @@ class ProgramTreeView extends BasicView{
                 
                     d3.select(node[0]).classed('tree_node_highlight', true);
                     publish('SOURCECODE_HIGHLIGHT', {'line':data.key, 'function': this.programtreedata.getFunctionName(data.key)});
+                    //console.log(this.hierachy_aggregation(data));
+                    publish('SUBSETDATA', this.hierachy_aggregation(data))
+                }else{
+                    //collapse or expand operation
+                    if(this.collapse_node.has(data.key)){
+                        this.collapse_node.delete(data.key);
+                    }
+                    else{
+                        this.collapse_node.add(data.key);
+                    }
+                    this.draw();
                 }
             })
-            .classed('tree_node', true);
+            .attr('class', (d)=>{
+                return this.collapse_node.has(d.key)?"tree_node_collapse":"tree_node";
+            });
 
         this.svg.selectAll('.treetext_'+d.key).data([d]).enter().append('text')
             .text(d=>d.key)
@@ -259,16 +305,18 @@ class ProgramTreeView extends BasicView{
     }
 
     draw_summary_annotation(x, y){
-        this.svg.append('g').append("text").text("Summary")
+        let g = this.svg.append('g');
+        
+        g.append("text").text("Fault Injection Summary")
             .attr('x', (d, i)=>{
-                return this.left_padding + this.blockw * 2 + this.padding * 2;
+                return this.left_padding + this.padding * 1.5 + this.blockw;
             })
             .attr('y', (d, i)=>{
-                return this.top_padding + 10;
+                return this.top_padding + this.blockh/3;
             })
             .attr("dominant-baseline", "central")
             .attr("text-anchor", "middle")
-            .style("font-size", 15);
+            .style("font-size", 20);
     }
 
     draw_annotation_stackchart(x, y){
@@ -304,7 +352,10 @@ class ProgramTreeView extends BasicView{
         this.stackbar_chart_text.selectAll('.stackbar_chart_text').data(Object.keys(this.outcome_color).sort())
             .enter()
             .append('text')
-            .text(d=>d)
+            .text((d)=>{
+                if (d=='DUE') return "Crash";
+                else return d;
+            })
             .attr('x', (d, i)=>{
                 return ratio_chart_x + this.stackbar_width/1.5;
             })
@@ -358,6 +409,8 @@ class ProgramTreeView extends BasicView{
         let colorscale_h = 20;
        
         this.bitHeatMapAnnotation_colorscale = this.svg.append('g');
+
+
         this.bitHeatMapAnnotation_colorscale.selectAll('.colorscale').data(colorscale).enter()
         .append('rect')
         .attr('x', (d, i)=>{
@@ -374,17 +427,46 @@ class ProgramTreeView extends BasicView{
         .style('stroke', 'gray')
         .style('stroke-width', '1px');
 
-        this.bitHeatMapAnnotation_colorscale.selectAll('.colorscale_text').data(['0<','100 %']).enter().append('text')
+        this.bitHeatMapAnnotation_colorscale.selectAll('.colorscale_text').data(()=>{
+            let data = ['0%<'];
+            for(let i = 1; i <= this.colorscale.length; i++){
+                data.push(parseInt(100.0/this.colorscale.length * i)+'%');
+            }
+            return data;
+        }).enter().append('text')
         .text(d=>d)
         .attr('x', (d, i)=>{
-            if(i == 0)
-                return  this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/5;
-            else 
-                return this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/5 + colorscale_w * this.colorscale.length;
+            return this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/5 + colorscale_w * i;
         })
         .attr('y', this.top_padding - 95)
         .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'central');
+        .attr('dominant-baseline', 'central')
+        .style('font-size', '10px');
+
+        //empty space color map
+        this.bitHeatMapAnnotation_colorscale
+        .append('rect')
+        .attr('x', (d, i)=>{
+            return this.left_padding + this.blockw * 4 + this.padding*2 + this.bitmap_width/5 + colorscale_w * -2;
+        })
+        .attr('y', (d, i)=>{
+            return this.top_padding - 85;
+        })
+        .attr('width', colorscale_w)
+        .attr('height', colorscale_h)
+        .attr('fill', 'white')
+        .style('stroke', 'gray')
+        .style('stroke-width', '1px');
+
+        this.bitHeatMapAnnotation_colorscale.append('text')
+        .text('0%')
+        .attr('x', (d, i)=>{
+            return  this.left_padding + this.blockw * 4 + this.padding * 2 + this.bitmap_width/5 + colorscale_w * -1.5;
+        })
+        .attr('y', this.top_padding - 95)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .style('font-size', '10px');
 
 
         if(this.viewoption == 'bit_heatmap' || this.viewoption == 'smart_bitStackBarChart' || this.viewoption == 'bitStackBarChart'){
@@ -395,7 +477,12 @@ class ProgramTreeView extends BasicView{
             }
 
             this.bitHeatMapAnnotation = this.svg.append('g');
-            this.bitHeatMapAnnotation.append('text').text('Bit Outcome Distribution')
+            this.bitHeatMapAnnotation.append('text').text(()=>{
+                if(this.viewoption == 'smart_bitStackBarChart')
+                    return 'Sample Distribution';
+                else
+                    return 'Bit Outcome Distribution'
+            })
             .attr('x', (d, i)=>{
                 return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / 2;
             })
@@ -428,7 +515,7 @@ class ProgramTreeView extends BasicView{
             let x = this.left_padding + this.blockw * 4 + this.padding;
             let maxdiff = this.viewoption == "error_output_dist" ? this.programtreedata.getMaxDiff() : 10;
             let mindiff = this.viewoption == "error_output_dist" ? this.programtreedata.getMinDiff() : 0;
-            let labeltext = this.viewoption == "error_output_dist"?"Output Distribution(log10)" : "SDC Impact Distribution(log10)";
+            let labeltext = this.viewoption == "error_output_dist"?"SDC Impact Distribution(log10)" : "SDC Impact Distribution(log10)";
             let x_axis = d3.scaleLinear().range([x, x + Math.floor(this.bitmap_width/10) * 10]).domain([mindiff, maxdiff]);
 
             this.impactHeatmapAnnotation = this.svg.append('g')
@@ -484,6 +571,20 @@ class ProgramTreeView extends BasicView{
         return 'key' in data.values[0] && !(data.values[0].key in this.outcome_color);
     }
 
+    hierachy_aggregation(data){
+        let result = []
+        if(data.key in this.outcome_color){
+            return data.values;
+        }
+
+        data.values.forEach((d)=>{ 
+            let rs = this.hierachy_aggregation(d);
+            result = result.concat(rs);
+        });
+
+        return result;
+    }
+
     setData(msg, data){
         this.programtreedata.setData(data);
         this.callbackBinding();
@@ -504,6 +605,7 @@ class ProgramTreeView extends BasicView{
     }
 
     updateStackChart(option){
+    
         if(option == 'global'){
             this.stackbar_chart_text_above.text('The Number of Fault Injections');
             let maxsize = 0;
@@ -533,6 +635,7 @@ class ProgramTreeView extends BasicView{
 
     treeStructureChangeEvent(pattern){
         this.programtreedata.setHierachicalData(pattern);
+        this.collapse_node = new Set();
         this.draw();
     }
 

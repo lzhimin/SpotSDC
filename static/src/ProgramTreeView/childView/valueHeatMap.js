@@ -61,7 +61,7 @@ class ValueHeatMap extends standardChildView{
             return this.y + this.rect_h * (Math.floor(i / this.col));
         })
         .style('fill', (d, i)=>{
-            return d == 0 ? 'white':this.get_local_color_scale(i, d);
+            return d3.interpolateViridis(this.get_global_color_scale(d));
 			//return d == 0 ? 'white':this.get_global_color_scale(d);
         })
         .on('click', (d, i)=>{
@@ -92,7 +92,8 @@ class ValueHeatMap extends standardChildView{
     }
 
     init_color_scale(){
-		this.globalcolorscale = d3.scaleQuantize().domain(d3.extent(this.hist, (d)=>{return d.length;})).range(this.color);
+        this.globalcolorscale = d3.scaleQuantize().domain(d3.extent(this.hist, (d)=>{return d.length;})).range([0, 1]);
+        //this.globalcolorscale = d3.scaleQuantize().domain(d3.extent(this.hist, (d)=>{return d.length;})).range(this.color);
 		this.local_color_scale = new Array(this.bin_size);
 		
 		for(let i = 0; i < this.col; i++){
@@ -109,7 +110,8 @@ class ValueHeatMap extends standardChildView{
 			data.push(this.hist[i * this.col + col]);
 		}
 	
-		let colorscale = d3.scaleQuantize().domain([0, d3.sum(data, (d)=>{return d.length;})]).range(this.color);
+        //let colorscale = d3.scaleQuantize().domain([0, d3.sum(data, (d)=>{return d.length;})]).range(this.color);
+        let colorscale = d3.scaleQuantize().domain([0, d3.sum(data, (d)=>{return d.length;})]).range([0, 1]);
         
         return colorscale;
 	}

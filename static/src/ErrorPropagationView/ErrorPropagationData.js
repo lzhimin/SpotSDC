@@ -36,6 +36,8 @@ class ErrorPropagationData{
         this.absolute_log_error = this.parseData_Aboslute_Log_Error(data);
 
         this.filteredAbsolutedError =  this.absoluteError.slice();
+
+        this.global_variable = this.getConvergeMetric();
     }
 
     setGoldenRunData(data){
@@ -54,7 +56,7 @@ class ErrorPropagationData{
             if(error >= x1 && error <= x2){
                 this.filteredAbsolutedError.push(d);
             }else{
-                this.filteredAbsolutedError.push([d[0], 0]);
+                this.filteredAbsolutedError.push([d[0], -1]);
             }
         });
     }
@@ -116,6 +118,21 @@ class ErrorPropagationData{
             //console.log(this.absoluteError[i][1]);
         }
         return max;
+    }
+
+    getConvergeMetric(){
+        let error = this.parseData_AbosluteError();
+
+        let norms = [0];
+
+        for(let i = 1; i < error.length; i++){
+            if(error[i][0] == "87:normr"){
+                norms.push(error[i][1]);
+            }else{
+                norms.push(norms[i-1]);
+            }
+        }
+        return norms;
     }
 
     extractProgramVariableExecutionSequence(){

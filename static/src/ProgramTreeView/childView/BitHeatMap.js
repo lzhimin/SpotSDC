@@ -56,8 +56,8 @@ class BitHeatMap extends standardChildView{
             return this.y + this.rect_h * (Math.floor(i / this.col));
         })
         .style('fill', (d, i)=>{
-            //return d == 0 ? 'white':this.get_local_color_scale(i, d);
-			return d == 0 ? 'white':this.get_global_color_scale(d);
+            return d == 0 ? 'white':this.get_local_color_scale(i, d);
+			//return d == 0 ? 'white':this.get_global_color_scale(d);
         })
         .on('click', (d, i)=>{
             publish('SUBSETDATA', d);
@@ -121,7 +121,7 @@ class BitHeatMap extends standardChildView{
                 //random sample 10%
                 let resample_set = [];
 
-                for(let i = 0; i < this.sample.length * 0.1; i++){
+                for(let i = 0; i < 20; i++){
                     let index = parseInt(Math.random() * this.sample.length);
                     resample_set.push(this.sample[index])
                 }

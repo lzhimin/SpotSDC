@@ -45,7 +45,6 @@ class BitStackChart extends standardChildView{
         .attr('height', this.height)
         .classed('Bit_outcome_heatmap_background_rect', true);
 
-
         for(let index = 0; index < this.hist2d.length; index++){
             let h_temp = 0;
             this.g.selectAll('.Bit_outcome_heatmap_'+this.uuid+'_rect'+index).data(this.hist2d[index]).enter()
@@ -63,59 +62,15 @@ class BitStackChart extends standardChildView{
                 })
                 .style('fill', (d, i)=>{
                     switch(i){
-                        case 0: return this.color['DUE'];break;
-                        case 1: return this.color['SDC'];break;
-                        case 2: return this.color['Masked'];break;
+                        case 0: return this.color['DUE'];
+                        case 1: return this.color['SDC'];
+                        case 2: return this.color['Masked'];
                     }
                 })
                 .on('click', (d, i)=>{
                     publish('SUBSETDATA', d);
                 });
         }
-
-        //heatmap rect
-        /*this.g.selectAll('.Bit_outcome_heatmap_'+this.uuid+'_rect').data(this.hist).enter()
-        .append('rect')
-        .attr('class', 'Bit_outcome_heatmap_rect')
-        .attr('width', this.rect_w)
-        .attr('height', this.rect_h)
-        .attr('x', (d, i)=>{
-            return this.x + this.rect_w * (i % this.col);
-        })
-        .attr('y', (d, i)=>{
-            return this.y + this.rect_h * (Math.floor(i / this.col));
-        })
-        .style('fill', (d, i)=>{
-
-            switch(i){
-                case 0: return this.color['DUE'];break;
-                case 1: return this.color['SDC'];break;
-                case 2: return this.color['Masked'];break;
-            }
-            //return d == 0 ? 'white':this.get_local_color_scale(i, d);
-			//return d == 0 ? 'white':this.get_global_color_scale(d);
-        })
-        .on('click', (d, i)=>{
-            publish('SUBSETDATA', d);
-        });*/
-
-        // y-axis
-		/*this.g.selectAll('.Bit_outcome_heatmap_'+this.uuid+'_y_label').data(this.categories_label).enter()
-		.append('text')
-		.text(d=>d)
-		.attr('class', 'Bit_outcome_heatmap_label')
-		.attr('x', (d, i)=>{
-			return this.x - 5;
-		})
-		.attr('y', (d, i)=>{
-			if(i == 0)
-				return this.y + this.height - this.rect_h/2;
-			else
-				return this.y  + this.height - this.rect_h * (i + 0.5)
-		})
-		.attr("text-anchor", "middle")
-		.attr("dominant-baseline", "central")
-		.attr('font-size', 7);	*/
 		
 		//draw dash line for sign bit, exponent bit and mantissa bit
 		let dashline_d = [[this.x + this.rect_w, this.y, this.x + this.rect_w, this.y + this.height], [this.x + this.rect_w * 12, this.y, this.x + this.rect_w * 12, this.y + this.height]];
@@ -128,17 +83,18 @@ class BitStackChart extends standardChildView{
 		.attr('y2', d=>d[3])
 		.style('stroke', 'black')
 		.style('stroke-width', '1px')
-		.style('stroke-opacity', 0.4)
-		.style('stroke-dasharray', '5,5');   
+		.style('stroke-opacity', 1)
+        .style('stroke-dasharray', '5,5'); 
+        
+        this.chart_axis = d3.scaleLinear().domain([0, 1]).range([this.rect_h, 0]);
+        this.chart_axis_annotation = this.g.append('g').attr('class','bitbarchart_axis')
+            .attr("transform", "translate("+(this.x )+","+ this.y + ")")
+            .call(d3.axisLeft(this.chart_axis).ticks(2));
     }
 
     setOutcomeColor(color){
         this.color  = color;
     }
-
-    //setColormapColor(color){
-    //    this.color = color;
-    //}
 
     init_color_scale(){
 		this.globalcolorscale = d3.scaleQuantize().domain(d3.extent(this.hist, (d)=>{return d.length;})).range(this.color);

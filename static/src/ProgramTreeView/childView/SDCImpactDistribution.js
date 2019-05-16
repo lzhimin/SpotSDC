@@ -79,7 +79,6 @@ class SDCImpactDistribution extends standardChildView{
      * @param {*} sdc_values 
      * @param {*} bins 
      */
-
     sdcImpact_bin(sdc_values, bins){
 
         let range = []

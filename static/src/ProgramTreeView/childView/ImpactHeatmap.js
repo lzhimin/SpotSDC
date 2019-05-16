@@ -34,7 +34,7 @@ class ImpactHeatmap extends standardChildView{
 
         let rect_w = this.width / this.sdc_bin_size;
         let colorscale = d3.scaleQuantize().domain([0, d3.sum(this.hist, (d)=>{return d.length})]).range(this.outcomeColor);
-    
+        //let colorscale = d3.scaleLinear().domain([0, d3.sum(this.hist, (d)=>{return d.length})]).range([0, 1]);
 
         this.g = this.svg.append('g').selectAll('.heatmap1d'+this.uuid+'_rect')
         .data(this.hist)
@@ -52,6 +52,7 @@ class ImpactHeatmap extends standardChildView{
         .attr('height', this.height)
         .style('fill', (d)=>{
             return d.length == 0? 'white': colorscale(d.length);
+            //return d3.interpolateViridis(colorscale(d.length));
         })
         .style('stroke', 'gray')
         .style('stroke-width', '1px')

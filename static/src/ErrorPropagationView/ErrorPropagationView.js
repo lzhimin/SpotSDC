@@ -57,7 +57,15 @@ class ErrorPropagationView extends BasicView{
 
         //clean svg
         this.svg.html('');
-        
+        //if($('input[name=propagatation_error_radio]:checked').val() == "propagation_dynamic")
+        this.draw_dynamic();
+    }
+
+    draw_dynamic(){
+        d3.select("#ErrorPropagationView_button_control").style("display", "block");
+        this.blockw = 80;
+        this.blockh = 30;
+
         //timer
         this.timer.setX(this.padding + this.blockw * 4);
         this.timer.setY(this.y - this.top_padding/2);
@@ -65,6 +73,7 @@ class ErrorPropagationView extends BasicView{
         this.timer.setWidth(Math.floor(this.path_width/this.step_size) * this.step_size);
         this.timer.setRelativeData(this.propagationData.relativeError);
         this.timer.setAbsoluteError(this.propagationData.absoluteError);
+        this.timer.setGlobalVariable(this.propagationData.global_variable);
         this.timer.draw();
 
         //if the propagation view is large than the computer screen view,
@@ -82,6 +91,21 @@ class ErrorPropagationView extends BasicView{
 
         //draw absolute error distribution histogram
         this.draw_absolute_value_histogram();
+    }
+
+    draw_static(){
+        d3.select("#ErrorPropagationView_button_control").style("display", "none");
+        this.blockw = 60;
+        this.blockh = 50;
+
+          //if the propagation view is large than the computer screen view,
+        //reset the height of svg 
+        let currentheight = this.y + (this.variableViewBucket[this.propagationData.seqVar[0]].getRectHeight() + this.variableViewBucket[this.propagationData.seqVar[0]].getPadding()) * this.propagationData.seqVar.length;
+        if(currentheight > this.height){
+            this.svg.attr('height', currentheight + this.variableViewBucket[this.propagationData.seqVar[0]].getPadding() * 2);
+        }
+
+        this.draw_tree(20, 100);
     }
 
     draw_absolute_value_histogram(){
@@ -124,7 +148,7 @@ class ErrorPropagationView extends BasicView{
         
         histogram.append('g')
             .append('text')
-            .text('Error(log) Density Distribution Histogram')
+            .text('Error(log) Distribution Histogram')
             .attr('class', 'histogram_anotation') 
             .attr('transform', 'translate(35, 200)');
 
@@ -161,10 +185,10 @@ class ErrorPropagationView extends BasicView{
         this.timer.redraw();
     }
 
-    draw_tree(){
+    draw_tree(x=20, y=250){
 
         let hierachicaldata = this.propagationData.hierachicalData;
-        let x = 20, y = this.top_padding, h = 0;
+        let h = 0;
         let padding = 3;
 
         hierachicaldata.values.sort(function(a, b){
@@ -323,8 +347,26 @@ class ErrorPropagationView extends BasicView{
         .attr('x', (d, i)=>{
             return i == 0? this.x + 400 : this.x + 400 + width * 3;
         })
-        .attr('y', 15)
+        .attr('y', 10)
         .text(d=>d)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central'); 
+
+        let filter_anotation = this.colorscalesvg.append('g');
+        filter_anotation.append('rect')
+        .attr('x', this.x + 350)
+        .attr('y', 20)
+        .attr('height', 15)
+        .attr('width', 15)
+        .style('fill', '#f7f7f7')
+        .style('stroke', 'gray')
+        .style('stroke-opacity', 0.5)
+        .style('stroke-width', '1px');;
+
+        filter_anotation.append('text')
+        .text('Filter-out')
+        .attr('x', this.x + 350)
+        .attr('y', 10)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central'); 
     }
@@ -360,7 +402,12 @@ class ErrorPropagationView extends BasicView{
             .attr('width', step_w)
             .attr('height', Math.min(step_w, this.blockh))
             .attr('fill', (d)=>{
-                return d[0][1]!=0?d3.interpolateOrRd(temp_colorscale(d[0][1])):'white';
+                if(d[0][1] == 0)
+                    return "white";
+                else if(d[0][1] == -1)
+                    return "#f7f7f7";//gray color
+                else 
+                    return d3.interpolateOrRd(temp_colorscale(d[0][1]));
             })
             .attr('fill-opacity', (d)=>{
                 return d[0][1]!=0?1:0;
