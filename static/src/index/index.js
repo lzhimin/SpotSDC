@@ -34,6 +34,9 @@ myLayout.registerComponent('ScatterPlot', function(container, state){
     sp = new ScatterPlot(container);
     
     subscribe('SUBSETDATA', sp.setData.bind(sp));
+    subscribe('HIGHLIGHT', sp.highlight.bind(sp));
+    subscribe("DISHIGHLIGHT", sp.dishighlight.bind(sp));
+
 });
 
 myLayout.registerComponent('SourceCodeView', function(container, state){

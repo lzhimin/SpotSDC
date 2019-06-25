@@ -14,6 +14,8 @@ class ScatterPlot extends BasicView{
         this.y = this.margin.top;
         this.x = this.margin.left;
 
+        this.is_init = false;//whether a scatter plot is drawn
+
         this.outcome_color = {
             'DUE': '#542788',
             'Masked': '#1b9e77',
@@ -34,16 +36,47 @@ class ScatterPlot extends BasicView{
             .append('g')
             .attr('class', 'individual_scatterplot');
             
+        this.is_init = true;        
+
+        this.drawContourPlot();
         this.draw();
     }
 
     setData(message, data){
-        console.log(message+" in scatter plot visualization")
+        console.log(message+" in scatter plot visualization");
         this.init(data);
     }
 
-    draw(){
+    highlight(message, data){
+        console.log(message + " in scatter plot");
+        console.log(data.File_index)
+
+        if(!this.is_init)
+            return;
         
+        this.chart_circle
+            .attr('r', (d)=>{
+                if (d.data.File_index == data.File_index)
+                    return this.circle_r * 3;
+                else
+                    return this.circle_r;
+            });
+    }
+
+    dishighlight(message, data){
+        console.log(message + "  in scatter plot");
+        console.log(data.File_index)
+
+        if(!this.is_init)
+            return;
+
+        this.chart_circle
+            .attr('r', (d)=>{
+                return this.circle_r;
+            });  
+    }
+
+    draw(){        
         this.circle_r = 5;
         this.x_axis = d3.scaleLinear().domain([0, d3.max(this.data, (d)=>{return d.x;})]).range([this.margin.left, this.width-this.margin.right]);
         this.y_axis = d3.scaleLinear().domain([0, d3.max(this.data, (d)=>{return d.y;})]).range([this.height - this.margin.top, this.margin.bottom]);
@@ -56,7 +89,7 @@ class ScatterPlot extends BasicView{
             .attr("transform", "translate("+this.margin.left+",0)")
             .call(d3.axisLeft(this.y_axis).ticks(10));
         
-        this.chart.append("g")
+        this.chart_circle = this.chart.append("g")
             .selectAll("scatter-dots")
             .data(this.data)
             .enter()
@@ -73,6 +106,12 @@ class ScatterPlot extends BasicView{
             .attr("fill-opacity", 0.8)
             .on('click', (d, i)=>{
                 fetchSingleSimulationData(d.data.File_index);
+            })
+            .on('mouseover', (d, i, node)=>{
+                d3.select(node[i]).attr('r', this.circle_r * 3);
+            })
+            .on('mouseout', (d, i, node)=>{
+                d3.select(node[i]).attr('r', this.circle_r);
             });
         
         this.chart.append('g').selectAll('scatterplot-data-axis-text')
@@ -149,10 +188,9 @@ class ScatterPlot extends BasicView{
         }).size([this.width - this.margin.right - this.margin.left, this.height - this.margin.top - this.margin.bottom])
         .bandwidth(20)(this.data);
 
-
         let color = d3.scaleLinear()
-        .domain([0, d3.max(densityData, (d)=>{return d.value;})])
-        .range(['white', '#69b3a2']);
+            .domain([0, d3.max(densityData, (d)=>{return d.value;})])
+            .range(['white', '#3f007d']);
 
         this.chart.insert("g", "g")
             .selectAll('path')

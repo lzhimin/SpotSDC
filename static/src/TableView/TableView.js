@@ -43,13 +43,24 @@ class TableView extends BasicView{
         .append('th')
         .html(d=>d);
 
+        //sort this.data based on the input error
+        this.data.sort(function(a, b){
+            return +a.out_xor - +b.out_xor;
+        });
+
         let tbody =this.table.append('tbody');
         tbody.selectAll('.tableView_tbody_tr')
         .data(this.data)
         .enter()
         .append('tr')
-        .on('click', (d, i)=>{
+        .on('click', (d)=>{
             fetchSingleSimulationData(d.File_index);
+        })
+        .on('mouseover', (d)=>{
+            publish('HIGHLIGHT', d);
+        })
+        .on('mouseout', (d)=>{
+            publish('DISHIGHLIGHT', d);
         })
         .selectAll('tableView_tbody_td')
         .data(d=>{

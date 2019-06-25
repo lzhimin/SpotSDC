@@ -33,17 +33,19 @@ class StackBarChart extends standardChildView{
                     width = this.x_axis(d.values.length);
                 }else{
                     width = d.values.length/this.sum * this.width;
+                    
                 }
                 loc_x += width;
                 return loc_x - width;
             })
             .attr('y', this.y)
             .attr('width', (d)=>{
+                
+
+
                 return this.globalflag ? this.x_axis(d.values.length):d.values.length/this.sum * this.width;
             })
             .attr('height', this.height)
-            //.attr('rx', 5)
-            //.attr('ry', 5)
             .classed('stackbar_'+this.uuid+'_rect', true)
             .classed('stackBarChart_rect', true)
             .style('fill', (d)=>{

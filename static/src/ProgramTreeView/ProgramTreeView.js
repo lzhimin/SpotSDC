@@ -1,6 +1,4 @@
 //import {SDCImpactDistribution} from "./childView/SDCImpactDistribution.js" 
-
-
 class ProgramTreeView extends BasicView{
 
     constructor(container){
@@ -17,15 +15,6 @@ class ProgramTreeView extends BasicView{
         }   
 
         this.colorscale = ['#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5','#08519c','#08306b'];
-        
-        //this.colorscale = [];
-        //for(let i = 1; i <= 10; i++){
-        //    this.colorscale.push(d3.interpolateViridis(i/10.0));
-            //this.colorscale.push(d3.interpolateViridis(i/20.0));
-            //this.colorscale.push(d3.interpolateCool(i/20.0));
-            //this.colorscale.push(d3.interpolateSpectral((20-i)/20.0));
-        //}
-
         
         this.viewoption = 'bitStackBarChart';
 
@@ -208,11 +197,12 @@ class ProgramTreeView extends BasicView{
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'central')
             .style('font-size', (d, i, node)=>{
-                let labelWidth = node[i].getComputedTextLength();
-                if (labelWidth < this.blockw) {
-                    return null;
-                }
-                return ((this.blockw - 4) / labelWidth) + 'em';
+                return 18;
+                //let labelWidth = node[i].getComputedTextLength();
+                //if (labelWidth < this.blockw) {
+                //    return null;
+                //}
+                //return ((this.blockw - 4) / labelWidth) + 'em';
             })
             .style('pointer-events', 'none');            
     }
@@ -441,7 +431,8 @@ class ProgramTreeView extends BasicView{
         .attr('y', this.top_padding - 95)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
-        .style('font-size', '10px');
+        .style('font-size', '12px')
+        .style('font-weight', 'bold');
 
         //empty space color map
         this.bitHeatMapAnnotation_colorscale
@@ -466,7 +457,8 @@ class ProgramTreeView extends BasicView{
         .attr('y', this.top_padding - 95)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
-        .style('font-size', '10px');
+        .style('font-size', '12px')
+        .style('font-weight', 'bold');
 
 
         if(this.viewoption == 'bit_heatmap' || this.viewoption == 'smart_bitStackBarChart' || this.viewoption == 'bitStackBarChart'){
@@ -479,9 +471,9 @@ class ProgramTreeView extends BasicView{
             this.bitHeatMapAnnotation = this.svg.append('g');
             this.bitHeatMapAnnotation.append('text').text(()=>{
                 if(this.viewoption == 'smart_bitStackBarChart')
-                    return 'Sample Distribution';
+                    return 'Bit Sample Distribution';
                 else
-                    return 'Bit Outcome Distribution'
+                    return 'Bit Outcome Distribution';
             })
             .attr('x', (d, i)=>{
                 return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / 2;
@@ -709,4 +701,3 @@ class ProgramTreeView extends BasicView{
         this.draw();
     }
 }
-
