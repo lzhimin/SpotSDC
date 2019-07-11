@@ -40,9 +40,6 @@ class StackBarChart extends standardChildView{
             })
             .attr('y', this.y)
             .attr('width', (d)=>{
-                
-
-
                 return this.globalflag ? this.x_axis(d.values.length):d.values.length/this.sum * this.width;
             })
             .attr('height', this.height)

@@ -31,6 +31,17 @@
             </div>
         </div>
     </div>
+
+    <div class='ProgramTreeViewMenu_div' id='ProgramTree_sort_option_menu' style="display:none">
+            <div>
+                <label> Sort Options</label><br>
+                <select id='sort_options'>
+                    <option value="SDC_ratio"> Ratio          </option>
+                    <option value="SDC_impact"> Impact </option>
+                    <option value="SDC_frequency"> Frequency </option>
+                </select>
+            </div>
+        </div>
         
     <div class='ProgramTreeViewMenu_div' id='ProgramTree_Tree_Menu'> 
         <select id='tree_level1' class='tree_attribute'>
@@ -62,20 +73,15 @@
                 <option value="smart_bitStackBarChart"> Smart Bit Outcome Dist. </option>
                 <option value="bit_heatmap"> Fault Injection Sample Dist. </option>
                 <option value="error_output_dist"> Error Output Dist.</option>
-                <option value="SDC_impact_dist"> SDC Impact Dist.</option>
+                <option value="SDC_impact_dist"> SDC Sensitivity Dist.</option>
             </select><br>
-            <!--label style='font-weight:normal;'> <input type='radio' name='view_radio'  value='smart_bit_heatmap'> Smart Bit </label><br>
-            <label style='font-weight:normal;'> <input type='radio' name='view_radio'  checked value='bitStackBarChart'> bitStack </label><br>
-            <label style='font-weight:normal;'> <input type='radio' name='view_radio'  value='bit_heatmap'> Bit </label><br>
-            <label style='font-weight:normal;'> <input type='radio' name='view_radio'  value='heatmap_impact'> Impact </label><br-->
         </div>
-        
     </div>
 
     <div class='ProgramTreeViewMenu_div' id='ProgramTree_ratio_chart_menu'>
         <div >
             <label> Normalize </label><br>
-            <label style='font-weight:normal;'> <input type='radio' name='normalize_radio' value='local'> local </label> <br>
+            <label style='font-weight:normal;'> <input type='radio' name='normalize_radio' value='local' checked> local </label> <br>
             <label style='font-weight:normal;'> <input type='radio' name='normalize_radio' value='global'> global </label>
         </div>
     </div>

@@ -18,7 +18,7 @@ class ProgramTreeView extends BasicView{
         
         this.viewoption = 'bitStackBarChart';
 
-        this.normalization = 'global';
+        this.normalization_global = false;
 
         this.collapse_node = new Set();
 
@@ -197,12 +197,11 @@ class ProgramTreeView extends BasicView{
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'central')
             .style('font-size', (d, i, node)=>{
-                return 18;
-                //let labelWidth = node[i].getComputedTextLength();
-                //if (labelWidth < this.blockw) {
-                //    return null;
-                //}
-                //return ((this.blockw - 4) / labelWidth) + 'em';
+                let labelWidth = node[i].getComputedTextLength();
+                if (labelWidth < this.blockw) {
+                    return null;
+                }
+                return ((this.blockw - 4) / labelWidth) + 'em';
             })
             .style('pointer-events', 'none');            
     }
@@ -220,6 +219,7 @@ class ProgramTreeView extends BasicView{
         this.stackbar_bucket[parent+'_'+data.key] = new StackBarChart(this.svg, x + this.bitmap_width + this.padding_between_bit_stack, y, this.stackbar_width, this.blockh, data);
         this.stackbar_bucket[parent+'_'+data.key].setOutcomeColor(this.outcome_color);
         this.stackbar_bucket[parent+'_'+data.key].draw();
+        this.stackbar_bucket[parent+'_'+data.key].setGlobalFlag(this.normalization_global);
 
         this.value_heatmap_bucket[parent+'_'+data.key] = new ValueHeatMap(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxInput(), this.programtreedata.getMinInput());
         this.value_heatmap_bucket[parent+'_'+data.key].setColor(this.colorscale);
@@ -270,6 +270,14 @@ class ProgramTreeView extends BasicView{
         .style('position', 'absolute')
         .style('top', this.top_padding + $('#ProgramTreeViewMenu').height() + 60)
         .style('left', this.left_padding + this.blockw);
+
+        //draw sort option memu
+        d3.select("#ProgramTree_sort_option_menu")
+        .style('display', 'block')
+        .style('position', 'absolute')
+        .style('top', $('#ProgramTreeViewMenu').height() + 10)
+        .style('left', this.left_padding);
+
 
         d3.selectAll('.tree_attribute').style('width', this.blockw - 3);
 
@@ -600,6 +608,7 @@ class ProgramTreeView extends BasicView{
     
         if(option == 'global'){
             this.stackbar_chart_text_above.text('The Number of Fault Injections');
+            this.normalization_global = true;
             let maxsize = 0;
             for(let key in  this.stackbar_bucket){
                 maxsize = Math.max(maxsize, this.stackbar_bucket[key].getExperimentCount());
@@ -607,15 +616,16 @@ class ProgramTreeView extends BasicView{
 
             for(let key in this.stackbar_bucket){
                 this.stackbar_bucket[key].setMaxDataSize(maxsize);
-                this.stackbar_bucket[key].setGlobalFlag(true);
+                this.stackbar_bucket[key].setGlobalFlag(this.normalization_global);
                 this.stackbar_bucket[key].draw();
             }
 
             this.stackbar_chart_axis.domain([0, maxsize]);
         }else if(option == 'local'){
             this.stackbar_chart_text_above.text('SDC Ratio');
+            this.normalization_global = false;
             for(let key in this.stackbar_bucket){
-                this.stackbar_bucket[key].setGlobalFlag(false);
+                this.stackbar_bucket[key].setGlobalFlag(this.normalization_global);
                 this.stackbar_bucket[key].draw();
             }
             this.stackbar_chart_axis.domain([0, 1]);

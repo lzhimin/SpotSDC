@@ -35,10 +35,75 @@ class ProgramTreeData{
         }
 
         values.key(function (d) {
-            return d.outcome
+            return d.outcome;
         }).sortKeys(d3.ascending);
 
-        this.hierachicalData =  {'key':$('#program_TreeView_file_selector').val().split('_')[0], 'values':values.entries(this.filterData)};
+        let data = values.entries(this.filterData);
+        if(this.pattern.length > 0){
+            //sort data
+            for(let i = 0; i < data.length; i++){
+                data[i]['metrics_value'] = this.sortHierachy(data[i]);
+            }
+
+            //sort current layer
+            data.sort((a, b)=>{
+                return b.metrics_value - a.metrics_value;
+            });
+        }
+        this.hierachicalData =  {'key':$('#program_TreeView_file_selector').val().split('_')[0], 'values': data};
+    }
+
+    sortHierachy(node){
+
+        let data = node.values;
+        let key = data[0].key;
+
+        //Check whether the child is a leaf node.
+        if(key == "DUE" || key == "Masked" || key == "SDC"){
+            
+            //SDC Frequency
+            /*data.sort((a, b)=>{
+                let a_l = 0;
+                for(let i = 0; i < a.values.length; i++){
+                    if(a.values[i].key== "SDC")
+                        a_l = a.values[i].values.length;
+                }
+
+                let b_l = 0;
+                for(let i = 0; i < b.values.length; i++){
+                    if(b.values[i].key == "SDC")
+                        b_l = b.values[i].values.length;
+                }
+                return a_l - b_l;
+            });*/
+
+            let metrics_value = 0;
+            for(let i = 0; i < data.length; i++){
+                if(data[i].key == "SDC")
+                    metrics_value += data[i].values.length;
+            }
+
+            return metrics_value;
+            //SDC Ratio
+            //SDC Impact
+
+
+        }else{
+            let metrics_sum = 0;
+            //sort the child node
+            for(let i = 0; i < data.length; i++){
+                let metrics_value = this.sortHierachy(data[i]);
+                data[i]['metrics_value'] = metrics_value;
+                metrics_sum += metrics_value;
+            }
+
+            //sort current layer
+            data.sort((a, b)=>{
+                return b.metrics_value - a.metrics_value;
+            });
+
+            return metrics_sum;
+        }
     }
 
     getSummaryData(){
