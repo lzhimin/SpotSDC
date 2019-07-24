@@ -1,4 +1,3 @@
-//import {SDCImpactDistribution} from "./childView/SDCImpactDistribution.js" 
 class ProgramTreeView extends BasicView{
 
     constructor(container){

@@ -10,7 +10,7 @@ class ScatterPlot extends BasicView{
             'SDC': '#d95f02'
         }   
         
-        this.margin = {top:50, right: 150, bottom: 50, left: 50};
+        this.margin = {top:50, right: 100, bottom: 200, left: 250};
         this.y = this.margin.top;
         this.x = this.margin.left;
 
@@ -38,7 +38,7 @@ class ScatterPlot extends BasicView{
             
         this.is_init = true;        
 
-        this.drawContourPlot();
+        //this.drawContourPlot();
         this.draw();
     }
 
@@ -79,14 +79,14 @@ class ScatterPlot extends BasicView{
     draw(){        
         this.circle_r = 5;
         this.x_axis = d3.scaleLinear().domain([0, d3.max(this.data, (d)=>{return d.x;})]).range([this.margin.left, this.width-this.margin.right]);
-        this.y_axis = d3.scaleLinear().domain([0, d3.max(this.data, (d)=>{return d.y;})]).range([this.height - this.margin.top, this.margin.bottom]);
+        this.y_axis = d3.scaleLinear().domain([0, d3.max(this.data, (d)=>{return d.y;})]).range([this.height - this.margin.bottom, this.margin.top]);
 
         this.chart_axis_x = this.chart.append('g').attr('class','scatterplot_axis')
-            .attr("transform", "translate(0,"+ (this.height-this.margin.bottom) + ")")
+            .attr("transform", "translate(0,"+ (this.height - this.margin.bottom) + ")")
             .call(d3.axisBottom(this.x_axis).ticks(10));
 
         this.chart_axis_y = this.chart.append('g').attr('class','scatterplot_axis')
-            .attr("transform", "translate("+this.margin.left+",0)")
+            .attr("transform", "translate("+this.margin.left + ",0)")
             .call(d3.axisLeft(this.y_axis).ticks(10));
         
         this.chart_circle = this.chart.append("g")
@@ -94,15 +94,11 @@ class ScatterPlot extends BasicView{
             .data(this.data)
             .enter()
             .append("circle")
-            .filter((d)=>{
-                return d.outcome != 'DUE';
-            })
-            .attr("cx", (d)=>{ return this.x_axis(d.x);})
-            .attr("cy", (d)=>{ return this.y_axis(d.y);})
+            .filter((d)=>{ return d.outcome != 'DUE'; })
+            .attr("cx", (d)=>{ return this.x_axis(d.x); })
+            .attr("cy", (d)=>{ return this.y_axis(d.y); })
             .attr("r", this.circle_r)
-            .attr("fill", (d)=>{
-                return this.outcome_color[d.outcome];
-            })
+            .attr("fill", (d)=>{ return this.outcome_color[d.outcome]; })
             .attr("fill-opacity", 0.8)
             .on('click', (d, i)=>{
                 fetchSingleSimulationData(d.data.File_index);
@@ -113,7 +109,102 @@ class ScatterPlot extends BasicView{
             .on('mouseout', (d, i, node)=>{
                 d3.select(node[i]).attr('r', this.circle_r);
             });
+
+
+        //draw x axis histogram
+        let x_histogram = d3.histogram()
+            .value((d)=>{return d.x;})
+            .domain(this.x_axis.domain())
+            .thresholds(this.x_axis.ticks(10));
+
+        let x_histogram_bin = x_histogram(this.data);
+
+        let x_histogram_y = d3.scaleLinear()
+            .range([this.margin.bottom - 50, 0])
+            .domain([0, d3.max(x_histogram_bin, (d)=>{return d.length;})]);
         
+        this.chart.append('g').selectAll('rect').data(x_histogram_bin).enter()
+            .append('rect')
+            .attr("x", 1)
+            .attr("transform", (d)=>{ return "translate(" + this.x_axis(d.x0) + "," + (this.height - this.margin.bottom + 20)  + ")"; })
+            .attr("width", (d)=>{ return this.x_axis(d.x1) - this.x_axis(d.x0) -1 ; })
+            .attr("height", (d)=>{ return this.margin.bottom - 50 - x_histogram_y(d.length); })
+            .style("fill", "gray");
+        
+        this.chart.append('g').selectAll('text').data(x_histogram_bin).enter()
+            .append('text')
+            .attr("x", (d)=>{
+                return this.x_axis(d.x0) + (this.x_axis(d.x1) - this.x_axis(d.x0))/2;
+            })
+            .attr("y", (d)=>{
+                return this.height - 5 - x_histogram_y(d.length);
+            })
+            .text((d)=>{
+                if(d.length > 0)
+                    return d.length;
+            })
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'central');
+            //.attr("transform", (d)=>{ return "translate(" + this.x_axis(d.x0) + "," + (this.height - this.margin.bottom + 20)  + ")"; })
+            //.attr("width", (d)=>{ return this.x_axis(d.x1) - this.x_axis(d.x0) - 1; })
+            //.attr("height", (d)=>{ return this.margin.bottom - 50 - x_histogram_y(d.length); })
+            //.style("fill", "gray")
+
+        //y-axis histogram
+        let y_histogram = d3.histogram()
+            .value((d)=>{return d.y;})
+            .domain(this.y_axis.domain())
+            .thresholds(this.y_axis.ticks(10));
+        
+        let y_histogram_bin = y_histogram(this.data);
+        let y_histogram_x = d3.scaleLinear()
+            .range([0, this.margin.left - 100])
+            .domain([0, d3.max(y_histogram_bin, (d)=>{return d.length;})]);
+
+        this.chart.append('g').selectAll('rect').data(y_histogram_bin).enter()
+        .append('rect')
+        .attr("x", 1)
+        .attr("transform", (d)=>{ 
+            return "translate(" + (this.margin.left-25-y_histogram_x(d.length)) + "," + this.y_axis(d.x1)  + ")";
+         })
+        .attr("width", (d)=>{ 
+            return y_histogram_x(d.length);
+        })
+        .attr("height", (d)=>{ 
+            return this.y_axis(d.x0) - this.y_axis(d.x1) -1;
+        })
+        .style("fill", "#84847f");
+        
+        this.chart.append('g').selectAll('text').data(y_histogram_bin).enter()
+        .append('text')
+        .attr("y", (d)=>{
+                return this.y_axis(d.x1) + (this.y_axis(d.x0) - this.y_axis(d.x1))/2;
+        })
+        .attr("x", (d)=>{
+                return this.margin.left - 40 - y_histogram_x(d.length);;
+        })
+        .text((d)=>{
+                if(d.length > 0)
+                    return d.length;
+        })
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central');
+
+
+        //this.chart.append('g').selectAll('text').data(x_histogram_bin).enter()
+        //.append('text')
+        //.attr("x", (d)=>{
+        //    return this.x_axis(d.x0) + (this.x_axis(d.x1) - this.x_axis(d.x0))/2;
+        //})
+        //.attr("y", (d)=>{
+        //    return this.height - 5 - x_histogram_y(d.length);
+        //})
+        //.text((d)=>{
+        //    if(d.length > 0)
+        //        return d.length;
+        //});
+
+        ///text annotation
         this.chart.append('g').selectAll('scatterplot-data-axis-text')
             .data(['Input Error(log)', 'SDC Impact(log)'])
             .enter()
@@ -128,7 +219,7 @@ class ScatterPlot extends BasicView{
             })
             .attr('y', (d)=>{
                 if(d === 'Input Error(log)'){
-                    return this.height - this.margin.bottom/2;
+                    return this.height - this.margin.bottom - 15;
                 }else{
                     return this.margin.top/2;
                 }

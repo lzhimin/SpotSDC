@@ -14,7 +14,6 @@ class ProgramTreeData{
 
     //TODO: what's the inter leaf order of the tree?
     setHierachicalData(pattern){
-
         let values = d3.nest();
         this.pattern = pattern;
 

@@ -12,15 +12,16 @@ let config = {
             type: 'component',
             componentName: 'ErrorPropagationView',
             title:'ErrorPropagationView'
+        },{
+            type: 'component',
+            componentName: 'TableView',
+            title:'Tableview'
         }]
     },{
         type: 'column',
          content:[{
             type: 'component',
             componentName: 'SourceCodeView'
-        },{
-            type: 'component',
-            componentName: 'TableView'
         },{
             type: 'component',
             componentName: 'ScatterPlot',
