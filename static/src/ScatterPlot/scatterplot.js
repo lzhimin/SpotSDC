@@ -9,10 +9,6 @@ class ScatterPlot extends BasicView{
             'Masked': '#1b9e77',
             'SDC': '#d95f02'
         }   
-        
-        this.margin = {top:50, right: 100, bottom: 200, left: 250};
-        this.y = this.margin.top;
-        this.x = this.margin.left;
 
         this.is_init = false;//whether a scatter plot is drawn
 
@@ -26,6 +22,10 @@ class ScatterPlot extends BasicView{
     init(data){
         super.init();
 
+        this.margin = {top:50, right: 100, bottom: 200, left: 250};
+        this.y = this.margin.top;
+        this.x = this.margin.left;
+        
         this.scaterplotdata = new ScatterPlotData(data);
         this.data = this.scaterplotdata.getInputVsOutput();
 

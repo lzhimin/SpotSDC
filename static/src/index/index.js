@@ -5,7 +5,8 @@ let myLayout = new GoldenLayout(config);
 //tv: table view
 //epv: error propagation view
 //sp: individual scatter plot
-let ptv, scv, tv, epv, sp;
+//rv: resiliency view
+let ptv, scv, tv, epv, sp, rv;
 
 myLayout.registerComponent('ProgramTreeView', function(container, state){
     $(container.getElement()[0]).load('../static/src/ProgramTreeView/ProgramTreeView.html');
@@ -26,6 +27,17 @@ myLayout.registerComponent('ErrorPropagationView', function(container, state){
     subscribe('SINGLE_SIMULATION', epv.setErrorRunData.bind(epv));
     subscribe('SINGLE_SIMULATION_GOLDEN', epv.setGoldenRunData.bind(epv));
 });
+
+myLayout.registerComponent('ResiliencyView', function(container, state){
+    //error propagation view subscribe to single simulation data
+    $(container.getElement()[0]).load("../static/src/ProgramResiliency/Resiliency.html");
+    rv = new ResiliencyView(container);
+
+    subscribe("DATASET", rv.setData.bind(rv));
+    subscribe("SINGLE_SIMULATION_GOLDEN", rv.setGoldenRunData.bind(rv));
+    subscribe('SINGLE_SIMULATION', rv.setSingleSimulationRun.bind(rv));
+});
+
 
 myLayout.registerComponent('ScatterPlot', function(container, state){
     //error propagation view subscribe to single simulation data

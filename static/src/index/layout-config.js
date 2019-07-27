@@ -16,6 +16,10 @@ let config = {
             type: 'component',
             componentName: 'TableView',
             title:'Tableview'
+        },{
+            type: 'component',
+            componentName: 'ResiliencyView',
+            title:'Resiliency'
         }]
     },{
         type: 'column',

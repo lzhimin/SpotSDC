@@ -13,6 +13,7 @@ class BasicView{
     init(){
         this.width = this.container.getElement().width();
         this.height = this.container.getElement().height() - 20; 
+        this.margin = {"left": 50, "right": 50, "top":50, "bottom":50};
     }
 
 

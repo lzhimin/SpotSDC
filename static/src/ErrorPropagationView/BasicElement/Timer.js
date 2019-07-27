@@ -304,7 +304,7 @@ class Timer{
         
         //connecting path
         let path = [];
-        let line = d3.line().x((d)=>{return d[0];}).y((d)=>{return d[1];});//.curve(d3.curveStepAfter);
+        let line = d3.line().x((d)=>{return d[0];}).y((d)=>{return d[1];});
         path.push([this.x, this.y + 100]);
         path.push([this.x, this.y + 40]);
         
