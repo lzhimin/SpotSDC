@@ -4,12 +4,6 @@ class ScatterPlot extends BasicView{
         super(container); 
 
         //color blind safe
-        this.outcome_color = {
-            'DUE': '#542788',
-            'Masked': '#1b9e77',
-            'SDC': '#d95f02'
-        }   
-
         this.is_init = false;//whether a scatter plot is drawn
 
         this.outcome_color = {
