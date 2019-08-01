@@ -77,11 +77,12 @@ class ProgramTreeView extends BasicView{
         this.draw_leaf_vis(x, y, this.programtreedata.getSummaryData(), "data_summary");    
         
         //draw axis?
-        if(this.viewoption == 'bit_heatmap' || this.viewoption == 'smart_bitStackBarChart' || this.viewoption == 'bitStackBarChart'){
+        if(this.viewoption == 'bitStackBarChart' || this.viewoption == 'smart_bitStackBarChart'){
             let chart_axis = d3.scaleLinear().domain([64, 1]).range([x, x + this.bitmap_width - 5]);
-            this.svg.append('g').attr('class','bitbarchart_axis')
+            this.summary_bit_axis = this.svg.append('g')
+                .attr('class','bitbarchart_axis')
                 .attr("transform", "translate("+(this.left_padding*2)+','+ (y + this.blockh - 8) + ")")
-                .call(d3.axisBottom(chart_axis).ticks(16));
+                .call(d3.axisBottom(chart_axis).ticks(16)); 
         }
     }
 
@@ -654,10 +655,15 @@ class ProgramTreeView extends BasicView{
             this.smart_bitStackBarChart_bucket[key].clear();
         }
 
+        //hidden the summary bit axis          
+        this.summary_bit_axis.attr('display', 'none');
+
         if(option == 'bit_heatmap'){
             for(let key in this.impact_heatmap_bucket){
                 this.bit_heatmap_bucket[key].draw();
             }
+
+
         }
         else if(option == 'smart_bit_heatmap'){
             for(let key in this.impact_heatmap_bucket){
@@ -675,6 +681,7 @@ class ProgramTreeView extends BasicView{
             }
         }
         else if(option == 'bitStackBarChart'){
+            this.summary_bit_axis.attr("display", "block");
             for(let key in this.bit_heatmap_bucket){
                 this.bitStackBarChart_bucket[key].draw();
             }
@@ -685,6 +692,7 @@ class ProgramTreeView extends BasicView{
             }
         }
         else if(option == 'smart_bitStackBarChart'){
+            this.summary_bit_axis.attr("display", "block");
             for(let key  in this.smart_bitStackBarChart_bucket){
                 this.smart_bitStackBarChart_bucket[key].draw();
             }

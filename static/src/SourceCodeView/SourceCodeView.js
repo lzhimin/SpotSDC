@@ -2,7 +2,6 @@ class SourceCodeView extends BasicView{
     constructor(container){
         super(container);
 
-
         //different metric
         this.sdc_ratio = undefined;
         this.sdc_impact = undefined;
@@ -10,11 +9,11 @@ class SourceCodeView extends BasicView{
     }
 
     draw(){
-        d3.selectAll("#sourceCode_display li").style('background', (d, i)=>{
-            if(this.line_number.has((i+1)+''))
+        //d3.selectAll("#sourceCode_display li").style('background', (d, i)=>{
+        //    if(this.line_number.has((i+1)+''))
                 //return  'rgba(244, 66, 66,'+  this.colorscale(this.sdc_frequency[(i+1)+''])+')';
-                return d3.interpolateOrRd(this.colorscale(this.sdc_frequency[(i+1)+'']))
-        });
+        //        return d3.interpolateOrRd(this.colorscale(this.sdc_frequency[(i+1)+'']))
+        //});
 
         /*
         if(this.sourceCodeVis == undefined){
@@ -149,19 +148,19 @@ class SourceCodeView extends BasicView{
 
     setHighLightIndex(msg, data){
         //scroll div to the target line
-        let offset = $('#sourceCode_display li')[+data.line-1].offsetTop;
+        let offset = $('#sourceCode_display li')[+data.linenum-1].offsetTop;
         this.container.getElement()[0].scrollTop = offset - $(this.container.getElement()[0]).height()/2;
 
         //highlight
         d3.selectAll('#sourceCode_display li')
         .style('background-color', (d, i)=>{
-            if(i == data.line -1)
+            if(i == data.linenum -1)
                 return "rgb(150, 159, 255)";
             else
                 return '';
         })
         .style('list-style-image' ,(d, i)=>{
-            if(i == +data.line-1)
+            if(i == +data.linenum-1)
                 return 'url("../static/src/resource/image/arrow.png")';
             else    
                 return '';

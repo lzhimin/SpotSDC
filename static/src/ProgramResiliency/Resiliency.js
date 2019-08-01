@@ -14,7 +14,6 @@ class ResiliencyView extends BasicView{
             'Masked': '#1b9e77',
             'SDC': '#d95f02'
         };
-        
     }
 
     init(){
@@ -32,8 +31,8 @@ class ResiliencyView extends BasicView{
 
         let indexs = this.generateRandomSimulations();
 
-        fetchMultipleSimulationData(indexs);
-        this.resiliencydata.setDynamicInstructionIndex(indexs);
+        //fetchMultipleSimulationData(indexs);
+        //this.resiliencydata.setDynamicInstructionIndex(indexs);
     }
 
     draw(){

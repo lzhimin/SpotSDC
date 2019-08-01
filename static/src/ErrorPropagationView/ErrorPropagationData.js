@@ -138,8 +138,8 @@ class ErrorPropagationData{
     extractProgramVariableExecutionSequence(){
         let seq = [];
         this.data.forEach((d)=>{
-            if(!seq.includes(d.line+':'+d.var)){
-                seq.push(d.line+':'+d.var);
+            if(!seq.includes(d.linenum+':'+d.variables)){
+                seq.push(d.linenum+':'+d.variable);
             }
         });
         return seq.sort();
@@ -170,7 +170,7 @@ class ErrorPropagationData{
         let lineVar = '';
 
         for(let i = 0; i < this.goldenRun.length; i++){
-            lineVar = this.data[i].line+':'+this.data[i].var;
+            lineVar = this.data[i].linenum+':'+this.data[i].variable;
 
             if(Math.abs(+this.data[i].value - +this.goldenRun[i].value) == 0){
                 error = 0;
@@ -189,7 +189,7 @@ class ErrorPropagationData{
         let lineVar = '';
 
         for(let i = 0; i < this.goldenRun.length; i++){
-            lineVar = this.data[i].line+':'+this.data[i].var;
+            lineVar = this.data[i].linenum+':'+this.data[i].variable;
 
             if(Math.abs(+this.data[i].value - +this.goldenRun[i].value) < 1){
                 error = Math.abs(+this.data[i].value - +this.goldenRun[i].value);
@@ -216,14 +216,14 @@ class ErrorPropagationData{
         }
 
         for(let i = 0; i < this.goldenRun.length; i++){
-            lineVar = this.data[i].line+':'+this.data[i].var;
+            lineVar = this.data[i].linenum+':'+this.data[i].variable;
             error = Math.abs(+this.data[i].value - +this.goldenRun[i].value);
             maxError_variableTable[lineVar] = Math.max(error, +maxError_variableTable[lineVar]);
         }
 
         //relative error
         for(let i = 0; i < this.goldenRun.length; i++){
-            lineVar = this.data[i].line+':'+this.data[i].var;
+            lineVar = this.data[i].linenum+':'+this.data[i].variable;
             if((+this.goldenRun[i].value) == 0)
                 error = Math.abs(+this.data[i].value);
             else{

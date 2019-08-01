@@ -6,16 +6,20 @@ function fetchDataset(filename){
 }
 
 function fetchSingleSimulationData(index){
-
-    let psv = d3.dsvFormat(" ");
-    d3.request("../static/data/cg_simulation/appstate_"+index+".log")
-    .mimeType("text/plain")
-    .response(function(xhr){
-        return psv.parse("filename line var value\n"+xhr.responseText);
-    })
-    .get(function(d){
-        publish("SINGLE_SIMULATION", d);
+    d3.csv("../static/data/cg_simulation/appstate_"+index+".log").then(function(data){
+        publish('SINGLE_SIMULATION', data);
     });
+
+    
+    //let psv = d3.dsvFormat(" ");
+    //d3.request("../static/data/cg_simulation/appstate_"+index+".log")
+    //.mimeType("text/plain")
+    //.response(function(xhr){
+    //    return psv.parse("filename line var value\n"+xhr.responseText);
+    //})
+    //.get(function(d){
+    //   publish("SINGLE_SIMULATION", d);
+    //});
 }
 
 function fetchMultipleSimulationData(indexs){
@@ -33,8 +37,6 @@ function fetchMultipleSimulationData(indexs){
 
 function fetchGoldenSimulationData(){
     //let psv = d3.dsvFormat(' ');
-
-
     d3.csv('../static/data/cg_simulation/golden.log').then(function(data){
         publish('SINGLE_SIMULATION_GOLDEN', data);
     });
