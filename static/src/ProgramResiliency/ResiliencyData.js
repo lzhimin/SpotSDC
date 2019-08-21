@@ -17,7 +17,6 @@ class ResiliencyData{
     }
 
     makeMaskedBoundary(){
-
         this.maskedBoundary = [];
         for(let i = 0; i < this.goldenrun.length; i++){
             let max_value = 0, min_value = 0;

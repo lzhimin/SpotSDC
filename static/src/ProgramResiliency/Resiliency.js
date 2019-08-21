@@ -4,9 +4,9 @@ class ResiliencyView extends BasicView{
         super(container);
 
         this.resiliencydata = new ResiliencyData();
-        this.dynamicInstructionIndex = 10;
+        this.dynamicInstructionIndex = 20;
 
-        this.number_of_sample_generate_boundary = 64 * 40;
+        this.number_of_sample_generate_boundary = 64 * 20;
 
         this.circle_r = 2;
         this.outcome_color = {
@@ -14,6 +14,8 @@ class ResiliencyView extends BasicView{
             'Masked': '#1b9e77',
             'SDC': '#d95f02'
         };
+
+        this.percentage = 0;
     }
 
     init(){
@@ -31,8 +33,8 @@ class ResiliencyView extends BasicView{
 
         let indexs = this.generateRandomSimulations();
 
-        //fetchMultipleSimulationData(indexs);
-        //this.resiliencydata.setDynamicInstructionIndex(indexs);
+        fetchMultipleSimulationData(indexs);
+        this.resiliencydata.setDynamicInstructionIndex(indexs);
     }
 
     draw(){
@@ -73,8 +75,8 @@ class ResiliencyView extends BasicView{
         this.chart.append("path")
             .attr("d", masked_up_lineFunc(this.resiliencydata.maskedBoundary))
             .attr("stroke", "black")
-            .attr("fill", "#1b9e77")
-            .attr("fill-opacity", 0.2);
+            .attr("fill", "white")//"#1b9e77")
+            .attr("fill-opacity", 0);
 
         let masked_low_lineFunc = d3.line()
             .curve(d3.curveBasis)
@@ -84,19 +86,17 @@ class ResiliencyView extends BasicView{
         this.chart.append("path")
             .attr("d", masked_low_lineFunc(this.resiliencydata.maskedBoundary))
             .attr("stroke", "black")
-            .attr("fill", "#1b9e77")
-            .attr("fill-opacity", 0.2);  
+            .attr("fill", "white")
+            .attr("fill-opacity", 0);  
         
         this.chart.append('g').selectAll(".faultInjectionPoint")
             .data(this.resiliencydata.faultInjectedData)
             .enter()
             .filter((d, i)=>{ 
-                let index = Math.floor(d.File_index/64)
-                
+                let index = Math.floor(d.File_index/64);
                 let flag = d.out_xor < this.resiliencydata.maskedBoundary[index][0] && 
-                        d.out_xor >this.resiliencydata.maskedBoundary[index][1];
-
-                return d.outcome != 'DUE' && flag && d.outcome != "Masked"; 
+                        d.out_xor > this.resiliencydata.maskedBoundary[index][1];
+                return d.outcome != "DUE" && flag && d.outcome != "Masked"; 
             })
             .append('circle')
             .attr('r', 5)

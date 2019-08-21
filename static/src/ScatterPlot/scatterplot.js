@@ -71,7 +71,7 @@ class ScatterPlot extends BasicView{
     }
 
     draw(){        
-        this.circle_r = 5;
+        this.circle_r = 3;
         this.x_axis = d3.scaleLinear().domain([0, d3.max(this.data, (d)=>{return d.x;})]).range([this.margin.left, this.width-this.margin.right]);
         this.y_axis = d3.scaleLinear().domain([0, d3.max(this.data, (d)=>{return d.y;})]).range([this.height - this.margin.bottom, this.margin.top]);
 
@@ -259,11 +259,11 @@ class ScatterPlot extends BasicView{
 
         this.chart_axis_x = this.chart.append('g').attr('class','scatterplot_axis')
             .attr("transform", "translate(0,"+ (this.height-this.margin.bottom) + ")")
-            .call(d3.axisBottom(this.x_axis).ticks(10));
+            .call(d3.axisBottom(this.x_axis).ticks(5));
 
         this.chart_axis_y = this.chart.append('g').attr('class','scatterplot_axis')
             .attr("transform", "translate("+this.margin.left+",0)")
-            .call(d3.axisLeft(this.y_axis).ticks(10));
+            .call(d3.axisLeft(this.y_axis).ticks(5));
 
         //compute the density data
         let densityData = d3.contourDensity().x((d)=>{
