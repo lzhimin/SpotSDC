@@ -1,4 +1,6 @@
-static/data/fft_run/*
+static/data/fft/*
 static/data/cg_simulation/*
-
+static/data/matrix/*
 ErrorVis_Poster*
+fft_*
+*.log

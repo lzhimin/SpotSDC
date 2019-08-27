@@ -43,13 +43,17 @@ class ImpactHeatmap extends standardChildView{
         .attr('rx', 5)
         .attr('ry', 5)
         .attr('x', (d, i)=>{
-            return this.x + i * rect_w;
+            return this.x + i * rect_w + (rect_w -(i+10)/20* rect_w)/2;
         })
         .attr('y', (d, i)=>{
-            return this.y;
+            return this.y + (this.height -(i+10)/20 * this.height)/2;
         })
-        .attr('width', rect_w)
-        .attr('height', this.height)
+        .attr('width', (d, i)=>{
+            return ((i+10)/20)* rect_w;
+        })
+        .attr('height', (d, i)=>{
+            return ((i+10)/20) * this.height;
+        })
         .style('fill', (d)=>{
             return d.length == 0? 'white': colorscale(d.length);
             //return d3.interpolateViridis(colorscale(d.length));

@@ -48,8 +48,12 @@ class ValueHeatMap extends standardChildView{
         this.g.selectAll('.value_heatmap_'+this.uuid+'_rect').data(this.hist).enter()
         .append('rect')
         .attr('class', 'value_heatmap_rect')
-        .attr('width', this.rect_w)
-        .attr('height', this.rect_h)
+        .attr('width', (d, i)=>{
+            return ((i+10)/20) * this.rect_w;
+        })
+        .attr('height', (d, i)=>{
+            return ((i+10)/20) * this.rect_h;
+        })
         .attr('rx', 3)
         .attr('ry', 3)
         .attr('x', (d, i)=>{

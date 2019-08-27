@@ -47,8 +47,12 @@ class SDCImpactDistribution extends standardChildView{
         .attr('y', (d, i)=>{
             return this.y;
         })
-        .attr('width', rect_w)
-        .attr('height', this.height)
+        .attr('width', (d, i)=>{
+            return ((i+10)/20) * rect_w
+        })
+        .attr('height', (d, i)=>{
+            return ((i+10)/20) * this.height
+        })
         .style('fill', (d)=>{
             return d.length == 0? 'white': colorscale(d.length);
         })
