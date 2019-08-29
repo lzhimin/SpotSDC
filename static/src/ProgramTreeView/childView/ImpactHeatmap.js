@@ -66,7 +66,6 @@ class ImpactHeatmap extends standardChildView{
     }
 
     histogram1D(){
-
         let sdc_distribution = [];
 
         for(let i = 0; i < this.sdc_bin_size; i++){
@@ -83,7 +82,6 @@ class ImpactHeatmap extends standardChildView{
     }
 
     sdc_bin(sdc_values, bins){
-
         let range = []
         for(let i = 0; i < this.sdc_bin_size; i++){
             range.push(i);

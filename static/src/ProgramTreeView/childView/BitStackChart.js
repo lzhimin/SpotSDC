@@ -146,12 +146,18 @@ class BitStackChart extends standardChildView{
             hist2d.push([[], [], []]);
         }
 
-        let bit = 0, outcome_menu = {'DUE':0, 'SDC': 1, 'Masked': 2};
+        let bit = 0, outcome_menu = {'Crash':0, 'SDC': 1, 'Masked': 2};
 
         this.data.values.forEach(element => {
             element.values.forEach(e=>{
                 bit = parseInt(e.bit) - 1;
-                hist2d[bit][outcome_menu[e.outcome]].push(e);
+
+                let outcome = e.outcome;
+                if(outcome == 'DUE')
+                    outcome = "Crash";
+               
+
+                hist2d[bit][outcome_menu[outcome]].push(e);
             });
         });
         let hist = [];

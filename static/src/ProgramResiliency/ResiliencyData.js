@@ -20,7 +20,7 @@ class ResiliencyData{
         this.maskedBoundary = [];
         for(let i = 0; i < this.goldenrun.length; i++){
             let max_value = 0, min_value = 0;
-            console.log(i);
+            //console.log(i);
             for(let j  = 0; j < this.simulation_bucket.Masked.length; j++){
                 let current_value = parseFloat(this.simulation_bucket.Masked[j][i].value) - parseFloat(this.goldenrun[i].value);
 

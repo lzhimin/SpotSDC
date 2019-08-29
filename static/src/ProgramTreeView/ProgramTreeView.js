@@ -9,6 +9,7 @@ class ProgramTreeView extends BasicView{
 
         this.outcome_color = {
             'DUE': '#542788',
+            'Crash': '#542788',
             'Masked': '#1b9e77',
             'SDC': '#d95f02'
         }   
