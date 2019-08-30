@@ -34,14 +34,14 @@ class StackBarChart extends standardChildView{
                 if(this.globalflag){
                     width = this.x_axis(d.values.length);
                 }else{
-                    width = this.ratio[d.key] * this.width;//d.values.length/this.sum * this.width;
+                    width = d.values.length/this.sum * this.width;
                 }
                 loc_x += width;
                 return loc_x - width;
             })
             .attr('y', this.y)
             .attr('width', (d)=>{
-                return this.globalflag ? this.x_axis(d.values.length) : this.ratio[d.key]* this.width//d.values.length/this.sum * this.width;
+                return this.globalflag ? this.x_axis(d.values.length) : d.values.length/this.sum * this.width;
             })
             .attr('height', this.height)
             .classed('stackbar_'+this.uuid+'_rect', true)

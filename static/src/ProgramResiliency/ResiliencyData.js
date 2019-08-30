@@ -18,22 +18,31 @@ class ResiliencyData{
 
     makeMaskedBoundary(){
         this.maskedBoundary = [];
+
+        let golden = 0, error = 0, current_value = 0;
+
         for(let i = 0; i < this.goldenrun.length; i++){
             let max_value = 0, min_value = 0;
-            //console.log(i);
+
             for(let j  = 0; j < this.simulation_bucket.Masked.length; j++){
-                let current_value = parseFloat(this.simulation_bucket.Masked[j][i].value) - parseFloat(this.goldenrun[i].value);
+                golden = parseFloat(this.goldenrun[i].value);
+                error = parseFloat(this.simulation_bucket.Masked[j][i].value);
+
+                if(golden != 0){
+                    current_value = (error-golden)/golden;
+                }else{
+                    current_value = 0;
+                }
 
                 if(current_value > max_value && current_value >= 0) max_value = current_value;
                 if(current_value < min_value && current_value < 0) min_value = current_value;
             }
 
             if(max_value > 1) max_value = Math.log10(max_value);
-            if(min_value < -1) min_value = -Math.log10(-min_value)
+            if(min_value < -1) min_value = -Math.log10(-min_value);
 
             this.maskedBoundary.push([max_value, min_value]);
-        }
-        
+        }  
     }
 
     SdcBoundary(){
@@ -51,7 +60,6 @@ class ResiliencyData{
                 continue;
             this.simulation_bucket[outcome].push(data[i]);
         }
-
         this.makeMaskedBoundary();
     }
 }
