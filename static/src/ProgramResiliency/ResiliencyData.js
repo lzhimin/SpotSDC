@@ -41,25 +41,23 @@ class ResiliencyData{
             if(max_value > 1) max_value = Math.log10(max_value);
             if(min_value < -1) min_value = -Math.log10(-min_value);
 
-            this.maskedBoundary.push([max_value, min_value]);
+            this.maskedBoundary.push({"max":max_value, "min":min_value});
         }  
-    }
-
-    SdcBoundary(){
-        this.sdc = [];
     }
 
     addSimulations(data){
         //clean
-        this.simulation_bucket.Masked = [];
-        this.simulation_bucket.SDC = [];
+        //this.simulation_bucket.Masked = [];
+        //this.simulation_bucket.SDC = [];
 
-        for(let i = 0; i < data.length; i++){
-            let outcome = this.faultInjectedData[this.faultinjectionIndexs[i]].outcome;
-            if(outcome == "DUE")
-                continue;
-            this.simulation_bucket[outcome].push(data[i]);
-        }
-        this.makeMaskedBoundary();
+        //for(let i = 0; i < data.length; i++){
+        //    let outcome = this.faultInjectedData[this.faultinjectionIndexs[i]].outcome;
+        //   if(outcome == "DUE")
+        //        continue;
+        //    this.simulation_bucket[outcome].push(data[i]);
+        //}
+        //this.makeMaskedBoundary();
+        this.maskedBoundary = data;
+
     }
 }

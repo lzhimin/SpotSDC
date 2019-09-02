@@ -186,7 +186,7 @@ class SmartValueBarChart extends standardChildView{
             hist2d.push([[], [], []]);
         }
 
-        let bit = 0, outcome_menu = {'DUE':2, 'SDC': 1, 'Masked': 0};
+        let bit = 0, outcome_menu = {'DUE':2, 'SDC': 1, 'Masked': 0, 'Crash':2};
 
         this.data.values.forEach(element => {
             element.values.forEach(e=>{

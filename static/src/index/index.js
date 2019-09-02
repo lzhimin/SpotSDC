@@ -20,8 +20,6 @@ myLayout.registerComponent('ErrorPropagationView', function(container, state){
     $(container.getElement()[0]).load('../static/src/ErrorPropagationView/ErrorPropagationView.html');
 
     epv = new ErrorPropagationView(container);
-    
-    fetchGoldenSimulationData();
 
     subscribe('DATASET', epv.setSummaryData.bind(epv));
     subscribe('SINGLE_SIMULATION', epv.setErrorRunData.bind(epv));
@@ -36,6 +34,7 @@ myLayout.registerComponent('ResiliencyView', function(container, state){
     subscribe("DATASET", rv.setData.bind(rv));
     subscribe("SINGLE_SIMULATION_GOLDEN", rv.setGoldenRunData.bind(rv));
     subscribe('MULTIPLE_SIMULATION', rv.addMultipleSimulation.bind(rv));
+    subscribe("MASKED_BOUNDARY", rv.updateChart.bind(rv))
 });
 
 

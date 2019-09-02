@@ -11,20 +11,39 @@ function fetchSingleSimulationData(index){
     });
 }
 
-function fetchMultipleSimulationData(indexs){
-    let lists = [];
-    for(let i = 0; i < indexs.length; i++)
-        lists.push(d3.csv("../static/data/cg_simulation/appstate_"+ (indexs[i])+".log"));
-
-    Promise.all(lists)
-    .then((res)=>{
-        publish("MULTIPLE_SIMULATION", res);
-    });
+function fetchMultipleSimulationData(json){
+    $.ajax({
+        url:'/_fetch_data',
+        type:'POST',
+        contentType:'application/json',
+        data:JSON.stringify(json),
+        dataType:'json',
+        success:function(data){  
+            publish("MULTIPLE_SIMULATION", data)
+        }
+    });  
 }
 
-function fetchGoldenSimulationData(){
-    //let psv = d3.dsvFormat(' ');
-    d3.csv('../static/data/cg_simulation/golden.log').then(function(data){
+function fetch_data(json){
+
+    console.log(json);
+    $.ajax({
+        url:'/_fetch_data',
+        type:'POST',
+        contentType:'application/json',
+        data:JSON.stringify(json),
+        dataType:'json',
+        success:function(data){  
+            publish("MASKED_BOUNDARY", data)
+        }
+    });  
+}
+
+function fetchGoldenSimulationData(path){
+    
+    let folder = path.split("_")[0];
+
+    d3.csv('../static/data/'+folder+"/"+path+"/golden.log").then(function(data){
         publish('SINGLE_SIMULATION_GOLDEN', data);
     });
 }

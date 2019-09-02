@@ -4,3 +4,5 @@ static/data/matrix/*
 ErrorVis_Poster*
 fft_*
 *.log
+.*
+static/data/*
