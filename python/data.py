@@ -10,9 +10,33 @@ def data_agent(request, app):
     if request["type"] == "masked_boundary":
         data = create_masked_boundary(request["first"], request["second"], request["dataset"], app.root_path)
         print("MASKED BOUNDARY", file=sys.stderr)
-        return data
+        
+    elif request["type"] == "resilency_single_run":
+        data = single_relative_run(request["index"], request["dataset"], app.root_path)
+        print("RESILIENCY SINGLE RUN", file=sys.stderr)
 
+    return data
 
+def single_relative_run(index, dataset, root_path):
+
+    result = []
+    folder = dataset.split("_")[0]
+    filepath = root_path+"/static/data/"+folder+"/"+dataset
+
+    fault_inject_run = pd.read_csv(filepath+"/appstate_"+str(index)+".log", sep=" ", names=['file', 'linenum', 'variable', 'value'])
+    golden_run = pd.read_csv(filepath+"/golden.log",  sep=" ", names=['file', 'linenum', 'variable', 'value'])
+    
+    errors = np.array(fault_inject_run.value[0:len(golden_run)], dtype="float") 
+    golden = np.array(golden_run.value, dtype="float")
+    for j in range(len(golden)):
+        if golden[j] != 0:
+            error = (errors[j] - golden[j])/golden[j] 
+        if abs(error) > 1:
+            error = math.log10(abs(error)) * error/abs(error)
+        else:
+            error = 0
+        result.append(error)
+    return result
 
 def create_masked_boundary(first_dyn, second_dyn, dataset, root_path):
     boundary = []

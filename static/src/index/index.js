@@ -35,6 +35,7 @@ myLayout.registerComponent('ResiliencyView', function(container, state){
     subscribe("SINGLE_SIMULATION_GOLDEN", rv.setGoldenRunData.bind(rv));
     subscribe('MULTIPLE_SIMULATION', rv.addMultipleSimulation.bind(rv));
     subscribe("MASKED_BOUNDARY", rv.updateChart.bind(rv))
+    subscribe('RESILENCY_SINGLE_SIMULATION', rv.resiliency_single_simulation.bind(rv));
 });
 
 

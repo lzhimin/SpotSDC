@@ -11,6 +11,20 @@ function fetchSingleSimulationData(index){
     });
 }
 
+function fetchResiliencySimulationData(json){
+    $.ajax({
+        url:'/_fetch_data',
+        type:'POST',
+        contentType:'application/json',
+        data:JSON.stringify(json),
+        dataType:'json',
+        success:function(data){  
+            publish("RESILENCY_SINGLE_SIMULATION", data)
+        }
+    });  
+
+}
+
 function fetchMultipleSimulationData(json){
     $.ajax({
         url:'/_fetch_data',

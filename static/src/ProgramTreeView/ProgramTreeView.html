@@ -4,27 +4,28 @@
             <label class='program_TreeView_menu_label'> Dataset </label>
             <select id='program_TreeView_file_selector' class='program_TreeView_menu_select' onchange="changeFile()">
                 <option>none</option>
-                <option>cg_in8</option> 
+                <option>cg_in8</option>
                 <option>cg_in10</option>
                 <option>cg_in20</option>
                 <option>cg_in27</option>
                 <option>fft_complete</option>
+                <option>lu_complete</option>
                 <option>cg_sample</option>
                 <option>cg_8vs2</option>
                 <option>cg_interactive</option>
-                
+
             </select>
         </div>
 
         <div class='ProgramTreeViewMenu_div'>
             <label class='program_TreeView_menu_label'> Sampling Method </label>
-            <select id='program_TreeView_sample_selector' class='program_TreeView_menu_select' >
+            <select id='program_TreeView_sample_selector' class='program_TreeView_menu_select'>
                 <option>uniform</option>
                 <option>highbit</option>
                 <option>iteractive</option>
             </select>
         </div>
-        
+
         <div class='ProgramTreeViewMenu_div'>
             <label class='program_TreeView_menu_label'>Data Filter</label>
             <select id='program_TreeView_Filter_Option' class='program_TreeView_menu_select'>
@@ -32,52 +33,58 @@
                 <option>outcome</option>
             </select>
             <div id='program_TreeView_filter_bit' class='program_TreeView_filter_div' style='display:block;'>
-                <label style='font-weight:normal;'> <input type='checkbox' name='bit_out_xor_radio' checked  class='bit_out_xor_filter' value='sign'> Sign </label>  
-                <label style='font-weight:normal;'> <input type='checkbox' name='bit_out_xor_radio' checked  class='bit_out_xor_filter' value='exponent'> Exponent </label> 
-                <label style='font-weight:normal;'> <input type='checkbox' name='bit_out_xor_radio' checked  class='bit_out_xor_filter' value='mantissa'> Mantissa </label>  
+                <label style='font-weight:normal;'> <input type='checkbox' name='bit_out_xor_radio' checked
+                        class='bit_out_xor_filter' value='sign'> Sign </label>
+                <label style='font-weight:normal;'> <input type='checkbox' name='bit_out_xor_radio' checked
+                        class='bit_out_xor_filter' value='exponent'> Exponent </label>
+                <label style='font-weight:normal;'> <input type='checkbox' name='bit_out_xor_radio' checked
+                        class='bit_out_xor_filter' value='mantissa'> Mantissa </label>
             </div>
             <div id='program_TreeView_filter_outcome' class='program_TreeView_filter_div'>
-                <label style='font-weight:normal;background-color:#542788;color:white'> <input type='checkbox' name='outcome_filter' checked value='DUE' class='check_filter' > Crash </label> 
-                <label style='font-weight:normal;background-color:#1b9e77;color:white'> <input type='checkbox' name='outcome_filter' checked value='Masked' class='check_filter'> Masked </label>  
-                <label style='font-weight:normal;background-color:#d95f02;color:white'> <input type='checkbox' name='outcome_filter' checked value='SDC' class='check_filter'> SDC </label> 
+                <label style='font-weight:normal;background-color:#542788;color:white'> <input type='checkbox'
+                        name='outcome_filter' checked value='DUE' class='check_filter'> Crash </label>
+                <label style='font-weight:normal;background-color:#1b9e77;color:white'> <input type='checkbox'
+                        name='outcome_filter' checked value='Masked' class='check_filter'> Masked </label>
+                <label style='font-weight:normal;background-color:#d95f02;color:white'> <input type='checkbox'
+                        name='outcome_filter' checked value='SDC' class='check_filter'> SDC </label>
             </div>
         </div>
     </div>
 
     <div class='ProgramTreeViewMenu_div' id='ProgramTree_sort_option_menu' style="display:none">
-            <div>
-                <label> Sort Options</label><br>
-                <select id='sort_options'>
-                    <option value="SDC_ratio"> Ratio          </option>
-                    <option value="SDC_impact"> Impact </option>
-                    <option value="SDC_frequency"> Frequency </option>
-                </select>
-            </div>
+        <div>
+            <label> Sort Options</label><br>
+            <select id='sort_options'>
+                <option value="SDC_ratio"> Ratio </option>
+                <option value="SDC_impact"> Impact </option>
+                <option value="SDC_frequency"> Frequency </option>
+            </select>
         </div>
-        
-    <div class='ProgramTreeViewMenu_div' id='ProgramTree_Tree_Menu'> 
+    </div>
+
+    <div class='ProgramTreeViewMenu_div' id='ProgramTree_Tree_Menu'>
         <select id='tree_level1' class='tree_attribute'>
             <option selected> </option>
-            <option >Function</option>
-            <option >Line</option>
-            <option >Variable</option>
-            <option >iter</option>
+            <option>Function</option>
+            <option>Line</option>
+            <option>Variable</option>
+            <option>iter</option>
         </select>
         <select id='tree_level2' class='tree_attribute' style='display:none'>
             <option> </option>
-            <option >Line</option>
+            <option>Line</option>
             <option selected>Variable</option>
-            <option >iter</option>
+            <option>iter</option>
         </select>
         <select id='tree_level3' class='tree_attribute' style='display:none'>
-            <option > </option>
+            <option> </option>
             <option selected> Line </option>
-            <option >iter</option>
+            <option>iter</option>
         </select>
     </div>
 
     <div class='ProgramTreeViewMenu_div' id='ProgramTree_impact_chart_menu'>
-        <div >
+        <div>
             <label> View Options </label><br>
             <select id="view_options">
                 <!--
@@ -94,10 +101,12 @@
     </div>
 
     <div class='ProgramTreeViewMenu_div' id='ProgramTree_ratio_chart_menu'>
-        <div >
+        <div>
             <label> Normalize </label><br>
-            <label style='font-weight:normal;'> <input type='radio' name='normalize_radio' value='local' checked> local </label> <br>
-            <label style='font-weight:normal;'> <input type='radio' name='normalize_radio' value='global'> global </label>
+            <label style='font-weight:normal;'> <input type='radio' name='normalize_radio' value='local' checked> local
+            </label> <br>
+            <label style='font-weight:normal;'> <input type='radio' name='normalize_radio' value='global'> global
+            </label>
         </div>
     </div>
 
@@ -105,6 +114,3 @@
 
     </div>
 </div>
-
-
-
