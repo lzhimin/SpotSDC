@@ -5,6 +5,7 @@ import math
 
 
 def remap_function_line(linenum):
+ 
 	if linenum == 906:
 		return [906, "InitA"]
 	elif linenum == 955:
@@ -15,8 +16,8 @@ def remap_function_line(linenum):
 		return [590, "lu0"]
 	elif linenum == 592:
 		return [592, "lu0"]
-	elif linenum == 661:
-		return [661, "daxpy"]
+	elif linenum == 660:
+		return [660, "daxpy"]
 	
 	elif linenum == 729:
 		return [729, "lu"]
@@ -25,11 +26,11 @@ def remap_function_line(linenum):
 	
 	elif linenum == 610:
 		return [610, "bdiv"]
-	elif linenum == 630:
-		return [630, "bmodd"]
+	elif linenum == 629:
+		return [629, "bmodd"]
 	
-	elif linenum == 628:
-		return [628, "bmodd"]
+	elif linenum == 627:
+		return [627, "bmodd"]
 	elif linenum == 796:
 		return [796, "lu"]
 		
@@ -38,8 +39,8 @@ def remap_function_line(linenum):
 	elif linenum == 814:
 		return [814, "lu"]
 		
-	elif linenum == 648:
-		return [648, "bmod"]
+	elif linenum == 647:
+		return [647, "bmod"]
 	elif linenum == 765:
 		return [765, "lu"]
 	else:
@@ -78,7 +79,7 @@ def remap_function_line(linenum):
 
 result_data_set = []
 		
-experiment = pd.read_csv("../../static/data/lu/injectlog.log",  sep=' ', names=['file', 'linenum', 'variable','byte_num', 'corrupted','init_value','to', 'corrupt_value', 'mask', 'byte','expo', 'ss', 'op', 'diffnorm', 'empty'])
+experiment = pd.read_csv("injectlog.log",  sep=' ', names=['file', 'linenum', 'variable','byte_num', 'corrupted','init_value','to', 'corrupt_value', 'mask', 'byte','expo', 'ss', 'op', 'diffnorm', 'empty'])
 
 L = len(experiment)/10
 for index, row in experiment.iterrows():
@@ -124,7 +125,7 @@ for index, row in experiment.iterrows():
 		raise Exception("unknown value for outcome")
 	
 	#iter
-	item.append(math.floor(index/L))
+	item.append(math.floor(int(index)/L))
 	
 	#bit
 	bit = 0

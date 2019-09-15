@@ -58,7 +58,7 @@ class ResiliencyView extends BasicView {
             .attr("transform", "translate(0," + (this.margin.top + (this.height - this.margin.bottom - this.margin.top) / 2) + ")")
             .call(d3.axisBottom(this.x_axis).ticks(20));
 
-        this.y_axis_positive = d3.scaleLinear().domain([d3.min(this.resiliencydata.maskedBoundary, (d) => {
+        this.y_axis_positive = d3.scaleLinear().domain([d3.max(this.resiliencydata.maskedBoundary, (d) => {
                 return d.max;
             }) * 1.5, 0])
             .range([this.margin.top, (this.height - this.margin.top - this.margin.bottom) / 2 + this.margin.top])
@@ -132,7 +132,7 @@ class ResiliencyView extends BasicView {
 
                 let flag = error < this.resiliencydata.maskedBoundary[index].max &&
                     error > this.resiliencydata.maskedBoundary[index].min;
-                return d.outcome != "DUE" && flag && d.outcome != "SDC"; // && d.diffnormr > 1;
+                return d.outcome != "DUE" && flag && d.outcome != "Masked"; // && d.diffnormr > 1;
             })
             .append('circle')
             .attr("cx", (d, i) => {
@@ -161,7 +161,7 @@ class ResiliencyView extends BasicView {
                     "dataset": $("#program_TreeView_file_selector").val(),
                     "type": "resilency_single_run"
                 };
-                fetchResiliencySimulationData(json);
+                //fetchResiliencySimulationData(json);
             })
             .on("mouseout", function (d, i) {
                 d3.select(this).attr("r", 4);
