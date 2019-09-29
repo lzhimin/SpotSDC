@@ -44,7 +44,6 @@ class ResiliencyView extends BasicView {
     }
 
     draw() {
-
         this.chart.html("");
 
         //selective choose a simulation run
@@ -161,10 +160,17 @@ class ResiliencyView extends BasicView {
                     "dataset": $("#program_TreeView_file_selector").val(),
                     "type": "resilency_single_run"
                 };
-                //fetchResiliencySimulationData(json);
+                fetchResiliencySimulationData(json);
             })
             .on("mouseout", function (d, i) {
                 d3.select(this).attr("r", 4);
+            })
+            .on("click", function (d, i) {
+                console.log(d);
+                publish('SOURCECODE_HIGHLIGHT', {
+                    'line': d.Line,
+                    'function': d.Function
+                });
             });
     }
 
