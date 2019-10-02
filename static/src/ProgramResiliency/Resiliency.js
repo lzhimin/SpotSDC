@@ -187,13 +187,13 @@ class ResiliencyView extends BasicView {
 
         //call the server to fetch masked case boundary
         let dataset = $("#program_TreeView_file_selector").val();
-        let data_info = {
-            "type": "masked_boundary",
-            "first": first_index,
-            "second": second_index,
-            "dataset": dataset
-        };
-        fetch_data(data_info);
+        //let data_info = {
+        //    "type": "masked_boundary",
+        //    "first": first_index,
+        //    "second": second_index,
+        //    "dataset": dataset
+        //};
+        //fetch_data(data_info);
     }
 
     updateChart(msg, data) {
