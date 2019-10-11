@@ -26,10 +26,10 @@ myLayout.registerComponent('ErrorPropagationView', function (container, state) {
     subscribe('SINGLE_SIMULATION_GOLDEN', epv.setGoldenRunData.bind(epv));
 });
 
-myLayout.registerComponent('ResiliencyView', function (container, state) {
+myLayout.registerComponent('faultToleranceBoudanryView', function (container, state) {
     //error propagation view subscribe to single simulation data
-    $(container.getElement()[0]).load("../static/src/ProgramResiliency/Resiliency.html");
-    rv = new ResiliencyView(container);
+    $(container.getElement()[0]).load("../static/src/faultToleranceBoudanry/faultToleranceBoudanry.html");
+    rv = new FaultToleranceBoudanryView(container);
 
     subscribe("DATASET", rv.setData.bind(rv));
     subscribe("SINGLE_SIMULATION_GOLDEN", rv.setGoldenRunData.bind(rv));

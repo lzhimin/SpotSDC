@@ -1,9 +1,9 @@
-class ResiliencyView extends BasicView {
+class FaultToleranceBoudanryView extends BasicView {
 
     constructor(container) {
         super(container);
 
-        this.resiliencydata = new ResiliencyData();
+        this.faultToleranceBoudanryData = new FaultToleranceBoudanryData();
         this.dynamicInstructionIndex = 140;
         this.number_of_sample_generate_boundary = 64;
 
@@ -19,8 +19,12 @@ class ResiliencyView extends BasicView {
 
     init() {
         super.init();
-        this.margin.left = 100;
-        this.margin.bottom = 100;
+        this.margin = {
+            'left': 200,
+            'bottom': 200,
+            'right': 50,
+            'top': 100
+        };
 
         //clean svg
         d3.select('#ResiliencyViewCanvas').html('');
@@ -50,108 +54,50 @@ class ResiliencyView extends BasicView {
         this.single_simulation_line = this.chart.append("g");
 
         this.x_axis = d3.scaleLinear()
-            .domain([0, this.resiliencydata.goldenrun.length])
+            .domain([0, this.faultToleranceBoudanryData.goldenrun.length])
             .range([this.margin.left, this.width - this.margin.left - this.margin.right]);
 
         this.chart_axis_x = this.chart.append('g').attr('class', 'resiliency_axis')
-            .attr("transform", "translate(0," + (this.margin.top + (this.height - this.margin.bottom - this.margin.top) / 2) + ")")
+            .attr("transform", "translate(0," + (this.height - this.margin.bottom - this.margin.top) + ")")
             .call(d3.axisBottom(this.x_axis).ticks(20));
 
-        this.y_axis_positive = d3.scaleLinear().domain([d3.max(this.resiliencydata.maskedBoundary, (d) => {
-                return d.max;
-            }) * 1.5, 0])
-            .range([this.margin.top, (this.height - this.margin.top - this.margin.bottom) / 2 + this.margin.top])
+        this.y_axis = d3.scaleLinear().domain([this.faultToleranceBoudanryData.getSampleMax(), 0])
+            .range([this.margin.top, this.height - this.margin.bottom - this.margin.top])
             .clamp(true);
 
-        this.y_axis_negative = d3.scaleLinear().domain([0, d3.min(this.resiliencydata.maskedBoundary, (d) => {
-                return d.min;
-            }) * 1.5])
-            .range([(this.height - this.margin.top - this.margin.bottom) / 2 + this.margin.top, (this.height - this.margin.bottom)])
-            .clamp(true);
-
-        this.chart_axis_y_positive = this.chart.append('g').attr('class', 'resiliency_axis')
+        this.chart_axis_y = this.chart.append('g').attr('class', 'resiliency_axis')
             .attr("transform", "translate(" + (this.margin.left - 5) + ", 0)")
-            .call(d3.axisLeft(this.y_axis_positive).ticks(10));
-
-        this.chart_axis_y_negative = this.chart.append('g').attr('class', 'resiliency_axis')
-            .attr("transform", "translate(" + (this.margin.left - 5) + ", 0)")
-            .call(d3.axisLeft(this.y_axis_negative).ticks(10));
+            .call(d3.axisLeft(this.y_axis).ticks(10));
 
         //define the brush aread
-        d3.select("#resiliencySvg")
-            .call(d3.brushX()
-                .extent([
-                    [this.margin.left, (this.margin.top + (this.height - this.margin.bottom - this.margin.top) / 2) - 20],
-                    [this.width - this.margin.left - this.margin.right, (this.margin.top + (this.height - this.margin.bottom - this.margin.top) / 2) + 20]
-                ])
-                .on("end", this.brushEvent.bind(this)));
-
-        let masked_up_lineFunc = d3.line()
-            .curve(d3.curveBasis)
-            .x((d, i) => {
-                return this.x_axis(i);
-            })
-            .y((d) => {
-                return this.y_axis_positive(d.max);
-            });
-
-        this.chart.append("path")
-            .attr("d", masked_up_lineFunc(this.resiliencydata.maskedBoundary))
-            .attr("stroke", "black")
-            .attr("fill", "white")
-            .attr("fill-opacity", 0);
-
-        let masked_low_lineFunc = d3.line()
-            .curve(d3.curveBasis)
-            .x((d, i) => {
-                return this.x_axis(i);
-            })
-            .y((d) => {
-                return this.y_axis_negative(d.min);
-            });
-
-        this.chart.append("path")
-            .attr("d", masked_low_lineFunc(this.resiliencydata.maskedBoundary))
-            .attr("stroke", "black")
-            .attr("fill", "white")
-            .attr("fill-opacity", 0);
+        //d3.select("#resiliencySvg")
+        //    .call(d3.brushX()
+        //        .extent([
+        //            [this.margin.left, (this.margin.top + (this.height - this.margin.bottom - this.margin.top) / 2) - 20],
+        //            [this.width - this.margin.left - this.margin.right, (this.margin.top + (this.height - this.margin.bottom - this.margin.top) / 2) + 20]
+        //        ])
+        //        .on("end", this.brushEvent.bind(this)));
 
         this.chart.append('g').selectAll(".faultInjectionPoint")
-            .data(this.resiliencydata.faultInjectedData)
+            .data(this.faultToleranceBoudanryData.samplingData)
             .enter()
-            .filter((d, i) => {
-                let index = Math.floor(d.File_index / 64);
-                let error = +d.out_xor_relative;
-
-                if (Math.abs(error) > 1)
-                    error = Math.log(Math.abs(error)) * error / Math.abs(error)
-
-                if (this.resiliencydata.maskedBoundary[index] == "undefined")
-                    return false;
-
-                let flag = error < this.resiliencydata.maskedBoundary[index].max &&
-                    error > this.resiliencydata.maskedBoundary[index].min;
-                return d.outcome != "DUE" && flag && d.outcome != "Masked"; // && d.diffnormr > 1;
-            })
+            //.filter((d, i) => {})
             .append('circle')
             .attr("cx", (d, i) => {
                 return this.x_axis(Math.floor(d.File_index / 64));
             })
             .attr("cy", (d) => {
-                let error = +d.out_xor_relative;
-                if (Math.abs(error) > 1)
-                    error = Math.log(Math.abs(error)) * error / Math.abs(error)
+                if (isNaN(+d.out_xor_relative) || !isFinite(+d.out_xor_relative)) {
+                    return this.y_axis.range()[0];
+                }
 
-                if (error >= 0)
-                    return this.y_axis_positive(error);
-                else
-                    return this.y_axis_negative(error);
+                return this.y_axis(this.faultToleranceBoudanryData.logFunc(Math.abs(+d.out_xor_relative)));
             })
             .attr("r", this.circle_r)
             .attr("fill", (d) => {
                 return this.outcome_color[d.outcome];
             })
-            .attr("fill-opacity", 0.8)
+            .attr("fill-opacity", 0.3)
             .on("mouseover", function (d, i) {
                 console.log(d.diffnormr);
                 d3.select(this).attr("r", 10);
@@ -172,6 +118,24 @@ class ResiliencyView extends BasicView {
                     'function': d.Function
                 });
             });
+
+        let masked_up_lineFunc = d3.line()
+            .curve(d3.curveBasis)
+            .x((d, i) => {
+                return this.x_axis(i);
+            })
+            .y((d) => {
+                return this.y_axis(d);
+            });
+
+        this.chart.append("path")
+            .attr("d", masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative))
+            .attr("stroke", "black")
+            .attr("fill", "white")
+            .attr("fill-opacity", 0);
+
+        console.log(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative);
+
     }
 
     brushEvent() {
@@ -198,13 +162,13 @@ class ResiliencyView extends BasicView {
 
     updateChart(msg, data) {
         console.log(msg)
-        this.resiliencydata.maskedBoundary = data;
+        this.faultToleranceBoudanryData.maskedBoundary = data;
         this.draw();
     }
 
     resiliency_single_simulation(msg, data) {
         console.log(msg);
-        let masked_lineFunc = d3.line()
+        /*let masked_lineFunc = d3.line()
             .curve(d3.curveBasis)
             .x((d, i) => {
                 return this.x_axis(i);
@@ -219,16 +183,16 @@ class ResiliencyView extends BasicView {
             .attr("d", masked_lineFunc(data))
             .attr("stroke", "red")
             .attr("fill", "white")
-            .attr("fill-opacity", 0);
+            .attr("fill-opacity", 0);*/
     }
 
     setGoldenRunData(msg, data) {
-        this.resiliencydata.setGoldenRun(data);
+        this.faultToleranceBoudanryData.setGoldenRun(data);
         console.log(msg + " in Resiliency View.");
     }
 
     setData(msg, data) {
-        this.resiliencydata.setFaultInjectData(data);
+        this.faultToleranceBoudanryData.setFaultInjectData(data);
         let dataset = $("#program_TreeView_file_selector").val();
         fetchGoldenSimulationData(dataset)
 
@@ -237,7 +201,7 @@ class ResiliencyView extends BasicView {
     }
 
     addMultipleSimulation(msg, data) {
-        this.resiliencydata.addSimulations(data);
+        this.faultToleranceBoudanryData.addSimulations(data);
         this.draw();
     }
 }
