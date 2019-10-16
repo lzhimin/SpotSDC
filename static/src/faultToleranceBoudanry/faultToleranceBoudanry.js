@@ -27,8 +27,8 @@ class FaultToleranceBoudanryView extends BasicView {
         };
 
         //clean svg
-        d3.select('#ResiliencyViewCanvas').html('');
-        this.chart = d3.select('#ResiliencyViewCanvas')
+        d3.select('#fault_tolerance_boundary_view').html('');
+        this.chart = d3.select('#fault_tolerance_boundary_view')
             .append('svg')
             .attr("id", "resiliencySvg")
             .attr('width', this.width)
@@ -69,16 +69,39 @@ class FaultToleranceBoudanryView extends BasicView {
             .attr("transform", "translate(" + (this.margin.left - 5) + ", 0)")
             .call(d3.axisLeft(this.y_axis).ticks(10));
 
-        //define the brush aread
-        //d3.select("#resiliencySvg")
-        //    .call(d3.brushX()
-        //        .extent([
-        //            [this.margin.left, (this.margin.top + (this.height - this.margin.bottom - this.margin.top) / 2) - 20],
-        //            [this.width - this.margin.left - this.margin.right, (this.margin.top + (this.height - this.margin.bottom - this.margin.top) / 2) + 20]
-        //        ])
-        //        .on("end", this.brushEvent.bind(this)));
+        //slider 
+        this.chart.append("line")
+            .attr('x1', this.width - this.margin.left - this.margin.right + 20)
+            .attr('x2', this.width - this.margin.left - this.margin.right + 20)
+            .attr('y1', this.margin.top)
+            .attr('y2', this.height - this.margin.bottom - this.margin.top)
+            .style("stroke", "steelblue")
+            .style("stroke-linecap", "round")
+            .style("stroke-width", 2);
 
-        this.chart.append('g').selectAll(".faultInjectionPoint")
+        const threshold_axis = d3.scaleLinear().domain([this.height - this.margin.bottom - this.margin.top, this.margin.top]).range([0, 1])
+        const circle = this.chart.append('circle')
+            .attr("r", 10)
+            .attr("cx", this.width - this.margin.left - this.margin.right + 20)
+            .attr("cy", threshold_axis.invert(this.faultToleranceBoudanryData.threshold))
+            .style("cursor", "grab")
+            .style("fill", "steelblue")
+            .call(d3.drag().on("end", () => {
+                let y = d3.event.y;
+                y = y < this.margin.top ? this.margin.top : y;
+                y = y > this.height - this.margin.bottom - this.margin.top ? this.height - this.margin.bottom - this.margin.top : y;
+                this.faultToleranceBoudanryData.threshold = threshold_axis(y);
+                this.faultToleranceBoudanryData.updateFaultToleranceBoundary_Relative();
+                circle.attr('cy', y);
+
+                this.fault_tolerance_boundary
+                    .transition()
+                    .duration(1000)
+                    .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative));
+            }));
+
+
+        /*this.chart.append('g').selectAll(".faultInjectionPoint")
             .data(this.faultToleranceBoudanryData.samplingData)
             .enter()
             //.filter((d, i) => {})
@@ -117,9 +140,9 @@ class FaultToleranceBoudanryView extends BasicView {
                     'line': d.Line,
                     'function': d.Function
                 });
-            });
+            });*/
 
-        let masked_up_lineFunc = d3.line()
+        this.masked_up_lineFunc = d3.line()
             .curve(d3.curveBasis)
             .x((d, i) => {
                 return this.x_axis(i);
@@ -128,14 +151,11 @@ class FaultToleranceBoudanryView extends BasicView {
                 return this.y_axis(d);
             });
 
-        this.chart.append("path")
-            .attr("d", masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative))
+        this.fault_tolerance_boundary = this.chart.append("path")
+            .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative))
             .attr("stroke", "black")
             .attr("fill", "white")
             .attr("fill-opacity", 0);
-
-        console.log(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative);
-
     }
 
     brushEvent() {

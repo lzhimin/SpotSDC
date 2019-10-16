@@ -1,0 +1,9 @@
+#fault_tolerance_boundary_menu {
+    border: 1px solid gray;
+    margin: 5px;
+}
+
+.fault_tolerance_boundary_menu_label {
+    width: 20%;
+    display: inline-block;
+}

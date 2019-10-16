@@ -115,6 +115,10 @@ class FaultToleranceBoudanryData {
         return relativeBoundary;
     }
 
+    updateFaultToleranceBoundary_Relative() {
+        this.faultToleranceBoundaryRelative = this.getFaultToleranceBoundary_Relative();
+    }
+
 
     //here we assume that we have the exhaust fault injection campaign dataset
     getFaultToleranceBoudanry_Bit() {
