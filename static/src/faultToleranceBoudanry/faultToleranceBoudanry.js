@@ -48,60 +48,16 @@ class FaultToleranceBoudanryView extends BasicView {
     }
 
     draw() {
+
+        //clean the vis board
         this.chart.html("");
 
-        //selective choose a simulation run
-        this.single_simulation_line = this.chart.append("g");
+        //this.draw_numerical_boundary();
 
-        this.x_axis = d3.scaleLinear()
-            .domain([0, this.faultToleranceBoudanryData.goldenrun.length])
-            .range([this.margin.left, this.width - this.margin.left - this.margin.right]);
+        this.draw_bit_boundary();
 
-        this.chart_axis_x = this.chart.append('g').attr('class', 'resiliency_axis')
-            .attr("transform", "translate(0," + (this.height - this.margin.bottom - this.margin.top) + ")")
-            .call(d3.axisBottom(this.x_axis).ticks(20));
-
-        this.y_axis = d3.scaleLinear().domain([this.faultToleranceBoudanryData.getSampleMax(), 0])
-            .range([this.margin.top, this.height - this.margin.bottom - this.margin.top])
-            .clamp(true);
-
-        this.chart_axis_y = this.chart.append('g').attr('class', 'resiliency_axis')
-            .attr("transform", "translate(" + (this.margin.left - 5) + ", 0)")
-            .call(d3.axisLeft(this.y_axis).ticks(10));
-
-        //slider 
-        this.chart.append("line")
-            .attr('x1', this.width - this.margin.left - this.margin.right + 20)
-            .attr('x2', this.width - this.margin.left - this.margin.right + 20)
-            .attr('y1', this.margin.top)
-            .attr('y2', this.height - this.margin.bottom - this.margin.top)
-            .style("stroke", "steelblue")
-            .style("stroke-linecap", "round")
-            .style("stroke-width", 2);
-
-        const threshold_axis = d3.scaleLinear().domain([this.height - this.margin.bottom - this.margin.top, this.margin.top]).range([0, 1])
-        const circle = this.chart.append('circle')
-            .attr("r", 10)
-            .attr("cx", this.width - this.margin.left - this.margin.right + 20)
-            .attr("cy", threshold_axis.invert(this.faultToleranceBoudanryData.threshold))
-            .style("cursor", "grab")
-            .style("fill", "steelblue")
-            .call(d3.drag().on("end", () => {
-                let y = d3.event.y;
-                y = y < this.margin.top ? this.margin.top : y;
-                y = y > this.height - this.margin.bottom - this.margin.top ? this.height - this.margin.bottom - this.margin.top : y;
-                this.faultToleranceBoudanryData.threshold = threshold_axis(y);
-                this.faultToleranceBoudanryData.updateFaultToleranceBoundary_Relative();
-                circle.attr('cy', y);
-
-                this.fault_tolerance_boundary
-                    .transition()
-                    .duration(1000)
-                    .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative));
-            }));
-
-
-        /*this.chart.append('g').selectAll(".faultInjectionPoint")
+        /*
+        this.chart.append('g').selectAll(".faultInjectionPoint")
             .data(this.faultToleranceBoudanryData.samplingData)
             .enter()
             //.filter((d, i) => {})
@@ -140,7 +96,68 @@ class FaultToleranceBoudanryView extends BasicView {
                     'line': d.Line,
                     'function': d.Function
                 });
-            });*/
+            });
+            */
+
+
+    }
+
+
+    draw_numerical_boundary() {
+        this.x_axis = d3.scaleLinear()
+            .domain([0, this.faultToleranceBoudanryData.goldenrun.length])
+            .range([this.margin.left, this.width - this.margin.left - this.margin.right]);
+
+        this.chart_axis_x = this.chart.append('g').attr('class', 'resiliency_axis')
+            .attr("transform", "translate(0," + (this.height - this.margin.bottom - this.margin.top) + ")")
+            .call(d3.axisBottom(this.x_axis).ticks(20));
+
+        this.y_axis = d3.scaleLinear().domain([this.faultToleranceBoudanryData.getSampleMax(), 0])
+            .range([this.margin.top, this.height - this.margin.bottom - this.margin.top])
+            .clamp(true);
+
+        this.chart_axis_y = this.chart.append('g').attr('class', 'resiliency_axis')
+            .attr("transform", "translate(" + (this.margin.left - 5) + ", 0)")
+            .call(d3.axisLeft(this.y_axis).ticks(10));
+
+        //slider 
+        this.chart.append("line")
+            .attr('x1', this.width - this.margin.left - this.margin.right + 20)
+            .attr('x2', this.width - this.margin.left - this.margin.right + 20)
+            .attr('y1', this.margin.top)
+            .attr('y2', this.height - this.margin.bottom - this.margin.top)
+            .style("stroke", "steelblue")
+            .style("stroke-linecap", "round")
+            .style("stroke-width", 2);
+
+        const threshold_axis = d3.scaleLinear().domain([this.height - this.margin.bottom - this.margin.top, this.margin.top]).range([0, 5])
+        const circle = this.chart.append('circle')
+            .attr("r", 10)
+            .attr("cx", this.width - this.margin.left - this.margin.right + 20)
+            .attr("cy", threshold_axis.invert(this.faultToleranceBoudanryData.threshold))
+            .style("cursor", "grab")
+            .style("fill", "steelblue")
+            .call(d3.drag()
+                .on("drag", () => {
+                    let y = d3.event.y;
+                    y = y < this.margin.top ? this.margin.top : y;
+                    y = y > this.height - this.margin.bottom - this.margin.top ? this.height - this.margin.bottom - this.margin.top : y;
+                    circle.attr('cy', y);
+                })
+                .on("end", () => {
+                    let y = d3.event.y;
+                    y = y < this.margin.top ? this.margin.top : y;
+                    y = y > this.height - this.margin.bottom - this.margin.top ? this.height - this.margin.bottom - this.margin.top : y;
+                    this.faultToleranceBoudanryData.threshold = threshold_axis(y);
+                    this.faultToleranceBoudanryData.updateFaultToleranceBoundary();
+                    circle.attr('cy', y);
+
+                    this.fault_tolerance_boundary
+                        .transition()
+                        .duration(1000)
+                        .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative));
+                })
+            );
 
         this.masked_up_lineFunc = d3.line()
             .curve(d3.curveBasis)
@@ -153,6 +170,78 @@ class FaultToleranceBoudanryView extends BasicView {
 
         this.fault_tolerance_boundary = this.chart.append("path")
             .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative))
+            .attr("stroke", "black")
+            .attr("fill", "white")
+            .attr("fill-opacity", 0);
+    }
+
+    draw_bit_boundary() {
+        this.x_axis = d3.scaleLinear()
+            .domain([0, this.faultToleranceBoudanryData.goldenrun.length])
+            .range([this.margin.left, this.width - this.margin.left - this.margin.right]);
+
+        this.chart_axis_x = this.chart.append('g').attr('class', 'resiliency_axis')
+            .attr("transform", "translate(0," + (this.height - this.margin.bottom - this.margin.top) + ")")
+            .call(d3.axisBottom(this.x_axis).ticks(20));
+
+        this.y_axis = d3.scaleLinear().domain([64, 0])
+            .range([this.margin.top, this.height - this.margin.bottom - this.margin.top])
+            .clamp(true);
+
+        this.chart_axis_y = this.chart.append('g').attr('class', 'resiliency_axis')
+            .attr("transform", "translate(" + (this.margin.left - 5) + ", 0)")
+            .call(d3.axisLeft(this.y_axis).ticks(10));
+
+        //slider 
+        this.chart.append("line")
+            .attr('x1', this.width - this.margin.left - this.margin.right + 20)
+            .attr('x2', this.width - this.margin.left - this.margin.right + 20)
+            .attr('y1', this.margin.top)
+            .attr('y2', this.height - this.margin.bottom - this.margin.top)
+            .style("stroke", "steelblue")
+            .style("stroke-linecap", "round")
+            .style("stroke-width", 2);
+
+        const threshold_axis = d3.scaleLinear().domain([this.height - this.margin.bottom - this.margin.top, this.margin.top]).range([0, 5])
+        const circle = this.chart.append('circle')
+            .attr("r", 10)
+            .attr("cx", this.width - this.margin.left - this.margin.right + 20)
+            .attr("cy", threshold_axis.invert(this.faultToleranceBoudanryData.threshold))
+            .style("cursor", "grab")
+            .style("fill", "steelblue")
+            .call(d3.drag()
+                .on("drag", () => {
+                    let y = d3.event.y;
+                    y = y < this.margin.top ? this.margin.top : y;
+                    y = y > this.height - this.margin.bottom - this.margin.top ? this.height - this.margin.bottom - this.margin.top : y;
+                    circle.attr('cy', y);
+                })
+                .on("end", () => {
+                    let y = d3.event.y;
+                    y = y < this.margin.top ? this.margin.top : y;
+                    y = y > this.height - this.margin.bottom - this.margin.top ? this.height - this.margin.bottom - this.margin.top : y;
+                    this.faultToleranceBoudanryData.threshold = threshold_axis(y);
+                    this.faultToleranceBoudanryData.updateFaultToleranceBoundary();
+                    circle.attr('cy', y);
+
+                    this.fault_tolerance_boundary
+                        .transition()
+                        .duration(1000)
+                        .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryBit));
+                })
+            );
+
+        this.masked_up_lineFunc = d3.line()
+            .curve(d3.curveBasis)
+            .x((d, i) => {
+                return this.x_axis(i);
+            })
+            .y((d) => {
+                return this.y_axis(d);
+            });
+
+        this.fault_tolerance_boundary = this.chart.append("path")
+            .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryBit))
             .attr("stroke", "black")
             .attr("fill", "white")
             .attr("fill-opacity", 0);

@@ -14,6 +14,7 @@ class FaultToleranceBoudanryData {
         this.faultInjectedData = data;
         this.samplingData = this.sampling();
         this.faultToleranceBoundaryRelative = this.getFaultToleranceBoundary_Relative();
+        this.faultToleranceBoundaryBit = this.getFaultToleranceBoundary_Bit();
     }
 
     setGoldenRun(data) {
@@ -79,22 +80,10 @@ class FaultToleranceBoudanryData {
     getFaultToleranceBoundary_Relative() {
         let relativeBoundary = [];
         let relative_error = [];
-        for (let i = 0; i < this.faultInjectedData.length; i++) {
-            /*if (this.faultInjectedData[i].outcome == "Masked") {
-                relative_error = this.logFunc(Math.abs(this.faultInjectedData[i].out_xor_relative));
-                if (boundaryvalue < relative_error)
-                    boundaryvalue = relative_error;
+        const l = this.faultInjectedData.length;
 
-                if (this.faultInjectedData[i].bit % 64 == 0 && i != 0)
-                    relativeBoundary.push(boundaryvalue);
-            } else if ((i + 1) < this.faultInjectedData.length && this.faultInjectedData[i + 1].outcome == "SDC") {
-                relativeBoundary.push(boundaryvalue);
-                boundaryvalue = -1;
-                i = i + (63 - i % 64); //jump to next bit
-            }*/
-
-
-            if (this.faultInjectedData[i].diffnormr > this.threshold) { // == 'SDC') {
+        for (let i = 0; i < l; i++) {
+            if (this.faultInjectedData[i].diffnormr > this.threshold) {
                 let error = Math.abs(+this.faultInjectedData[i].out_xor_relative);
                 if (isNaN(error) || !isFinite(error) || error == undefined)
                     continue;
@@ -105,29 +94,36 @@ class FaultToleranceBoudanryData {
                 if (relative_error.length == 0)
                     relativeBoundary.push(10000);
                 else
-
                     relativeBoundary.push(d3.min(relative_error));
                 relative_error = [];
             }
-
         }
-        console.log(relativeBoundary);
         return relativeBoundary;
     }
 
-    updateFaultToleranceBoundary_Relative() {
-        this.faultToleranceBoundaryRelative = this.getFaultToleranceBoundary_Relative();
+    //here we assume that we have the exhaust fault injection campaign dataset
+    getFaultToleranceBoundary_Bit() {
+        const bitBoundary = [];
+        const l = this.faultInjectedData.length;
+        let min_sdc_bit = 64;
+
+        for (let i = 0; i < l; i++) {
+            if (this.faultInjectedData[i].diffnormr > this.threshold) {
+                min_sdc_bit = +this.faultInjectedData[i].bit;
+                bitBoundary.push(min_sdc_bit);
+                i += (63 - (min_sdc_bit - 1));
+                min_sdc_bit = 64;
+            } else if (i % 63 == 0 && i != 0) {
+                bitBoundary.push(min_sdc_bit);
+            }
+        }
+        console.log(bitBoundary);
+        return bitBoundary;
     }
 
-
-    //here we assume that we have the exhaust fault injection campaign dataset
-    getFaultToleranceBoudanry_Bit() {
-        let bitBoundary = [];
-        let bit_error = -1,
-            boundary_bit = -1;
-        for (let i = 0; i < this.faultInjectedData.length; i++) {
-
-        }
+    updateFaultToleranceBoundary() {
+        this.faultToleranceBoundaryRelative = this.getFaultToleranceBoundary_Relative();
+        this.faultToleranceBoundaryBit = this.getFaultToleranceBoundary_Bit();
     }
 
     sampling(n = 1000) {
