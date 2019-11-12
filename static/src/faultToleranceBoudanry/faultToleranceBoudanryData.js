@@ -8,13 +8,15 @@ class FaultToleranceBoudanryData {
 
         //The threshold value for SDC outcome.
         this.threshold = 0.07;
+
+        //display the 99% boundary value correctly and truncate the rest to 99% maximum.
+        this.percentage = 0.95;
     }
 
     setFaultInjectData(data) {
         this.faultInjectedData = data;
         this.samplingData = this.sampling();
         this.faultToleranceBoundaryRelative = this.getFaultToleranceBoundary_Relative();
-        this.faultToleranceBoundaryBit = this.getFaultToleranceBoundary_Bit();
     }
 
     setGoldenRun(data) {
@@ -101,29 +103,13 @@ class FaultToleranceBoudanryData {
         return relativeBoundary;
     }
 
-    //here we assume that we have the exhaust fault injection campaign dataset
-    getFaultToleranceBoundary_Bit() {
-        const bitBoundary = [];
-        const l = this.faultInjectedData.length;
-        let min_sdc_bit = 64;
-
-        for (let i = 0; i < l; i++) {
-            if (this.faultInjectedData[i].diffnormr > this.threshold) {
-                min_sdc_bit = +this.faultInjectedData[i].bit;
-                bitBoundary.push(min_sdc_bit);
-                i += (63 - (min_sdc_bit - 1));
-                min_sdc_bit = 64;
-            } else if (i % 63 == 0 && i != 0) {
-                bitBoundary.push(min_sdc_bit);
-            }
-        }
-        console.log(bitBoundary);
-        return bitBoundary;
+    //the percentage of propagation error will be shown
+    setPercentage(p) {
+        this.percentage = p;
     }
 
     updateFaultToleranceBoundary() {
         this.faultToleranceBoundaryRelative = this.getFaultToleranceBoundary_Relative();
-        this.faultToleranceBoundaryBit = this.getFaultToleranceBoundary_Bit();
     }
 
     sampling(n = 1000) {
@@ -139,7 +125,6 @@ class FaultToleranceBoudanryData {
     //get sample max return the maximum inject error by applying the boxplot's 
     //outlier detection rule.
     getSampleMax() {
-
         let inject_error = this.samplingData.map((d) => Math.abs(+d.out_xor_relative)).sort(function (a, b) {
             if (isNaN(a) || !isFinite(a))
                 return 1;
@@ -148,12 +133,11 @@ class FaultToleranceBoudanryData {
             return a - b
         });
 
-        //let q3 = d3.quantile(inject_error, 0.75);
-        //let q1 = d3.quantile(inject_error, 0.25);
-        let q95 = d3.quantile(inject_error, 0.95);
+        if (this.percentage == 1)
+            return this.logFunc(d3.max(inject_error));
 
-        //return this.logFunc(q3 + (q3 - q1) * 1.5);
-        return this.logFunc(q95);
+        let q = d3.quantile(inject_error, this.percentage);
+        return this.logFunc(q);
     }
 
     //assume the pass value is positive.
@@ -162,5 +146,17 @@ class FaultToleranceBoudanryData {
             return value;
         else
             return Math.log10(value) + 1;
+    }
+
+    getExecutionLineNum() {
+        let linenum_set = new Set();
+        let linenum = [];
+        this.goldenrun.forEach((d) => {
+            if (!linenum_set.has(d.linenum)) {
+                linenum.push(d.linenum);
+                linenum_set.add(d.linenum);
+            }
+        });
+        return linenum;
     }
 }
