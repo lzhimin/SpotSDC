@@ -19,7 +19,7 @@ class FaultToleranceBoudanryView extends BasicView {
         this.margin = {
             'left': 250,
             'bottom': 200,
-            'right': 10,
+            'right': 50,
             'top': 100
         };
 
@@ -51,10 +51,10 @@ class FaultToleranceBoudanryView extends BasicView {
         this.draw_boundary_occupation();
     }
 
-    //Indicate the truncation location as red.
+    //Indicate the truncation location as color.
     //Add a threshold line to indicate the location that is bad or good. (This is one of the domain requirement.)
     //A gradient base selection in the threshold axis.
-
+    //get a better fault tolerance boundary by using linear approximation method.
     draw_numerical_boundary() {
         this.x_axis = d3.scaleLinear()
             .domain([0, this.faultToleranceBoudanryData.goldenrun.length])
@@ -155,6 +155,32 @@ class FaultToleranceBoudanryView extends BasicView {
             .attr("stroke", "steelblue")
             .attr("fill", "white")
             .attr("fill-opacity", 0);
+
+        this.fault_tolerance_boundary_truncation_error = this.y_axis.domain()[0];
+        this.fault_tolerance_boundary_truncation_line = this.chart.append('rect')
+            .attr("x", this.margin.left)
+            .attr("y", this.margin.top)
+            .attr('width', this.width - 2 * this.margin.left - this.margin.right)
+            .attr("height", 3)
+            .attr("fill", 'orange')
+            .attr("fill-opacity", 0.7)
+            .call(d3.drag()
+                .on("drag end", () => {
+                    let y = d3.event.y;
+                    y = y < this.margin.top ? this.margin.top : y;
+                    y = y > (this.height - this.margin.bottom - this.margin.top) / 2 ? (this.height - this.margin.bottom - this.margin.top) / 2 : y;
+                    this.fault_tolerance_boundary_truncation_line.attr('y', y);
+                    this.fault_tolerance_boundary_truncation_error = this.y_axis.invert(y);
+
+                    this.fault_tolerance_occupation_dot.style('fill', (d, i) => {
+                        if (this.faultToleranceBoudanryData.faultToleranceBoundaryRelative[i] < this.fault_tolerance_boundary_truncation_error) {
+                            return "#ad0000";
+                        } else {
+                            return "steelblue";
+                        }
+                    });
+                })
+            );
     }
 
     draw_boundary_occupation() {
@@ -165,8 +191,7 @@ class FaultToleranceBoudanryView extends BasicView {
             .domain([0, linenum.length])
             .range([(this.height - this.margin.bottom - this.margin.top) / 2 + padding_top, this.height - this.margin.bottom]);
 
-
-        this.chart.append("g").selectAll(".linenum_dot").data(this.faultToleranceBoudanryData.goldenrun)
+        this.fault_tolerance_occupation_dot = this.chart.append("g").selectAll(".linenum_dot").data(this.faultToleranceBoudanryData.goldenrun)
             .enter()
             .append('circle')
             .attr('r', 2)
@@ -275,5 +300,8 @@ class FaultToleranceBoudanryView extends BasicView {
                 .duration(1000)
                 .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative));
         });
+
+        //truncation line
+
     }
 }
