@@ -78,29 +78,70 @@ class FaultToleranceBoudanryData {
 
     }
 
-    //here we assume that we have the exhaust fault injection campaign dataset
+    //here we assume that we have the exhaust fault injection campaign dataset.
     getFaultToleranceBoundary_Relative() {
         let relativeBoundary = [];
-        let relative_error = [];
+        let sdc_relative_error = [];
+        let masked_relative_error = [];
         const l = this.faultInjectedData.length;
 
         for (let i = 0; i < l; i++) {
-            if (this.faultInjectedData[i].diffnormr > this.threshold) {
-                let error = Math.abs(+this.faultInjectedData[i].out_xor_relative);
-                if (isNaN(error) || !isFinite(error) || error == undefined)
-                    continue;
-                relative_error.push(this.logFunc(error));
+            let error = Math.abs(+this.faultInjectedData[i].out_xor_relative);
+            //get the minimum SDC value and the Masked value below it.
+            if (isNaN(error) || !isFinite(error) || error == undefined) {
+                if ((i + 1) % 64 != 0) continue;
+            } else {
+                if (isNaN(this.faultInjectedData[i].diffnormr) || !isFinite(this.faultInjectedData[i].diffnormr)) {
+                    //do nothing
+                } else if (this.faultInjectedData[i].diffnormr > this.threshold) {
+                    sdc_relative_error.push({
+                        "error": this.logFunc(error),
+                        "norm": this.faultInjectedData[i].diffnormr
+                    });
+                } else {
+                    masked_relative_error.push({
+                        "error": this.logFunc(error),
+                        "norm": this.faultInjectedData[i].diffnormr
+                    });
+                }
             }
 
             if ((i + 1) % 64 == 0) {
-                if (relative_error.length == 0)
+                if (sdc_relative_error.length == 0) {
                     relativeBoundary.push(10000);
-                else
-                    relativeBoundary.push(d3.min(relative_error));
-                relative_error = [];
+                } else {
+                    //Here use the lowest SDC fault injection to approximate the golden boundary value.
+                    let min_sdc = sdc_relative_error.reduce((prev, current) => {
+                        return (prev.error < current.error) ? prev : current;
+                    });
+                    let boundary_masked = {
+                        "error": -1
+                    };
+                    masked_relative_error.forEach((d) => {
+                        if (d.error > boundary_masked.error && d.error < min_sdc.error) {
+                            boundary_masked = d;
+                        }
+                    });
+
+                    if (boundary_masked.error == -1) {
+                        relativeBoundary.push(min_sdc.error);
+                    } else {
+                        relativeBoundary.push(this.simpleLinearInterpolation(min_sdc, boundary_masked, this.threshold));
+                    }
+
+                }
+                sdc_relative_error = [];
+                masked_relative_error = [];
             }
         }
         return relativeBoundary;
+    }
+
+    // a simple interpolation method
+    simpleLinearInterpolation(p1, p2, v) {
+        let a = (p2.norm - p1.norm) / (p2.error - p1.error);
+        let b = (p1.error * p2.norm - p2.error * p1.norm) / (p1.error - p2.error);
+        return (v - b) / a;
     }
 
     //the percentage of propagation error will be shown

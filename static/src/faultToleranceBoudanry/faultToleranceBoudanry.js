@@ -54,7 +54,6 @@ class FaultToleranceBoudanryView extends BasicView {
     //Indicate the truncation location as color.
     //Add a threshold line to indicate the location that is bad or good. (This is one of the domain requirement.)
     //A gradient base selection in the threshold axis.
-    //get a better fault tolerance boundary by using linear approximation method.
     draw_numerical_boundary() {
         this.x_axis = d3.scaleLinear()
             .domain([0, this.faultToleranceBoudanryData.goldenrun.length])
@@ -101,6 +100,13 @@ class FaultToleranceBoudanryView extends BasicView {
             .attr('class', 'threshold_axis_class')
             .attr('transform', "translate(" + (this.width - this.margin.right - this.margin.left + 20) + ", 0)")
             .call(d3.axisRight(threshold_axis).ticks(10));
+        this.chart.append("text")
+            .attr("y", this.margin.top - 30)
+            .attr("x", this.width - this.margin.right - this.margin.left + 20)
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .style("vertical-align", "middle")
+            .text("SDC threshold");
 
         const threshold_text = this.chart.append('text')
             .attr('x', this.width - this.margin.left - this.margin.right + 30)
@@ -201,7 +207,16 @@ class FaultToleranceBoudanryView extends BasicView {
             .attr("cy", (d, i) => {
                 return this.text_axis_y(linenum.indexOf(d.linenum));
             })
-            .style("fill", "steelblue");
+            .style("fill", "steelblue")
+            .on('mouseover', function (d) {
+                d3.select(this).attr('r', 5);
+                publish('SOURCECODE_HIGHLIGHT', {
+                    'line': d.linenum
+                });
+            })
+            .on('mouseout', function (d) {
+                d3.select(this).attr('r', 2);
+            });
 
         this.chart.append("g").selectAll('.linenum_text').data(linenum).enter().append("text")
             .text((d) => d)
@@ -300,8 +315,5 @@ class FaultToleranceBoudanryView extends BasicView {
                 .duration(1000)
                 .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative));
         });
-
-        //truncation line
-
     }
 }
