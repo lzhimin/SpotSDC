@@ -17,9 +17,9 @@ class FaultToleranceBoudanryView extends BasicView {
     init() {
         super.init();
         this.margin = {
-            'left': 250,
+            'left': 150,
             'bottom': 200,
-            'right': 50,
+            'right': 200,
             'top': 100
         };
 
@@ -51,9 +51,9 @@ class FaultToleranceBoudanryView extends BasicView {
         this.draw_boundary_occupation();
     }
 
-    //Indicate the truncation location as color.
-    //Add a threshold line to indicate the location that is bad or good. (This is one of the domain requirement.)
     //A gradient base selection in the threshold axis.
+    //the display of the truncation line.
+    //look at the shoestring.
     draw_numerical_boundary() {
         this.x_axis = d3.scaleLinear()
             .domain([0, this.faultToleranceBoudanryData.goldenrun.length])
@@ -98,25 +98,25 @@ class FaultToleranceBoudanryView extends BasicView {
         const threshold_axis = d3.scaleLog().domain([0.000001, 100000]).range([(this.height - this.margin.bottom - this.margin.top) / 2, this.margin.top])
         this.chart.append("g")
             .attr('class', 'threshold_axis_class')
-            .attr('transform', "translate(" + (this.width - this.margin.right - this.margin.left + 20) + ", 0)")
+            .attr('transform', "translate(" + (this.width - this.margin.right + 20) + ", 0)")
             .call(d3.axisRight(threshold_axis).ticks(10));
         this.chart.append("text")
             .attr("y", this.margin.top - 30)
-            .attr("x", this.width - this.margin.right - this.margin.left + 20)
+            .attr("x", this.width - this.margin.right + 20)
             .attr("dy", "1em")
             .style("text-anchor", "middle")
             .style("vertical-align", "middle")
             .text("SDC threshold");
 
         const threshold_text = this.chart.append('text')
-            .attr('x', this.width - this.margin.left - this.margin.right + 30)
+            .attr('x', this.width - this.margin.right + 30)
             .attr('y', threshold_axis(this.faultToleranceBoudanryData.threshold))
             .text(this.faultToleranceBoudanryData.threshold.toFixed(4))
             .style('color', "steelblue");
 
         const circle = this.chart.append('circle')
             .attr("r", 10)
-            .attr("cx", this.width - this.margin.left - this.margin.right + 20)
+            .attr("cx", this.width - this.margin.right + 20)
             .attr("cy", threshold_axis(this.faultToleranceBoudanryData.threshold))
             .style("cursor", "grab")
             .style("fill-opacity", 0)
@@ -178,13 +178,28 @@ class FaultToleranceBoudanryView extends BasicView {
                     this.fault_tolerance_boundary_truncation_line.attr('y', y);
                     this.fault_tolerance_boundary_truncation_error = this.y_axis.invert(y);
 
-                    this.fault_tolerance_occupation_dot.style('fill', (d, i) => {
-                        if (this.faultToleranceBoudanryData.faultToleranceBoundaryRelative[i] < this.fault_tolerance_boundary_truncation_error) {
-                            return "#ad0000";
-                        } else {
-                            return "steelblue";
-                        }
-                    });
+                    this.fault_tolerance_occupation_dot
+                        .attr('r', (d, i) => {
+                            if (this.faultToleranceBoudanryData.faultToleranceBoundaryRelative[i] < this.fault_tolerance_boundary_truncation_error) {
+                                return 10;
+                            } else {
+                                return 3;
+                            }
+                        })
+                        .style('fill', (d, i) => {
+                            if (this.faultToleranceBoudanryData.faultToleranceBoundaryRelative[i] < this.fault_tolerance_boundary_truncation_error) {
+                                return "#ad0000";
+                            } else {
+                                return "steelblue";
+                            }
+                        })
+                        .style("fill-opacity", (d, i) => {
+                            if (this.faultToleranceBoudanryData.faultToleranceBoundaryRelative[i] < this.fault_tolerance_boundary_truncation_error) {
+                                return 0.9;
+                            } else {
+                                return 0;
+                            }
+                        });
                 })
             );
     }
@@ -209,13 +224,13 @@ class FaultToleranceBoudanryView extends BasicView {
             })
             .style("fill", "steelblue")
             .on('mouseover', function (d) {
-                d3.select(this).attr('r', 5);
+                d3.select(this).attr('r', 10);
                 publish('SOURCECODE_HIGHLIGHT', {
                     'line': d.linenum
                 });
             })
             .on('mouseout', function (d) {
-                d3.select(this).attr('r', 2);
+                d3.select(this).attr('r', 10);
             });
 
         this.chart.append("g").selectAll('.linenum_text').data(linenum).enter().append("text")
@@ -315,5 +330,8 @@ class FaultToleranceBoudanryView extends BasicView {
                 .duration(1000)
                 .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative));
         });
+
+        //truncation line
+
     }
 }

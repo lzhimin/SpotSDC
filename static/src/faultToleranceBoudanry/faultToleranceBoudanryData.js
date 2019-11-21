@@ -5,10 +5,8 @@ class FaultToleranceBoudanryData {
             "Masked": [],
             "SDC": []
         };
-
         //The threshold value for SDC outcome.
         this.threshold = 0.07;
-
         //display the 99% boundary value correctly and truncate the rest to 99% maximum.
         this.percentage = 0.95;
     }
@@ -110,6 +108,7 @@ class FaultToleranceBoudanryData {
                 if (sdc_relative_error.length == 0) {
                     relativeBoundary.push(10000);
                 } else {
+
                     //Here use the lowest SDC fault injection to approximate the golden boundary value.
                     let min_sdc = sdc_relative_error.reduce((prev, current) => {
                         return (prev.error < current.error) ? prev : current;
@@ -117,6 +116,7 @@ class FaultToleranceBoudanryData {
                     let boundary_masked = {
                         "error": -1
                     };
+
                     masked_relative_error.forEach((d) => {
                         if (d.error > boundary_masked.error && d.error < min_sdc.error) {
                             boundary_masked = d;
