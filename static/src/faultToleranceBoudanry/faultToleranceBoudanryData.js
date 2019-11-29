@@ -181,6 +181,27 @@ class FaultToleranceBoudanryData {
         return this.logFunc(q);
     }
 
+    //get sample max/min diffnorm ignore nan, +inf.
+    getMaxMinDiff() {
+        const l = this.faultInjectedData.length;
+        let max_diff = Number.MIN_VALUE;
+        let min_diff = Number.MAX_VALUE;
+        for (let i = 0; i < l; i++) {
+            let diff = Math.abs(+this.faultInjectedData[i].diffnormr);
+            //get the minimum SDC value and the Masked value below it.
+            if (isNaN(diff) || !isFinite(diff) || diff == undefined) {
+                continue;
+            } else {
+                if (min_diff > diff) min_diff = diff;
+                if (max_diff < diff) max_diff = diff;
+            }
+        }
+        min_diff = Math.max(0.0001, min_diff);
+        max_diff = Math.min(10000, max_diff);
+        console.log([min_diff, max_diff]);
+        return [min_diff, max_diff];
+    }
+
     //assume the pass value is positive.
     logFunc(value) {
         if (value < 1)

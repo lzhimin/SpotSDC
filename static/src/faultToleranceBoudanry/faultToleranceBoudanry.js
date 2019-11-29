@@ -7,6 +7,7 @@ class FaultToleranceBoudanryView extends BasicView {
         this.dynamicInstructionIndex = 140;
         this.number_of_sample_generate_boundary = 64;
         this.circle_r = 4;
+        this.fault_tolerance_boundary_truncation_background_height = 40;
         this.outcome_color = {
             'DUE': '#542788',
             'Masked': '#1b9e77',
@@ -48,7 +49,7 @@ class FaultToleranceBoudanryView extends BasicView {
         //clean the vis board
         this.chart.html("");
         this.draw_numerical_boundary();
-        this.draw_boundary_occupation();
+        //this.draw_boundary_occupation();
     }
 
     //A gradient base selection in the threshold axis.
@@ -95,7 +96,11 @@ class FaultToleranceBoudanryView extends BasicView {
             .text("relative error (log10)");
 
         //slider 
-        const threshold_axis = d3.scaleLog().domain([0.000001, 100000]).range([(this.height - this.margin.bottom - this.margin.top) / 2, this.margin.top])
+        const threshold_axis = d3.scaleLog()
+            .domain(this.faultToleranceBoudanryData.getMaxMinDiff())
+            .range([(this.height - this.margin.bottom - this.margin.top) / 2, this.margin.top])
+            .clamp(true);
+
         this.chart.append("g")
             .attr('class', 'threshold_axis_class')
             .attr('transform', "translate(" + (this.width - this.margin.right + 20) + ", 0)")
@@ -140,6 +145,7 @@ class FaultToleranceBoudanryView extends BasicView {
                     circle.attr('cy', y);
                     threshold_text.attr('y', y).text(this.faultToleranceBoudanryData.threshold.toFixed(6));
 
+                    publish("THRESHOLD_CHANGE_EVENT", this.faultToleranceBoudanryData.threshold);
                     this.fault_tolerance_boundary
                         .transition()
                         .duration(1000)
@@ -160,25 +166,29 @@ class FaultToleranceBoudanryView extends BasicView {
             .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative))
             .attr("stroke", "steelblue")
             .attr("fill", "white")
-            .attr("fill-opacity", 0);
+            .attr("fill-opacity", 0)
+            .style("pointer-events", "none");
 
         this.fault_tolerance_boundary_truncation_error = this.y_axis.domain()[0];
-        this.fault_tolerance_boundary_truncation_line = this.chart.append('rect')
+        this.fault_tolerance_boundary_truncation_background = this.chart.append('rect')
             .attr("x", this.margin.left)
-            .attr("y", this.margin.top)
+            .attr("y", this.margin.top - this.fault_tolerance_boundary_truncation_background_height / 2)
             .attr('width', this.width - 2 * this.margin.left - this.margin.right)
-            .attr("height", 3)
-            .attr("fill", 'orange')
-            .attr("fill-opacity", 0.7)
+            .attr("height", this.fault_tolerance_boundary_truncation_background_height)
+            .style("stroke-width", "2px")
+            .style("fill", "steelblue")
+            .style("fill-opacity", 0.05)
             .call(d3.drag()
                 .on("drag end", () => {
                     let y = d3.event.y;
-                    y = y < this.margin.top ? this.margin.top : y;
-                    y = y > (this.height - this.margin.bottom - this.margin.top) / 2 ? (this.height - this.margin.bottom - this.margin.top) / 2 : y;
-                    this.fault_tolerance_boundary_truncation_line.attr('y', y);
-                    this.fault_tolerance_boundary_truncation_error = this.y_axis.invert(y);
-
-                    this.fault_tolerance_occupation_dot
+                    let top = this.margin.top - this.fault_tolerance_boundary_truncation_background_height / 2;
+                    let bottom = (this.height - this.margin.bottom - this.margin.top) / 2 + -this.fault_tolerance_boundary_truncation_background_height / 2;
+                    y = y < top ? top : y;
+                    y = y > bottom ? bottom : y;
+                    this.fault_tolerance_boundary_truncation_background.attr("y", y);
+                    this.fault_tolerance_boundary_truncation_line.attr("y", y + this.fault_tolerance_boundary_truncation_background_height / 2);
+                    this.fault_tolerance_boundary_truncation_error = this.y_axis.invert(y + this.fault_tolerance_boundary_truncation_background_height / 2);
+                    /*this.fault_tolerance_occupation_dot
                         .attr('r', (d, i) => {
                             if (this.faultToleranceBoudanryData.faultToleranceBoundaryRelative[i] < this.fault_tolerance_boundary_truncation_error) {
                                 return 10;
@@ -199,9 +209,17 @@ class FaultToleranceBoudanryView extends BasicView {
                             } else {
                                 return 0;
                             }
-                        });
+                        });*/
                 })
-            );
+            );;
+
+        this.fault_tolerance_boundary_truncation_line = this.chart.append('rect')
+            .attr("x", this.margin.left)
+            .attr("y", this.margin.top)
+            .attr('width', this.width - 2 * this.margin.left - this.margin.right)
+            .attr("height", 3)
+            .attr("fill", 'orange')
+            .style("pointer-events", "none");
     }
 
     draw_boundary_occupation() {
@@ -215,7 +233,7 @@ class FaultToleranceBoudanryView extends BasicView {
         this.fault_tolerance_occupation_dot = this.chart.append("g").selectAll(".linenum_dot").data(this.faultToleranceBoudanryData.goldenrun)
             .enter()
             .append('circle')
-            .attr('r', 2)
+            .attr('r', 1)
             .attr('cx', (d, i) => {
                 return this.x_axis(i);
             })

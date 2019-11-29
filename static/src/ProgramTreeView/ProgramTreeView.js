@@ -2,9 +2,7 @@ class ProgramTreeView extends BasicView {
 
     constructor(container) {
         super(container);
-
         this.programtreedata = new ProgramTreeData();
-
         this.programtreecontroller = new ProgramViewController();
 
         this.outcome_color = {
@@ -16,7 +14,7 @@ class ProgramTreeView extends BasicView {
 
         this.colorscale = ['#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#08519c', '#08306b'];
 
-        this.viewoption = 'bitStackBarChart';
+        this.viewoption = 'bit_outcome_dist';
 
         this.normalization_global = false;
 
@@ -41,13 +39,17 @@ class ProgramTreeView extends BasicView {
         this.bitmap_width = 500;
         this.stackbar_width = 300;
 
+        //bit outcome distribution
+        this.bit_Outcome_Dist_bucket = {};
+        this.bit_Sample_Dist_bucket = {};
+
         this.stackbar_bucket = {};
         this.bit_heatmap_bucket = {};
         this.smart_bit_heatmap_bucket = {};
         this.impact_heatmap_bucket = {};
         this.value_heatmap_bucket = {};
-        this.bitStackBarChart_bucket = {};
-        this.smart_bitStackBarChart_bucket = {};
+
+
         this.valueStack_bucket = {};
         this.SDC_Impact_dist_bucket = {};
 
@@ -78,7 +80,7 @@ class ProgramTreeView extends BasicView {
         this.draw_leaf_vis(x, y, this.programtreedata.getSummaryData(), "data_summary");
 
         //draw axis?
-        if (this.viewoption == 'bitStackBarChart' || this.viewoption == 'smart_bitStackBarChart') {
+        if (this.viewoption == 'bit_outcome_dist' || this.viewoption == 'bit_sample_dist') {
             let chart_axis = d3.scaleLinear().domain([64, 1]).range([x, x + this.bitmap_width - 5]);
             this.summary_bit_axis = this.svg.append('g')
                 .attr('class', 'bitbarchart_axis')
@@ -155,7 +157,6 @@ class ProgramTreeView extends BasicView {
     }
 
     draw_node(x, y, h, w, d) {
-
         this.svg.selectAll('.treenode_' + d.key).data([d]).enter().append('rect')
             .attr('width', w)
             .attr('height', h)
@@ -237,31 +238,31 @@ class ProgramTreeView extends BasicView {
         this.SDC_Impact_dist_bucket[parent + '_' + data.key].setOutcomeColor(this.colorscale);
 
 
-        this.bitStackBarChart_bucket[parent + '_' + data.key] = new BitStackChart(this.svg, x, y, this.bitmap_width, this.blockh, data);
-        this.bitStackBarChart_bucket[parent + '_' + data.key].setOutcomeColor(this.outcome_color);
+        this.bit_Outcome_Dist_bucket[parent + '_' + data.key] = new Bit_Outcome_Dist(this.svg, x, y, this.bitmap_width, this.blockh, data);
+        this.bit_Outcome_Dist_bucket[parent + '_' + data.key].setOutcomeColor(this.outcome_color);
 
-        this.smart_bitStackBarChart_bucket[parent + '_' + data.key] = new SmartValueBarChart(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getLowestProblemBit());
-        this.smart_bitStackBarChart_bucket[parent + '_' + data.key].setOutcomeColor(this.outcome_color);
+        this.bit_Sample_Dist_bucket[parent + '_' + data.key] = new Bit_Sample_Dist(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getLowestProblemBit());
+        this.bit_Sample_Dist_bucket[parent + '_' + data.key].setOutcomeColor(this.outcome_color);
 
         this.valueStack_bucket[parent + '_' + data.key] = new valueStack(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxDiff(), this.programtreedata.getMinDiff())
         this.valueStack_bucket[parent + '_' + data.key].setOutcomeColor(this.outcome_color);
 
-        if (this.viewoption == 'bit_heatmap')
+        if (this.viewoption == 'bit_outcome_dist')
+            this.bit_Outcome_Dist_bucket[parent + '_' + data.key].draw();
+        else if (this.viewoption == 'bit_heatmap')
             this.bit_heatmap_bucket[parent + '_' + data.key].draw();
-        else if (this.viewoption == 'smart_bit_heatmap')
-            this.smart_bit_heatmap_bucket[parent + '_' + data.key].draw();
+        //else if (this.viewoption == 'smart_bit_heatmap')
+        //    this.smart_bit_heatmap_bucket[parent + '_' + data.key].draw();
         else if (this.viewoption == 'error_output_dist')
             this.impact_heatmap_bucket[parent + '_' + data.key].draw();
         else if (this.viewoption == 'value_heatmap')
             this.value_heatmap_bucket[parent + '_' + data.key].draw();
-        else if (this.viewoption == 'bitStackBarChart')
-            this.bitStackBarChart_bucket[parent + '_' + data.key].draw();
         else if (this.viewoption == 'value_stackChart')
             this.valueStack_bucket[parent + '_' + data.key].draw();
         else if (this.viewoption == "SDC_impact_dist")
             this.SDC_Impact_dist_bucket[parent + '_' + data.key].draw();
-        else if (this.viewoption == "smart_bitStackBarChart")
-            this.smart_bitStackBarChart_bucket[parent + '_' + data.key].draw();
+        else if (this.viewoption == "bit_sample_dist")
+            this.bit_Sample_Dist_bucket[parent + '_' + data.key].draw();
     }
 
     draw_menu() {
@@ -283,7 +284,6 @@ class ProgramTreeView extends BasicView {
             .style('position', 'absolute')
             .style('top', $('#ProgramTreeViewMenu').height() + 10)
             .style('left', this.left_padding);
-
 
         d3.selectAll('.tree_attribute').style('width', this.blockw - 3);
 
@@ -406,9 +406,6 @@ class ProgramTreeView extends BasicView {
         if (this.bitHeatMapAnnotation_colorscale != undefined)
             this.bitHeatMapAnnotation_colorscale.remove();
 
-        if (this.smartBitHeatMapAnnotation != undefined)
-            this.smartBitHeatMapAnnotation.remove();
-
         if (this.valueImpactHeatMapAnnotation != undefined)
             this.valueImpactHeatMapAnnotation.remove();
 
@@ -479,16 +476,16 @@ class ProgramTreeView extends BasicView {
             .style('font-weight', 'bold');
 
 
-        if (this.viewoption == 'bit_heatmap' || this.viewoption == 'smart_bitStackBarChart' || this.viewoption == 'bitStackBarChart') {
+        if (this.viewoption == 'bit_heatmap' || this.viewoption == 'bit_sample_dist' || this.viewoption == 'bit_outcome_dist') {
 
-            if (this.viewoption == 'bitStackBarChart' || this.viewoption == 'smart_bitStackBarChart') {
+            if (this.viewoption == 'bit_outcome_dist' || this.viewoption == 'bit_sample_dist') {
                 this.bitHeatMapAnnotation_colorscale.attr('display', 'none');
                 this.bitHeatMapAnnotation_colorscale.attr('display', 'none');
             }
 
             this.bitHeatMapAnnotation = this.svg.append('g');
             this.bitHeatMapAnnotation.append('text').text(() => {
-                    if (this.viewoption == 'smart_bitStackBarChart')
+                    if (this.viewoption == 'bit_sample_dist')
                         return 'Bit Sample Distribution';
                     else
                         return 'Bit Outcome Distribution';
@@ -539,39 +536,6 @@ class ProgramTreeView extends BasicView {
             this.impactHeatmapAnnotation.append('g').attr('class', 'axis axis--x')
                 .attr("transform", "translate(0," + (this.top_padding - 20) + ")")
                 .call(d3.axisTop(x_axis).tickValues(d3.range(mindiff, maxdiff, (maxdiff - mindiff) / 10)));
-        } else if (this.viewoption == 'smart_bit_heatmap') {
-            let lowestbit = this.programtreedata.getLowestProblemBit();
-            this.smartBitHeatMapAnnotation = this.svg.append('g')
-            this.smartBitHeatMapAnnotation.append('text').text('Bit Outcome Distribution')
-                .attr('x', (d, i) => {
-                    return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / 2;
-                })
-                .attr('y', (d, i) => {
-                    return this.top_padding - 40;
-                })
-                .attr("text-anchor", "middle")
-                .attr("dominant-baseline", "central");
-
-            this.smartBitHeatMapAnnotation.selectAll('.programTreeViewMenu_annotation').data(['sign', 'exponent', 'mantissa', '<' + lowestbit])
-                .enter()
-                .append('text')
-                .text(d => d)
-                .attr('x', (d, i) => {
-                    if (i == 0)
-                        return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / ((64 - lowestbit) * 2);
-                    else if (i == 1)
-                        return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / (64 - lowestbit) * 6.5;
-                    else if (i == 2)
-                        return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / (64 - lowestbit) * 13;
-                    else if (i == 3)
-                        return this.left_padding + this.blockw * 4 + this.padding + this.bitmap_width / (64 - lowestbit) * (64 - lowestbit);
-                })
-                .attr('y', (d, i) => {
-                    return this.top_padding - 20;
-                })
-                .attr("text-anchor", "middle")
-                .attr("dominant-baseline", "central")
-                .style('font-size', 10);
         }
     }
 
@@ -600,20 +564,20 @@ class ProgramTreeView extends BasicView {
         this.draw();
     }
 
-    /**
-     *  callback binding
-     **/
+    setThresholdValue(msg, value) {
+        console.log(msg);
+        this.programtreedata.setThresholdValue(value);
+    }
+
     callbackBinding() {
         this.programtreecontroller.bindingEvent();
         this.programtreecontroller.setNormalizationChangeCallback(this.updateStackChart.bind(this));
         this.programtreecontroller.setTreeStructureChangeCallback(this.treeStructureChangeEvent.bind(this));
         this.programtreecontroller.setfiltercalllback(this.filterData.bind(this));
         this.programtreecontroller.setViewChangeCallback(this.changeViewEvent.bind(this));
-        //this.programtreecontroller.setBitfilterChangeCallback()
     }
 
     updateStackChart(option) {
-
         if (option == 'global') {
             this.stackbar_chart_text_above.text('The Number of Fault Injections');
             this.normalization_global = true;
@@ -658,9 +622,9 @@ class ProgramTreeView extends BasicView {
             this.value_heatmap_bucket[key].clear();
             this.smart_bit_heatmap_bucket[key].clear();
             this.bit_heatmap_bucket[key].clear();
-            this.bitStackBarChart_bucket[key].clear();
+            this.bit_Outcome_Dist_bucket[key].clear();
             this.valueStack_bucket[key].clear();
-            this.smart_bitStackBarChart_bucket[key].clear();
+            this.bit_Sample_Dist_bucket[key].clear();
         }
 
         //hidden the summary bit axis          
@@ -684,19 +648,19 @@ class ProgramTreeView extends BasicView {
             for (let key in this.bit_heatmap_bucket) {
                 this.value_heatmap_bucket[key].draw();
             }
-        } else if (option == 'bitStackBarChart') {
+        } else if (option == 'bit_outcome_dist') {
             this.summary_bit_axis.attr("display", "block");
             for (let key in this.bit_heatmap_bucket) {
-                this.bitStackBarChart_bucket[key].draw();
+                this.bit_Outcome_Dist_bucket[key].draw();
             }
         } else if (option == 'value_stackChart') {
             for (let key in this.valueStack_bucket) {
                 this.valueStack_bucket[key].draw();
             }
-        } else if (option == 'smart_bitStackBarChart') {
+        } else if (option == 'bit_sample_dist') {
             this.summary_bit_axis.attr("display", "block");
-            for (let key in this.smart_bitStackBarChart_bucket) {
-                this.smart_bitStackBarChart_bucket[key].draw();
+            for (let key in this.bit_Sample_Dist_bucket) {
+                this.bit_Sample_Dist_bucket[key].draw();
             }
         } else if (option == 'SDC_impact_dist') {
             for (let key in this.SDC_Impact_dist_bucket) {

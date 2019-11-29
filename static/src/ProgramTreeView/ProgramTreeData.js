@@ -5,14 +5,19 @@ class ProgramTreeData {
             'maxDiff': -Number.MAX_VALUE,
             'minDiff': Number.MAX_VALUE
         };
+
+        this.thresholdValue = 0.07;
     }
 
     setData(data, pattern = []) {
         this.data = data;
         this.filterData = this.data;
         this.setHierachicalData(pattern);
-
         this.parseDataProperty();
+    }
+
+    setThresholdValue(value) {
+        this.thresholdValue = value;
     }
 
     //TODO: what's the inter leaf order of the tree?
@@ -47,24 +52,16 @@ class ProgramTreeData {
     }
 
     sortHierachy(node) {
-
         let data = node.values;
         let key = data[0].key;
-
         //Check whether the child is a leaf node.
         if (key == "DUE" || key == "Masked" || key == "SDC") {
-
             let metrics_value = 0;
             for (let i = 0; i < data.length; i++) {
                 if (data[i].key == "SDC")
                     metrics_value += data[i].values.length;
             }
-
             return metrics_value;
-            //SDC Ratio
-            //SDC Impact
-
-
         } else {
             let metrics_sum = 0;
             //sort the child node
@@ -208,7 +205,6 @@ class ProgramTreeData {
     }
 
     filterDataCallBack(category, filteritems) {
-
         this.filterData = [];
         if (category == 'bit') {
             for (let i = 0; i < this.data.length; i++) {

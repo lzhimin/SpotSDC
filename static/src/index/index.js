@@ -13,6 +13,7 @@ myLayout.registerComponent('ProgramTreeView', function (container, state) {
     //program Tree view, subscribe to data event
     ptv = new ProgramTreeView(container);
     subscribe('DATASET', ptv.setData.bind(ptv));
+    subscribe("THRESHOLD_CHANGE_EVENT", ptv.setThresholdValue.bind(ptv));
 });
 
 myLayout.registerComponent('ErrorPropagationView', function (container, state) {
