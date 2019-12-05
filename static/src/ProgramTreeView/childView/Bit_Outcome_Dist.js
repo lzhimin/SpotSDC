@@ -16,6 +16,11 @@ class Bit_Outcome_Dist extends standardChildView {
         this.rect_w = this.width / this.bit;
 
         this.rect_h = this.height;
+
+        this.thresholdvalue = 0.07;
+
+        subscribe("THRESHOLD_CHANGE_EVENT", this.thresholdvalue_change.bind(this));
+
     }
 
     clear() {
@@ -25,11 +30,8 @@ class Bit_Outcome_Dist extends standardChildView {
         }
     }
 
-
     draw() {
         this.histogram2d();
-
-        //this.init_color_scale();
 
         this.clear();
 
@@ -37,8 +39,7 @@ class Bit_Outcome_Dist extends standardChildView {
             this.g = this.svg.append('g');
 
         //background rect
-        this.g
-            .append('rect')
+        this.g.append('rect')
             .attr('x', this.x)
             .attr('y', this.y)
             .attr('width', this.width)
@@ -111,7 +112,8 @@ class Bit_Outcome_Dist extends standardChildView {
             .style('stroke-dasharray', '5,5');
 
         this.chart_axis = d3.scaleLinear().domain([0, 1]).range([this.rect_h, 0]);
-        this.chart_axis_annotation = this.g.append('g').attr('class', 'bitbarchart_axis')
+        this.chart_axis_annotation = this.g.append('g')
+            .attr('class', 'bitbarchart_axis')
             .attr("transform", "translate(" + (this.x) + "," + this.y + ")")
             .call(d3.axisLeft(this.chart_axis).ticks(2));
     }
@@ -120,47 +122,13 @@ class Bit_Outcome_Dist extends standardChildView {
         this.color = color;
     }
 
-    init_color_scale() {
-        this.globalcolorscale = d3.scaleQuantize().domain(d3.extent(this.hist, (d) => {
-            return d.length;
-        })).range(this.color);
-        this.local_color_scale = new Array(this.bit);
-
-        for (let i = 0; i < this.col; i++) {
-            this.local_color_scale[i] = this.init_local_color_scale(i);
-        }
+    thresholdvalue_change(msg, value) {
+        this.thresholdvalue = value;
+        this.draw();
     }
-
-    init_local_color_scale(i) {
-        let col = i % this.col;
-
-        let data = [];
-
-        for (let i = 0; i < this.row; i++) {
-            data.push(this.hist[i * this.col + col]);
-        }
-
-        let colorscale = d3.scaleQuantize().domain([0, d3.sum(data, (d) => {
-            return d.length;
-        })]).range(this.color);
-
-        return colorscale;
-    }
-
-    get_global_color_scale(d) {
-        return this.globalcolorscale(d.length);
-    }
-
-    get_local_color_scale(i, d) {
-        let col = i % this.col;
-
-        return this.local_color_scale[col](d.length);
-    }
-
     histogram2d() {
 
         let hist2d = [];
-
         for (let i = 0; i < this.bit; i++) {
             hist2d.push([
                 [],
@@ -178,12 +146,12 @@ class Bit_Outcome_Dist extends standardChildView {
 
         this.data.values.forEach(element => {
             element.values.forEach(e => {
-                bit = parseInt(e.bit) - 1;
+                let bit = parseInt(e.bit) - 1,
+                    outcome = e.outcome;
 
-                let outcome = e.outcome;
-                if (outcome == 'DUE')
-                    outcome = "Crash";
-
+                if (outcome == 'DUE') outcome = "Crash";
+                else if (e.diffnormr >= this.thresholdvalue) outcome = "SDC";
+                else outcome = "Masked";
 
                 hist2d[bit][outcome_menu[outcome]].push(e);
             });
@@ -195,7 +163,6 @@ class Bit_Outcome_Dist extends standardChildView {
             }
         }
         this.hist = hist;
-
         this.hist2d = hist2d;
     }
 }
