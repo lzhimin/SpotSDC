@@ -550,7 +550,6 @@ class ProgramTreeView extends BasicView {
     }
 
     setThresholdValue(msg, value) {
-        console.log(msg);
         this.programtreedata.setThresholdValue(value);
     }
 

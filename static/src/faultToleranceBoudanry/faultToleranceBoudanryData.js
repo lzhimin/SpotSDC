@@ -77,7 +77,7 @@ class FaultToleranceBoudanryData {
     }
 
     //here we assume that we have the exhaust fault injection campaign dataset.
-    getFaultToleranceBoundary_Relative() {
+    getFaultToleranceBoundary_Relative(threshold = this.threshold) {
         let relativeBoundary = [];
         let sdc_relative_error = [];
         let masked_relative_error = [];
@@ -91,7 +91,7 @@ class FaultToleranceBoudanryData {
             } else {
                 if (isNaN(this.faultInjectedData[i].diffnormr) || !isFinite(this.faultInjectedData[i].diffnormr)) {
                     //do nothing
-                } else if (this.faultInjectedData[i].diffnormr > this.threshold) {
+                } else if (this.faultInjectedData[i].diffnormr > threshold) {
                     sdc_relative_error.push({
                         "error": this.logFunc(error),
                         "norm": this.faultInjectedData[i].diffnormr
@@ -126,7 +126,7 @@ class FaultToleranceBoudanryData {
                     if (boundary_masked.error == -1) {
                         relativeBoundary.push(min_sdc.error);
                     } else {
-                        relativeBoundary.push(this.simpleLinearInterpolation(min_sdc, boundary_masked, this.threshold));
+                        relativeBoundary.push(this.simpleLinearInterpolation(min_sdc, boundary_masked, threshold));
                     }
 
                 }
@@ -134,6 +134,7 @@ class FaultToleranceBoudanryData {
                 masked_relative_error = [];
             }
         }
+
         return relativeBoundary;
     }
 

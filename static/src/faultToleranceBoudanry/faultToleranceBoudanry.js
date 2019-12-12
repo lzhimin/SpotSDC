@@ -1,5 +1,8 @@
 class FaultToleranceBoudanryView extends BasicView {
-
+    /**
+     * A potential reference link for visual analysis
+     * https: //bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172
+     */
     constructor(container) {
         super(container);
 
@@ -32,8 +35,7 @@ class FaultToleranceBoudanryView extends BasicView {
             .append('svg')
             .attr("id", "resiliencySvg")
             .attr('width', this.width)
-            .attr('height', this.height)
-            .append("g");
+            .attr('height', this.height);
 
         let dataset = $("#program_TreeView_file_selector").val();
         let data_info = {
@@ -43,6 +45,9 @@ class FaultToleranceBoudanryView extends BasicView {
             "dataset": dataset
         };
 
+        //display interaction menu
+        d3.select("#fault_tolerance_boundary_view_panel").style("visibility", "visible");
+
         fetchGoldenSimulationData(dataset)
         fetchMultipleSimulationData(data_info);
     }
@@ -50,8 +55,12 @@ class FaultToleranceBoudanryView extends BasicView {
     draw() {
         //clean the vis board
         this.chart.html("");
+        this.sensitivity_area = undefined;
         this.draw_numerical_boundary();
-        //this.draw_boundary_occupation();
+    }
+
+    draw_sensitivity_analysis() {
+
     }
 
     //A gradient base selection in the threshold axis.
@@ -107,6 +116,7 @@ class FaultToleranceBoudanryView extends BasicView {
             .attr('class', 'threshold_axis_class')
             .attr('transform', "translate(" + (this.width - this.margin.right + 20) + ", 0)")
             .call(d3.axisRight(threshold_axis).ticks(10));
+
         this.chart.append("text")
             .attr("y", this.margin.top - 30)
             .attr("x", this.width - this.margin.right + 20)
@@ -115,45 +125,88 @@ class FaultToleranceBoudanryView extends BasicView {
             .style("vertical-align", "middle")
             .text("SDC threshold");
 
-        const threshold_text = this.chart.append('text')
-            .attr('x', this.width - this.margin.right + 30)
-            .attr('y', threshold_axis(this.faultToleranceBoudanryData.threshold))
-            .text(this.faultToleranceBoudanryData.threshold.toFixed(4))
-            .style('color', "steelblue");
+        //brush event
+        let analysis_option = $("#fault_tolerance_boundary_analysis_mod").val();
+        if (analysis_option == "Sensitivity Analysis") {
+            d3.select("#resiliencySvg").append("g").call(d3.brushY().extent([
+                    [this.width - this.margin.right, this.margin.top],
+                    [this.width - this.margin.right + 40, (this.height - this.margin.bottom - this.margin.top) / 2]
+                ])
+                .on("brush end", () => {
+                    if (d3.event.selection == null)
+                        return;
 
-        const circle = this.chart.append('circle')
-            .attr("r", 10)
-            .attr("cx", this.width - this.margin.right + 20)
-            .attr("cy", threshold_axis(this.faultToleranceBoudanryData.threshold))
-            .style("cursor", "grab")
-            .style("fill-opacity", 0)
-            .style("stroke", "steelblue")
-            .style("stroke-width", "2px")
-            .call(d3.drag()
-                .on("drag", () => {
-                    let y = d3.event.y;
-                    y = y < this.margin.top ? this.margin.top : y;
-                    y = y > (this.height - this.margin.bottom - this.margin.top) / 2 ? (this.height - this.margin.bottom - this.margin.top) / 2 : y;
-                    this.faultToleranceBoudanryData.threshold = threshold_axis.invert(y);
-                    circle.attr('cy', y);
-                    threshold_text.attr('y', y).text(this.faultToleranceBoudanryData.threshold.toFixed(6));
-                })
-                .on("end", () => {
-                    let y = d3.event.y;
-                    y = y < this.margin.top ? this.margin.top : y;
-                    y = y > (this.height - this.margin.bottom - this.margin.top) / 2 ? (this.height - this.margin.bottom - this.margin.top) / 2 : y;
-                    this.faultToleranceBoudanryData.threshold = threshold_axis.invert(y);
-                    this.faultToleranceBoudanryData.updateFaultToleranceBoundary();
-                    circle.attr('cy', y);
-                    threshold_text.attr('y', y).text(this.faultToleranceBoudanryData.threshold.toFixed(6));
+                    let y1 = d3.min(d3.event.selection),
+                        y2 = d3.max(d3.event.selection);
 
-                    publish("THRESHOLD_CHANGE_EVENT", this.faultToleranceBoudanryData.threshold);
-                    this.fault_tolerance_boundary
+                    let first_threshold = threshold_axis.invert(y1),
+                        second_threshold = threshold_axis.invert(y2);
+
+                    let first_boundary = this.faultToleranceBoudanryData.getFaultToleranceBoundary_Relative(first_threshold),
+                        second_boundary = this.faultToleranceBoudanryData.getFaultToleranceBoundary_Relative(second_threshold);
+
+                    let points = [];
+                    for (let i = 0; i < first_boundary.length; i++)
+                        points.push([this.x_axis(i), this.y_axis(first_boundary[i])]);
+                    for (let i = second_boundary.length - 1; i > -1; i--)
+                        points.push([this.x_axis(i), this.y_axis(second_boundary[i])]);
+
+                    //clean the old area visualization
+                    if (typeof this.sensitivity_area != 'undefined')
+                        this.sensitivity_area
                         .transition()
                         .duration(1000)
-                        .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative));
-                })
-            );
+                        .attr('d', d3.area()(points));
+                    else
+                        this.sensitivity_area = this.chart.append('g')
+                        .append('path')
+                        .attr('d', d3.area()(points))
+                        .attr("stroke", "gray")
+                        .attr("fill", "gray")
+                        .attr("fill-opacity", 0.3)
+                        .style("pointer-events", "none");;
+                }));
+        } else if (analysis_option == "Golden Boundary") {
+            const threshold_text = this.chart.append('text')
+                .attr('x', this.width - this.margin.right + 30)
+                .attr('y', threshold_axis(this.faultToleranceBoudanryData.threshold))
+                .text(this.faultToleranceBoudanryData.threshold.toFixed(4))
+                .style('color', "steelblue");
+
+            const circle = this.chart.append('circle')
+                .attr("r", 10)
+                .attr("cx", this.width - this.margin.right + 20)
+                .attr("cy", threshold_axis(this.faultToleranceBoudanryData.threshold))
+                .style("cursor", "grab")
+                .style("fill-opacity", 0)
+                .style("stroke", "steelblue")
+                .style("stroke-width", "2px")
+                .call(d3.drag()
+                    .on("drag", () => {
+                        let y = d3.event.y;
+                        y = y < this.margin.top ? this.margin.top : y;
+                        y = y > (this.height - this.margin.bottom - this.margin.top) / 2 ? (this.height - this.margin.bottom - this.margin.top) / 2 : y;
+                        this.faultToleranceBoudanryData.threshold = threshold_axis.invert(y);
+                        circle.attr('cy', y);
+                        threshold_text.attr('y', y).text(this.faultToleranceBoudanryData.threshold.toFixed(6));
+                    })
+                    .on("end", () => {
+                        let y = d3.event.y;
+                        y = y < this.margin.top ? this.margin.top : y;
+                        y = y > (this.height - this.margin.bottom - this.margin.top) / 2 ? (this.height - this.margin.bottom - this.margin.top) / 2 : y;
+                        this.faultToleranceBoudanryData.threshold = threshold_axis.invert(y);
+                        this.faultToleranceBoudanryData.updateFaultToleranceBoundary();
+                        circle.attr('cy', y);
+                        threshold_text.attr('y', y).text(this.faultToleranceBoudanryData.threshold.toFixed(6));
+
+                        publish("THRESHOLD_CHANGE_EVENT", this.faultToleranceBoudanryData.threshold);
+                        this.fault_tolerance_boundary
+                            .transition()
+                            .duration(1000)
+                            .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative));
+                    })
+                );
+        }
 
         this.masked_up_lineFunc = d3.line()
             .curve(d3.curveBasis)
@@ -171,6 +224,7 @@ class FaultToleranceBoudanryView extends BasicView {
             .attr("fill-opacity", 0)
             .style("pointer-events", "none");
 
+        //whether the user want to use truncation line to indicate the more sensitive or less sensitive location.
         if (this.truncation_line_display) {
             this.fault_tolerance_boundary_truncation_error = this.y_axis.domain()[0];
             this.fault_tolerance_boundary_truncation_background = this.chart.append('rect')
@@ -355,6 +409,11 @@ class FaultToleranceBoudanryView extends BasicView {
         //whether the truncation line will be displayed.
         $('#fault_tolerance_truncation_line').on("change", () => {
             this.truncation_line_display = document.getElementById("fault_tolerance_truncation_line").checked;
+            this.draw();
+        });
+
+        //option change event
+        $("#fault_tolerance_boundary_analysis_mod").on("change", () => {
             this.draw();
         });
     }
