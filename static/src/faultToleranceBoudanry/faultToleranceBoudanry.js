@@ -13,6 +13,8 @@ class FaultToleranceBoudanryView extends BasicView {
             'Masked': '#1b9e77',
             'SDC': '#d95f02'
         };
+
+        this.truncation_line_display = false;
     }
 
     init() {
@@ -169,57 +171,59 @@ class FaultToleranceBoudanryView extends BasicView {
             .attr("fill-opacity", 0)
             .style("pointer-events", "none");
 
-        this.fault_tolerance_boundary_truncation_error = this.y_axis.domain()[0];
-        this.fault_tolerance_boundary_truncation_background = this.chart.append('rect')
-            .attr("x", this.margin.left)
-            .attr("y", this.margin.top - this.fault_tolerance_boundary_truncation_background_height / 2)
-            .attr('width', this.width - 2 * this.margin.left - this.margin.right)
-            .attr("height", this.fault_tolerance_boundary_truncation_background_height)
-            .style("stroke-width", "2px")
-            .style("fill", "steelblue")
-            .style("fill-opacity", 0.05)
-            .call(d3.drag()
-                .on("drag end", () => {
-                    let y = d3.event.y;
-                    let top = this.margin.top - this.fault_tolerance_boundary_truncation_background_height / 2;
-                    let bottom = (this.height - this.margin.bottom - this.margin.top) / 2 + -this.fault_tolerance_boundary_truncation_background_height / 2;
-                    y = y < top ? top : y;
-                    y = y > bottom ? bottom : y;
-                    this.fault_tolerance_boundary_truncation_background.attr("y", y);
-                    this.fault_tolerance_boundary_truncation_line.attr("y", y + this.fault_tolerance_boundary_truncation_background_height / 2);
-                    this.fault_tolerance_boundary_truncation_error = this.y_axis.invert(y + this.fault_tolerance_boundary_truncation_background_height / 2);
-                    /*this.fault_tolerance_occupation_dot
-                        .attr('r', (d, i) => {
-                            if (this.faultToleranceBoudanryData.faultToleranceBoundaryRelative[i] < this.fault_tolerance_boundary_truncation_error) {
-                                return 10;
-                            } else {
-                                return 3;
-                            }
-                        })
-                        .style('fill', (d, i) => {
-                            if (this.faultToleranceBoudanryData.faultToleranceBoundaryRelative[i] < this.fault_tolerance_boundary_truncation_error) {
-                                return "#ad0000";
-                            } else {
-                                return "steelblue";
-                            }
-                        })
-                        .style("fill-opacity", (d, i) => {
-                            if (this.faultToleranceBoudanryData.faultToleranceBoundaryRelative[i] < this.fault_tolerance_boundary_truncation_error) {
-                                return 0.9;
-                            } else {
-                                return 0;
-                            }
-                        });*/
-                })
-            );;
+        if (this.truncation_line_display) {
+            this.fault_tolerance_boundary_truncation_error = this.y_axis.domain()[0];
+            this.fault_tolerance_boundary_truncation_background = this.chart.append('rect')
+                .attr("x", this.margin.left)
+                .attr("y", this.margin.top - this.fault_tolerance_boundary_truncation_background_height / 2)
+                .attr('width', this.width - 2 * this.margin.left - this.margin.right)
+                .attr("height", this.fault_tolerance_boundary_truncation_background_height)
+                .style("stroke-width", "2px")
+                .style("fill", "steelblue")
+                .style("fill-opacity", 0.05)
+                .call(d3.drag()
+                    .on("drag end", () => {
+                        let y = d3.event.y;
+                        let top = this.margin.top - this.fault_tolerance_boundary_truncation_background_height / 2;
+                        let bottom = (this.height - this.margin.bottom - this.margin.top) / 2 + -this.fault_tolerance_boundary_truncation_background_height / 2;
+                        y = y < top ? top : y;
+                        y = y > bottom ? bottom : y;
+                        this.fault_tolerance_boundary_truncation_background.attr("y", y);
+                        this.fault_tolerance_boundary_truncation_line.attr("y", y + this.fault_tolerance_boundary_truncation_background_height / 2);
+                        this.fault_tolerance_boundary_truncation_error = this.y_axis.invert(y + this.fault_tolerance_boundary_truncation_background_height / 2);
+                        /*this.fault_tolerance_occupation_dot
+                            .attr('r', (d, i) => {
+                                if (this.faultToleranceBoudanryData.faultToleranceBoundaryRelative[i] < this.fault_tolerance_boundary_truncation_error) {
+                                    return 10;
+                                } else {
+                                    return 3;
+                                }
+                            })
+                            .style('fill', (d, i) => {
+                                if (this.faultToleranceBoudanryData.faultToleranceBoundaryRelative[i] < this.fault_tolerance_boundary_truncation_error) {
+                                    return "#ad0000";
+                                } else {
+                                    return "steelblue";
+                                }
+                            })
+                            .style("fill-opacity", (d, i) => {
+                                if (this.faultToleranceBoudanryData.faultToleranceBoundaryRelative[i] < this.fault_tolerance_boundary_truncation_error) {
+                                    return 0.9;
+                                } else {
+                                    return 0;
+                                }
+                            });*/
+                    })
+                );;
 
-        this.fault_tolerance_boundary_truncation_line = this.chart.append('rect')
-            .attr("x", this.margin.left)
-            .attr("y", this.margin.top)
-            .attr('width', this.width - 2 * this.margin.left - this.margin.right)
-            .attr("height", 3)
-            .attr("fill", 'orange')
-            .style("pointer-events", "none");
+            this.fault_tolerance_boundary_truncation_line = this.chart.append('rect')
+                .attr("x", this.margin.left)
+                .attr("y", this.margin.top)
+                .attr('width', this.width - 2 * this.margin.left - this.margin.right)
+                .attr("height", 3)
+                .attr("fill", 'orange')
+                .style("pointer-events", "none");
+        }
     }
 
     draw_boundary_occupation() {
@@ -338,7 +342,6 @@ class FaultToleranceBoudanryView extends BasicView {
             this.faultToleranceBoudanryData.setPercentage(+percentage * 0.01);
 
             this.y_axis.domain([this.faultToleranceBoudanryData.getSampleMax(), 0]);
-            //this.chart_axis_y.call(this.y_axis);
             d3.select("#chart_axis_y")
                 .transition()
                 .duration(1000)
@@ -349,7 +352,10 @@ class FaultToleranceBoudanryView extends BasicView {
                 .attr("d", this.masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative));
         });
 
-        //truncation line
-
+        //whether the truncation line will be displayed.
+        $('#fault_tolerance_truncation_line').on("change", () => {
+            this.truncation_line_display = document.getElementById("fault_tolerance_truncation_line").checked;
+            this.draw();
+        });
     }
 }
