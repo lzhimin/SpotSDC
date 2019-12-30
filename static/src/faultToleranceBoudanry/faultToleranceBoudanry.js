@@ -59,9 +59,7 @@ class FaultToleranceBoudanryView extends BasicView {
         this.draw_numerical_boundary();
     }
 
-    draw_sensitivity_analysis() {
 
-    }
 
     //A gradient base selection in the threshold axis.
     //the display of the truncation line.
@@ -128,18 +126,37 @@ class FaultToleranceBoudanryView extends BasicView {
         //brush event
         let analysis_option = $("#fault_tolerance_boundary_analysis_mod").val();
         if (analysis_option == "Sensitivity Analysis") {
+
+            let g = this.chart.append('g');
+            g.append('rect')
+                .attr("width", 80)
+                .attr("height", 2)
+                .attr("x", this.width - this.margin.right - 20)
+                .attr("y", threshold_axis(this.faultToleranceBoudanryData.threshold))
+                .attr("fill", "steelblue");
+            g.append('text')
+                .attr("y", threshold_axis(this.faultToleranceBoudanryData.threshold) - 20)
+                .attr("x", this.width - this.margin.right - 20)
+                .attr("dy", "1em")
+                .style("text-anchor", "middle")
+                .style("vertical-align", "middle")
+                .text(this.faultToleranceBoudanryData.threshold.toFixed(4));
+
             d3.select("#resiliencySvg").append("g").call(d3.brushY().extent([
                     [this.width - this.margin.right, this.margin.top],
                     [this.width - this.margin.right + 40, (this.height - this.margin.bottom - this.margin.top) / 2]
                 ])
-                .on("brush end", () => {
-                    if (d3.event.selection == null)
-                        return;
+                .on("brush end", (i, d, node) => {
+                    // The brush event near the fault tolerance boundary
+                    // It makes much more sense to make sure that the selective diff is near the 
+                    // domain specific threshold value.
+                    const selection = d3.event.selection;
+                    if (!d3.event.sourceEvent || !selection) return;
 
-                    let y1 = d3.min(d3.event.selection),
-                        y2 = d3.max(d3.event.selection);
+                    let y1 = d3.min(selection),
+                        y2 = d3.max(selection);
 
-                    let first_threshold = threshold_axis.invert(y1),
+                    let first_threshold = threshold_axis.invert(y1), //this.faultToleranceBoudanryData.threshold,
                         second_threshold = threshold_axis.invert(y2);
 
                     let first_boundary = this.faultToleranceBoudanryData.getFaultToleranceBoundary_Relative(first_threshold),
@@ -166,6 +183,7 @@ class FaultToleranceBoudanryView extends BasicView {
                         .attr("fill-opacity", 0.3)
                         .style("pointer-events", "none");;
                 }));
+
         } else if (analysis_option == "Golden Boundary") {
             const threshold_text = this.chart.append('text')
                 .attr('x', this.width - this.margin.right + 30)
@@ -278,6 +296,10 @@ class FaultToleranceBoudanryView extends BasicView {
                 .attr("fill", 'orange')
                 .style("pointer-events", "none");
         }
+    }
+
+    draw_mini_numerical_boundary() {
+
     }
 
     draw_boundary_occupation() {

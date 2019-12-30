@@ -6,8 +6,16 @@ function fetchDataset(filename) {
 }
 
 function fetchSingleSimulationData(index) {
-    d3.csv("../static/data/cg_simulation/appstate_" + index + ".log").then(function (data) {
-        publish('SINGLE_SIMULATION', data);
+    d3.csv("../static/data/cg/cg_in8/appstate_" + index + ".log").then(function (data) {
+        let keys = ['file', 'linenum', 'variable', 'value'];
+        let parsedata = data.map((d) => {
+            let item = {};
+            Object.values(d)[0].split(" ").forEach((d, i) => {
+                item[keys[i]] = d;
+            });
+            return item;
+        });
+        publish('SINGLE_SIMULATION', parsedata);
     });
 }
 
