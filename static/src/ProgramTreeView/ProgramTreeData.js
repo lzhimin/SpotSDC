@@ -7,6 +7,7 @@ class ProgramTreeData {
         };
 
         this.thresholdValue = 0.07;
+        subscribe("THRESHOLD_CHANGE_EVENT", this.thresholdvalue_change.bind(this));
     }
 
     setData(data, pattern = []) {
@@ -233,6 +234,10 @@ class ProgramTreeData {
 
         //reset the data property
         this.parseDataProperty();
+    }
+
+    thresholdvalue_change(msg, value) {
+        this.thresholdValue = value;
     }
 
 }

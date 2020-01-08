@@ -73,7 +73,6 @@ class ProgramTreeView extends BasicView {
         let y = this.top_padding;
 
         this.draw_leaf_vis(x, y, this.programtreedata.getSummaryData(), "data_summary");
-
         //draw axis?
         if (this.viewoption == 'bit_outcome_dist' || this.viewoption == 'bit_sample_dist') {
             let chart_axis = d3.scaleLinear().domain([64, 1]).range([x, x + this.bitmap_width - 5]);
@@ -212,28 +211,28 @@ class ProgramTreeView extends BasicView {
 
         x = this.left_padding + this.blockw * 4 + this.padding;
 
-        this.stackbar_bucket[parent + '_' + data.key] = new StackBarChart(this.svg, x + this.bitmap_width + this.padding_between_bit_stack, y, this.stackbar_width, this.blockh, data);
+        this.stackbar_bucket[parent + '_' + data.key] = new StackBarChart(this.svg, x + this.bitmap_width + this.padding_between_bit_stack, y, this.stackbar_width, this.blockh, data, this.programtreedata.thresholdValue);
         this.stackbar_bucket[parent + '_' + data.key].setOutcomeColor(this.outcome_color);
         this.stackbar_bucket[parent + '_' + data.key].draw();
         this.stackbar_bucket[parent + '_' + data.key].setGlobalFlag(this.normalization_global);
 
-        this.value_heatmap_bucket[parent + '_' + data.key] = new ValueHeatMap(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxInput(), this.programtreedata.getMinInput());
+        this.value_heatmap_bucket[parent + '_' + data.key] = new ValueHeatMap(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxInput(), this.programtreedata.getMinInput(), this.programtreedata.thresholdValue);
         this.value_heatmap_bucket[parent + '_' + data.key].setColor(this.colorscale);
 
-        this.impact_heatmap_bucket[parent + '_' + data.key] = new ImpactHeatmap(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxDiff(), this.programtreedata.getMinDiff());
+        this.impact_heatmap_bucket[parent + '_' + data.key] = new ImpactHeatmap(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxDiff(), this.programtreedata.getMinDiff(), this.programtreedata.thresholdValue);
         this.impact_heatmap_bucket[parent + '_' + data.key].setOutcomeColor(this.colorscale);
 
-        this.SDC_Impact_dist_bucket[parent + '_' + data.key] = new SDCImpactDistribution(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxSDCImpact(), this.programtreedata.getMinSDCImpact());
+        this.SDC_Impact_dist_bucket[parent + '_' + data.key] = new SDCImpactDistribution(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxSDCImpact(), this.programtreedata.getMinSDCImpact(), this.programtreedata.thresholdValue);
         this.SDC_Impact_dist_bucket[parent + '_' + data.key].setOutcomeColor(this.colorscale);
 
 
-        this.bit_Outcome_Dist_bucket[parent + '_' + data.key] = new Bit_Outcome_Dist(this.svg, x, y, this.bitmap_width, this.blockh, data);
+        this.bit_Outcome_Dist_bucket[parent + '_' + data.key] = new Bit_Outcome_Dist(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.thresholdValue);
         this.bit_Outcome_Dist_bucket[parent + '_' + data.key].setOutcomeColor(this.outcome_color);
 
-        this.bit_Sample_Dist_bucket[parent + '_' + data.key] = new Bit_Sample_Dist(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getLowestProblemBit());
+        this.bit_Sample_Dist_bucket[parent + '_' + data.key] = new Bit_Sample_Dist(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getLowestProblemBit(), this.programtreedata.thresholdValue);
         this.bit_Sample_Dist_bucket[parent + '_' + data.key].setOutcomeColor(this.outcome_color);
 
-        this.valueStack_bucket[parent + '_' + data.key] = new valueStack(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxDiff(), this.programtreedata.getMinDiff())
+        this.valueStack_bucket[parent + '_' + data.key] = new valueStack(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxDiff(), this.programtreedata.getMinDiff(), this.programtreedata.thresholdValue)
         this.valueStack_bucket[parent + '_' + data.key].setOutcomeColor(this.outcome_color);
 
         if (this.viewoption == 'bit_outcome_dist')

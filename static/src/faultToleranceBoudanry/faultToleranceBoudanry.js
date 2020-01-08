@@ -19,6 +19,8 @@ class FaultToleranceBoudanryView extends BasicView {
 
         this.truncation_line_display = false;
         this.mini_numerical_boundary_height = 150;
+
+
     }
 
     init() {
@@ -61,14 +63,12 @@ class FaultToleranceBoudanryView extends BasicView {
         this.draw_zoom_in_numerical_boundary();
     }
 
-
-
     //A gradient base selection in the threshold axis.
     //the display of the truncation line.
     //look at the shoestring.
     draw_zoom_in_numerical_boundary() {
         this.zoom_in_x_axis = d3.scaleLinear()
-            .domain([0, this.faultToleranceBoudanryData.goldenrun.length])
+            .domain([this.select_index1, this.select_index2])
             .range([this.margin.left, this.width - this.margin.left - this.margin.right]);
 
         this.chart_zoom_in_axis_x = this.chart.append('g').attr('class', 'resiliency_axis')
@@ -476,6 +476,9 @@ class FaultToleranceBoudanryView extends BasicView {
     setGoldenRunData(msg, data) {
         this.faultToleranceBoudanryData.setGoldenRun(data);
         console.log(msg + " in Resiliency View.");
+
+        this.select_index1 = 0;
+        this.select_index2 = this.faultToleranceBoudanryData.goldenrun.length;
     }
 
     setData(msg, data) {
@@ -500,10 +503,23 @@ class FaultToleranceBoudanryView extends BasicView {
             this.faultToleranceBoudanryData.setPercentage(+percentage * 0.01);
 
             this.y_axis.domain([this.faultToleranceBoudanryData.getSampleMax(), 0]);
-            d3.select("#chart_axis_y")
+            this.zoom_in_y_axis.domain([this.faultToleranceBoudanryData.getSampleMax(), 0]);
+
+            this.chart_zoom_in_axis_y
+                .transition()
+                .duration(1000)
+                .call(d3.axisLeft(this.zoom_in_y_axis).ticks(10))
+            this.mini_boundary_axis_y
                 .transition()
                 .duration(1000)
                 .call(d3.axisLeft(this.y_axis).ticks(10));
+
+
+            //animation update
+            this.zoom_in_fault_tolerance_boundary
+                .transition()
+                .duration(1000)
+                .attr("d", this.zoom_in_masked_up_lineFunc(this.faultToleranceBoudanryData.faultToleranceBoundaryRelative))
             this.fault_tolerance_boundary
                 .transition()
                 .duration(1000)

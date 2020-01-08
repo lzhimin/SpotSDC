@@ -1,6 +1,6 @@
 class Bit_Sample_Dist extends standardChildView {
 
-    constructor(svg, x, y, width, height, data, lowestProblemBit) {
+    constructor(svg, x, y, width, height, data, lowestProblemBit, threshold) {
         super(svg, x, y, width, height, data);
 
         this.lowestProblemBit = lowestProblemBit
@@ -18,6 +18,8 @@ class Bit_Sample_Dist extends standardChildView {
         this.rect_w = this.width / this.bit;
 
         this.rect_h = this.height;
+
+        this.threshold = threshold;
     }
 
     clear() {

@@ -1,6 +1,6 @@
 class Bit_Outcome_Dist extends standardChildView {
 
-    constructor(svg, x, y, width, height, data) {
+    constructor(svg, x, y, width, height, data, thresholdvalue) {
         super(svg, x, y, width, height, data);
 
         this.bit = 64;
@@ -17,7 +17,7 @@ class Bit_Outcome_Dist extends standardChildView {
 
         this.rect_h = this.height;
 
-        this.thresholdvalue = 0.07;
+        this.thresholdvalue = thresholdvalue;
 
         subscribe("THRESHOLD_CHANGE_EVENT", this.thresholdvalue_change.bind(this));
 
