@@ -161,6 +161,9 @@ class FaultToleranceBoudanryView extends BasicView {
                     let first_threshold = this.threshold_axis.invert(x1), //this.faultToleranceBoudanryData.threshold,
                         second_threshold = this.threshold_axis.invert(x2);
 
+                    console.log(first_threshold);
+                    console.log(second_threshold);
+
                     this.first_boundary = this.faultToleranceBoudanryData.getFaultToleranceBoundary_Relative(first_threshold),
                         this.second_boundary = this.faultToleranceBoudanryData.getFaultToleranceBoundary_Relative(second_threshold);
 
