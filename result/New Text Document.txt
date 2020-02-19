@@ -1,0 +1,1 @@
+what's the difference between the propagation boundary and the boundary constructed by fault injection campaign?
