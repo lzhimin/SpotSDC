@@ -1,32 +1,36 @@
 class ProgramViewController{
+	
     constructor(){
 
         this.treestructurechangecallback = undefined;
-        
         this.viewchangecallback = undefined;
         this.filtercalllback = undefined;
-
         this.normalizationchangecallback = undefined;
         this.outcomechangecallback = undefined;
     }
 
     setTreeStructureChangeCallback(func){
+
         this.treestructurechangecallback = func;
     }
 
     setViewChangeCallback(func){
+
         this.viewchangecallback = func;
     }
 
     setfiltercalllback(func){
+
         this.filtercalllback = func;
     }
 
     setNormalizationChangeCallback(func){
+
         this.normalizationchangecallback = func;
     }
 
     setOutcomeChangeCallback(func){
+
         this.outcomechangecallback = func;
     }
 
@@ -113,14 +117,7 @@ class ProgramViewController{
         $("#view_options").change(()=>{
             let option = $("#view_options").val();
             this.viewchangecallback(option);
-        })
-
-        //binding view change event.
-        //$('input:radio[name="view_radio"]').unbind();
-        //$('input:radio[name="view_radio"]').change(()=>{
-        //    let option = $('input[name=view_radio]:checked').val();
-        //    this.viewchangecallback(option);
-        //});
+        });
     }
 
     bindingNormalizationMenu(){

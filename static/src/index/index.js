@@ -14,6 +14,7 @@ myLayout.registerComponent('ProgramTreeView', function (container, state) {
     ptv = new ProgramTreeView(container);
     subscribe('DATASET', ptv.setData.bind(ptv));
     subscribe("THRESHOLD_CHANGE_EVENT", ptv.setThresholdValue.bind(ptv));
+    subscribe("SUB_SET_SELECTION", ptv.setSubsetSelection.bind(ptv));
 });
 
 myLayout.registerComponent('ErrorPropagationView', function (container, state) {

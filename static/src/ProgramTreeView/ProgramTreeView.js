@@ -63,6 +63,7 @@ class ProgramTreeView extends BasicView {
         //reset all the content on canvas
         this.draw_summary();
         this.draw_tree();
+
         this.draw_menu();
         this.draw_annotation();
 
@@ -84,7 +85,6 @@ class ProgramTreeView extends BasicView {
     }
 
     draw_tree() {
-
         let hierachicaldata = this.programtreedata.getHierachicalData();
         let x = this.left_padding,
             y = this.top_padding + 80,
@@ -109,8 +109,8 @@ class ProgramTreeView extends BasicView {
         if (this.height < this.top_padding + h + this.bottom_padding + 80) {
             this.svg.attr('height', this.top_padding + h + this.bottom_padding + 80);
         }
-        this.draw_node(x, y, h - padding, this.blockw, hierachicaldata);
 
+        this.draw_node(x, y, h - padding, this.blockw, hierachicaldata);
     }
 
     draw_inner_node(x, y, data, parent) {
@@ -140,7 +140,6 @@ class ProgramTreeView extends BasicView {
                 item['values'] = rs;
 
                 this.draw_leaf_vis(this.left_padding + this.blockw * 4, y, item, data.key);
-
             } else {
                 height_of_current_node = this.blockh;
                 this.draw_leaf_vis(x + this.blockw + this.padding, y, data, parent + '_' + data.key);
@@ -170,8 +169,8 @@ class ProgramTreeView extends BasicView {
                         'line': data.key,
                         'function': this.programtreedata.getFunctionName(data.key)
                     });
-                    //console.log(this.hierachy_aggregation(data));
-                    publish('SUBSETDATA', this.hierachy_aggregation(data))
+
+                    publish('SUBSETDATA', this.hierachy_aggregation(data));
                 } else {
                     //collapse or expand operation
                     if (this.collapse_node.has(data.key)) {
@@ -225,7 +224,6 @@ class ProgramTreeView extends BasicView {
         this.SDC_Impact_dist_bucket[parent + '_' + data.key] = new SDCImpactDistribution(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxSDCImpact(), this.programtreedata.getMinSDCImpact(), this.programtreedata.thresholdValue);
         this.SDC_Impact_dist_bucket[parent + '_' + data.key].setOutcomeColor(this.colorscale);
 
-
         this.bit_Outcome_Dist_bucket[parent + '_' + data.key] = new Bit_Outcome_Dist(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.thresholdValue);
         this.bit_Outcome_Dist_bucket[parent + '_' + data.key].setOutcomeColor(this.outcome_color);
 
@@ -235,6 +233,7 @@ class ProgramTreeView extends BasicView {
         this.valueStack_bucket[parent + '_' + data.key] = new valueStack(this.svg, x, y, this.bitmap_width, this.blockh, data, this.programtreedata.getMaxDiff(), this.programtreedata.getMinDiff(), this.programtreedata.thresholdValue)
         this.valueStack_bucket[parent + '_' + data.key].setOutcomeColor(this.outcome_color);
 
+        
         if (this.viewoption == 'bit_outcome_dist')
             this.bit_Outcome_Dist_bucket[parent + '_' + data.key].draw();
         else if (this.viewoption == 'error_output_dist')
@@ -316,7 +315,6 @@ class ProgramTreeView extends BasicView {
             .call(d3.axisTop(this.stackbar_chart_axis).ticks(5));
 
         //SDC frequency
-
         if (this.stackbar_chart_text_above != undefined)
             this.stackbar_chart_text_above.remove();
 
@@ -413,8 +411,8 @@ class ProgramTreeView extends BasicView {
             .attr('fill', (d, i) => {
                 return d;
             })
-            .style('stroke', 'gray')
-            .style('stroke-width', '1px');
+	            .style('stroke', 'gray')
+	            .style('stroke-width', '1px');
 
         this.bitHeatMapAnnotation_colorscale.selectAll('.colorscale_text').data(() => {
                 let data = ['0%<'];
@@ -523,7 +521,7 @@ class ProgramTreeView extends BasicView {
         }
     }
 
-    is_the_node_a_leaf(data) {
+    is_the_node_a_leaf(data) {        
         return 'key' in data.values[0] && !(data.values[0].key in this.outcome_color);
     }
 
@@ -549,6 +547,7 @@ class ProgramTreeView extends BasicView {
     }
 
     setThresholdValue(msg, value) {
+
         this.programtreedata.setThresholdValue(value);
     }
 
@@ -642,7 +641,12 @@ class ProgramTreeView extends BasicView {
     }
 
     filterData(category, items) {
-        this.programtreedata.filterDataCallBack(category, items);
+        this.programtreedata.filterDataOperation(category, items);
+        this.draw();
+    }
+
+    setSubsetSelection(msg, value) {
+        this.programtreedata.filterDataOperation('interval', value);
         this.draw();
     }
 

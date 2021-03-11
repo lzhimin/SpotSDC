@@ -6,10 +6,9 @@ import math
 
 
 def data_agent(request, app):
-
     if request["type"] == "masked_boundary":
         data = create_masked_boundary(
-            request["first"], request["second"], request["dataset"], app.root_path)
+            request["indexs"], request["dataset"], app.root_path)
         print("MASKED BOUNDARY", file=sys.stderr)
 
     elif request["type"] == "resilency_single_run":
@@ -44,20 +43,21 @@ def single_relative_run(index, dataset, root_path):
     return result
 
 
-def create_masked_boundary(first_dyn, second_dyn, dataset, root_path):
-    boundary = []
+def create_masked_boundary(indexs, dataset, root_path):
+    # return a masked relative error boundary
     folder = dataset.split("_")[0]
     filepath = root_path+"/static/data/"+folder+"/"+dataset
 
     dataset_summary = pd.read_csv(root_path+"/static/data/"+dataset+".csv")
     golden_run = pd.read_csv(filepath+"/golden.log",  sep=" ",
                              names=['file', 'linenum', 'variable', 'value'])
+    boundary = np.zeros(len(golden_run)) + np.nextafter(0, 1)
 
-    for i in range(len(golden_run)):
-        boundary.append({"min": 0, "max": 0})
+    # for i in range(len(golden_run)):
+    #    boundary.append({"min": 0, "max": 0})
 
-    for i in range(first_dyn * 64, second_dyn * 64):
-        if dataset_summary.outcome[i] != "Masked":
+    for i in indexs:
+        if dataset_summary.outcome[int(i)] != "Masked":
             continue
 
         # whether current run is masked
@@ -67,24 +67,31 @@ def create_masked_boundary(first_dyn, second_dyn, dataset, root_path):
             print("weird!", file=sys.stderr)
             continue
 
-        # TODO: change to relative error.
         errors = np.array(
             fault_inject_run.value[0:len(golden_run)], dtype="float")
+
+        # if the current propagation contain nan or inf discard it.
+        if np.isnan(errors).any() or np.isinf(errors).any():
+            continue
+
         golden = np.array(golden_run.value, dtype="float")
         for j in range(len(golden_run)):
             if golden[j] != 0:
                 error = (errors[j] - golden[j])/golden[j]
                 if abs(error) > 1:
-                    error = math.log10(abs(error)) * error/abs(error)
+                    error = math.log10(abs(error))  # * error/abs(error)
             else:
                 error = 0
 
-            if error >= 0 and error > boundary[j]["max"]:
-                boundary[j]["max"] = error
+            if error > boundary[j]:
+                boundary[j] = error
+            # if error >= 0 and error > boundary[j]["max"]:
+            #    boundary[j]["max"] = error
 
-            if error < 0 and error < boundary[j]["min"]:
-                boundary[j]["min"] = error
-    return boundary
+            # if error < 0 and error < boundary[j]["min"]:
+            #    boundary[j]["min"] = error
+
+    return boundary.tolist()
 
 
 # There are three different type of boundaries

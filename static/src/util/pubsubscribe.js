@@ -1,7 +1,3 @@
-/**
- * Created by yarden on 6/11/16.
- */
-
 let channels = new Map();
 
 function subscribe(channel, listener) {

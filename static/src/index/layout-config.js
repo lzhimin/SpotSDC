@@ -3,7 +3,7 @@ let config = {
         type: 'row',
         content: [{
             type: 'stack',
-            width: 60,
+            width: 55,
             content: [{
                 type: 'component',
                 componentName: 'ProgramTreeView',
@@ -16,14 +16,14 @@ let config = {
                 type: 'component',
                 componentName: 'TableView',
                 title: 'Tableview'
-            }, {
+            }]
+        }, {
+            type: 'stack',
+            content: [{
                 type: 'component',
                 componentName: 'faultToleranceBoudanryView',
                 title: 'FaultTolerance'
-            }]
-        }, {
-            type: 'column',
-            content: [{
+            }, {
                 type: 'component',
                 componentName: 'SourceCodeView'
             }, {

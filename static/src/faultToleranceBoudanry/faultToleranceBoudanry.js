@@ -43,8 +43,7 @@ class FaultToleranceBoudanryView extends BasicView {
         let dataset = $("#program_TreeView_file_selector").val();
         let data_info = {
             "type": "masked_boundary",
-            "first": 1,
-            "second": 2,
+            "indexs": this.faultToleranceBoudanryData.getSampleFileIndex(),
             "dataset": dataset
         };
 
@@ -56,13 +55,16 @@ class FaultToleranceBoudanryView extends BasicView {
     }
 
     draw() {
-
         this.analysis_option = $("#fault_tolerance_boundary_analysis_mod").val();
-        //clean the vis board
         this.chart.html("");
         this.sensitivity_area = undefined;
         this.draw_mini_numerical_boundary();
         this.draw_zoom_in_numerical_boundary();
+    }
+
+    //choose two fault injection cases, one is masked and the other is SDC.
+    draw_masked_sdc_comparing() {
+
     }
 
     //A gradient base selection in the threshold axis.
@@ -93,7 +95,7 @@ class FaultToleranceBoudanryView extends BasicView {
             .style("top", this.margin.top);
 
         this.zoom_in_masked_up_lineFunc = d3.line()
-            .curve(d3.curveBasis)
+            .curve(d3.curveStep)
             .x((d, i) => {
                 return this.zoom_in_x_axis(i);
             })
@@ -107,7 +109,7 @@ class FaultToleranceBoudanryView extends BasicView {
             .attr("fill", "white")
             .attr("fill-opacity", 0)
             .style("pointer-events", "none");
-        //slider 
+
         this.threshold_axis = d3.scaleLog()
             .domain(this.faultToleranceBoudanryData.getMaxMinDiff())
             .range([(this.width - this.margin.left - this.margin.right) / 2, this.width - this.margin.left - this.margin.right])
@@ -356,7 +358,7 @@ class FaultToleranceBoudanryView extends BasicView {
             .call(d3.axisLeft(this.y_axis).ticks(5));
 
         this.masked_up_lineFunc = d3.line()
-            .curve(d3.curveBasis)
+            .curve(d3.curveStep)
             .x((d, i) => {
                 return this.x_axis(i);
             })
@@ -376,7 +378,7 @@ class FaultToleranceBoudanryView extends BasicView {
                 [this.margin.left, (this.height - this.margin.bottom - this.margin.top) / 2 + 40],
                 [this.width - this.margin.left - this.margin.right, (this.height - this.margin.bottom - this.margin.top) / 2 + this.mini_numerical_boundary_height]
             ])
-            .on("brush end", (i, d, node) => {
+            .on("end", (i, d, node) => {
                 //update the select boundary view
                 const selection = d3.event.selection;
                 if (!d3.event.sourceEvent || !selection) return;
@@ -384,8 +386,8 @@ class FaultToleranceBoudanryView extends BasicView {
                 let x1 = d3.min(selection),
                     x2 = d3.max(selection);
 
-                this.select_index1 = Math.floor(this.x_axis.invert(x1)), //this.faultToleranceBoudanryData.threshold,
-                    this.select_index2 = Math.floor(this.x_axis.invert(x2));
+                this.select_index1 = Math.floor(this.x_axis.invert(x1));
+                this.select_index2 = Math.floor(this.x_axis.invert(x2));
 
                 this.zoom_in_x_axis.domain([this.select_index1, this.select_index2]);
                 this.chart_zoom_in_axis_x
@@ -404,8 +406,15 @@ class FaultToleranceBoudanryView extends BasicView {
                 this.zoom_in_fault_tolerance_boundary
                     .attr("d", this.zoom_in_masked_up_lineFunc(selectRegionData));
 
+                //publish sub selection event
+                publish('SUB_SET_SELECTION', {
+                    'index1': this.select_index1,
+                    'index2': this.select_index2
+                });
 
-                //sensitivity view update
+                console.log('index1', this.select_index1, "index2", this.select_index2);
+
+                /*
                 if (this.analysis_option == "Sensitivity Analysis") {
                     //zoom-in fault tolerance boundary view sensitivity boundary
                     let zoom_points = [];
@@ -420,7 +429,7 @@ class FaultToleranceBoudanryView extends BasicView {
                         this.sensitivity_zoom_in_area
                             .attr('d', d3.area()(zoom_points));
                     }
-                }
+                }*/
             });
 
         d3.select("#resiliencySvg").append("g").call(mini_boundary_brush);
@@ -489,7 +498,6 @@ class FaultToleranceBoudanryView extends BasicView {
     }
 
     updateChart(msg, data) {
-        console.log(msg)
         this.faultToleranceBoudanryData.maskedBoundary = data;
         this.draw();
     }

@@ -31,6 +31,8 @@ class Bit_Outcome_Dist extends standardChildView {
     }
 
     draw() {
+
+
         this.histogram2d();
 
         this.clear();
@@ -126,6 +128,7 @@ class Bit_Outcome_Dist extends standardChildView {
         this.thresholdvalue = value;
         this.draw();
     }
+
     histogram2d() {
 
         let hist2d = [];

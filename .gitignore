@@ -7,5 +7,4 @@ fft_*
 *.log
 .*
 static/data/*
-notebook/cg_iteractive.csv
-notebook/notebook_env.db
+notebook/*

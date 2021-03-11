@@ -12,9 +12,12 @@ class FaultToleranceBoudanryData {
     }
 
     setFaultInjectData(data) {
+
         this.faultInjectedData = data;
         this.samplingData = this.sampling();
         this.faultToleranceBoundaryRelative = this.getFaultToleranceBoundary_Relative();
+        //Get approximate fault tolerance boundary
+
     }
 
     setGoldenRun(data) {
@@ -27,7 +30,6 @@ class FaultToleranceBoudanryData {
 
     makeMaskedBoundary() {
         this.maskedBoundary = [];
-
         let golden = 0,
             error = 0,
             current_value = 0;
@@ -58,6 +60,8 @@ class FaultToleranceBoudanryData {
                 "min": min_value
             });
         }
+
+
     }
 
     addSimulations(data) {
@@ -154,7 +158,7 @@ class FaultToleranceBoudanryData {
         this.faultToleranceBoundaryRelative = this.getFaultToleranceBoundary_Relative();
     }
 
-    sampling(n = 1000) {
+    sampling(n = 520) {
         let data = [];
         let index = Math.floor(Math.random() * this.faultInjectedData.length);
         for (let i = 0; i < n; i++) {
@@ -209,6 +213,14 @@ class FaultToleranceBoudanryData {
             return value;
         else
             return Math.log10(value) + 1;
+    }
+
+    getSampleFileIndex() {
+        let fileindexs = [];
+        for (let i = 0; i < this.samplingData.length; i++) {
+            fileindexs.push(this.samplingData[i].File_index);
+        }
+        return fileindexs;
     }
 
     getExecutionLineNum() {

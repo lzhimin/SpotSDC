@@ -6,8 +6,7 @@ class ProgramTreeData {
             'minDiff': Number.MAX_VALUE
         };
 
-        this.thresholdValue = 0.07;
-        subscribe("THRESHOLD_CHANGE_EVENT", this.thresholdvalue_change.bind(this));
+        this.thresholdValue = 0.06;
     }
 
     setData(data, pattern = []) {
@@ -15,6 +14,14 @@ class ProgramTreeData {
         this.filterData = this.data;
         this.setHierachicalData(pattern);
         this.parseDataProperty();
+
+
+        const t0 = performance.now();
+        this.filterData.forEach((d)=>{
+            let data = d;
+        });
+        const t1 = performance.now();
+        console.log((t1-t0)+' passing one round of the data');
     }
 
     setThresholdValue(value) {
@@ -46,6 +53,7 @@ class ProgramTreeData {
         }).sortKeys(d3.ascending);
 
         let data = values.entries(this.filterData);
+
         this.hierachicalData = {
             'key': $('#program_TreeView_file_selector').val().split('_')[0],
             'values': data
@@ -205,7 +213,10 @@ class ProgramTreeData {
         publish('IMPACT_FACTOR', this.impact_factors);
     }
 
-    filterDataCallBack(category, filteritems) {
+    filterDataOperation(category, filteritems) {
+
+
+        console.log('getdata');
         this.filterData = [];
         if (category == 'bit') {
             for (let i = 0; i < this.data.length; i++) {
@@ -221,13 +232,16 @@ class ProgramTreeData {
                     this.filterData.push(item);
                 }
             }
-        } else if (category == 'diffnorm') {
-
-        } else if (category == 'injectError') {
-
-        } else {
-
+        } else if (category == 'interval') {
+            let index1 = filteritems.index1;
+            let index2 = filteritems.index2;
+            for (let i = 0; i < this.data.length; i++) {
+                let item = this.data[i];
+                if (item.DI > index1 && item.DI < index2)
+                    this.filterData.push(item);
+            }
         }
+
 
         //reset the data hierachy
         this.setHierachicalData(this.pattern);
@@ -236,8 +250,8 @@ class ProgramTreeData {
         this.parseDataProperty();
     }
 
-    thresholdvalue_change(msg, value) {
-        this.thresholdValue = value;
+    setSubsetSelection(msg, value) {
+
     }
 
 }
